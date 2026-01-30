@@ -6,8 +6,12 @@ export interface Book {
   id: string
   title: string
   author: string
+  author_nationality: string
+  publisher: string
   total_pages: number
-  read_pages: number
+  read_pages: number // Você confirmou que esta já existe!
+  cover_url: string  // Adicionando agora
+  format: string     // Adicionando agora
   status: 'Lendo' | 'Na Fila' | 'Concluído'
 }
 
