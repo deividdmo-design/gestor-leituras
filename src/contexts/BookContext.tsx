@@ -1,17 +1,20 @@
 import { createContext, useState, useEffect, useContext } from 'react'
-import type { ReactNode } from 'react' // <--- A CORREÇÃO ESTÁ AQUI
+import type { ReactNode } from 'react'
 import { supabase } from '../lib/supabase'
 
 export interface Book {
   id: string
   title: string
   author: string
-  status: string
+  total_pages: number
+  read_pages: number
+  status: 'Lendo' | 'Na Fila' | 'Concluído'
 }
 
 interface BookContextData {
   books: Book[]
   loading: boolean
+  refreshBooks: () => Promise<void>
 }
 
 const BookContext = createContext<BookContextData>({} as BookContextData)
@@ -20,24 +23,29 @@ export function BookProvider({ children }: { children: ReactNode }) {
   const [books, setBooks] = useState<Book[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    async function fetchBooks() {
-      try {
-        setLoading(true)
-        const { data, error } = await supabase.from('books').select('*')
-        if (error) throw error
-        if (data) setBooks(data)
-      } catch (error) {
-        console.error('Erro:', error)
-      } finally {
-        setLoading(false)
-      }
+  async function refreshBooks() {
+    try {
+      setLoading(true)
+      const { data, error } = await supabase
+        .from('books')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      if (data) setBooks(data as Book[])
+    } catch (error) {
+      console.error('Erro ao buscar livros:', error)
+    } finally {
+      setLoading(false)
     }
-    fetchBooks()
+  }
+
+  useEffect(() => {
+    refreshBooks()
   }, [])
 
   return (
-    <BookContext.Provider value={{ books, loading }}>
+    <BookContext.Provider value={{ books, loading, refreshBooks }}>
       {children}
     </BookContext.Provider>
   )
