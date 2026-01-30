@@ -3,7 +3,7 @@ import { useBooks } from './contexts/BookContext'
 import { supabase } from './lib/supabase'
 import { 
   Library, Plus, Trash2, CheckCircle2, 
-  BookMarked, X, Pencil, Search, ArrowUpDown, Sparkles, Star, Trophy, Calendar, Globe, Link as LinkIcon, Image as ImageIcon,
+  BookMarked, X, Pencil, Search, ArrowUpDown, Sparkles, Star, Trophy, Globe, Link as LinkIcon, Image as ImageIcon,
   BookOpen, Layers, Book, PlayCircle, StopCircle, Timer
 } from 'lucide-react'
 
@@ -78,6 +78,7 @@ export default function App() {
     genre: 'Outros'
   })
 
+  // 📊 DASHBOARD
   const stats = useMemo(() => ({
     totalBooks: books.length,
     totalReadPages: books.reduce((acc, b) => acc + (b.read_pages || 0), 0),
