@@ -4,7 +4,7 @@ import { supabase } from './lib/supabase'
 import { 
   Library, Plus, Trash2, CheckCircle2, 
   BookMarked, X, Pencil, Search, ArrowUpDown, Sparkles, Star, Trophy, Calendar, Globe, Link as LinkIcon, Image as ImageIcon,
-  BookOpen, Layers, Book, PlayCircle, StopCircle, Timer, Tag
+  BookOpen, Layers, Book, PlayCircle, StopCircle, Timer
 } from 'lucide-react'
 
 // 🌍 MAPA-MÚNDI
@@ -25,9 +25,8 @@ const countryFlags: Record<string, string> = {
   'afeganistao': '🇦🇫', 'vietna': '🇻🇳', 'australia': '🇦🇺', 'timor leste': '🇹🇱'
 };
 
-// 🏷️ CORES DAS CATEGORIAS (MAPPING COMPLETO)
+// 🏷️ CORES DAS CATEGORIAS
 const genreColors: Record<string, string> = {
-  // LITERATURA (Roxos/Rosas)
   'Ficção': 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-100',
   'Romance': 'bg-rose-50 text-rose-700 border-rose-100',
   'Fantasia': 'bg-purple-50 text-purple-700 border-purple-100',
@@ -35,15 +34,11 @@ const genreColors: Record<string, string> = {
   'Terror': 'bg-slate-900 text-slate-50 border-slate-700',
   'Clássicos': 'bg-amber-100 text-amber-800 border-amber-200',
   'HQ/Mangá': 'bg-pink-50 text-pink-700 border-pink-100',
-  
-  // TÉCNICO (Azuis/Cyan)
   'Tecnologia': 'bg-cyan-50 text-cyan-700 border-cyan-100',
   'Programação': 'bg-blue-50 text-blue-700 border-blue-100',
   'Data Science': 'bg-sky-50 text-sky-700 border-sky-100',
   'Design': 'bg-violet-50 text-violet-700 border-violet-100',
   'Ciência': 'bg-teal-50 text-teal-700 border-teal-100',
-  
-  // NEGÓCIOS (Verdes)
   'Finanças': 'bg-emerald-50 text-emerald-700 border-emerald-100',
   'Economia': 'bg-green-50 text-green-700 border-green-100',
   'Gestão': 'bg-lime-50 text-lime-700 border-lime-100',
@@ -51,8 +46,6 @@ const genreColors: Record<string, string> = {
   'Empreendedorismo': 'bg-yellow-50 text-yellow-700 border-yellow-100',
   'Liderança': 'bg-blue-50 text-blue-800 border-blue-200',
   'Produtividade': 'bg-red-50 text-red-700 border-red-100',
-
-  // HUMANAS (Amarelos/Terrosos)
   'Filosofia': 'bg-amber-50 text-amber-700 border-amber-100',
   'História': 'bg-stone-100 text-stone-700 border-stone-200',
   'Psicologia': 'bg-rose-100 text-rose-800 border-rose-200',
@@ -60,8 +53,6 @@ const genreColors: Record<string, string> = {
   'Direito': 'bg-slate-100 text-slate-800 border-slate-200',
   'Educação': 'bg-yellow-100 text-yellow-800 border-yellow-200',
   'Espiritualidade': 'bg-violet-100 text-violet-800 border-violet-200',
-
-  // VIDA (Variados)
   'Biografia': 'bg-gray-100 text-gray-700 border-gray-200',
   'Autoajuda': 'bg-orange-100 text-orange-800 border-orange-200',
   'Saúde': 'bg-green-100 text-green-800 border-green-200',
@@ -87,7 +78,6 @@ export default function App() {
     genre: 'Outros'
   })
 
-  // 📊 DASHBOARD
   const stats = useMemo(() => ({
     totalBooks: books.length,
     totalReadPages: books.reduce((acc, b) => acc + (b.read_pages || 0), 0),
@@ -96,8 +86,7 @@ export default function App() {
     queueBooks: books.filter(b => b.status === 'Na Fila').length
   }), [books]);
 
-  // CALCULO DE DIAS
-  function calculateDays(start?: string, end?: string) {
+  function calculateDays(start?: string | null, end?: string | null) {
     if (!start) return null;
     const startDate = new Date(start);
     const endDate = end ? new Date(end) : new Date();
@@ -105,7 +94,6 @@ export default function App() {
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
   }
 
-  // 🔍 BUSCA GOOGLE BOOKS
   async function searchGoogleBooks() {
     const query = formData.title.trim();
     if (!query) return alert('Digite o título!');
@@ -121,7 +109,6 @@ export default function App() {
         
         let detectedGenre = 'Outros';
         const cats = info.categories ? info.categories[0].toLowerCase() : '';
-        // Tentativa de detecção básica
         if (cats.includes('fiction')) detectedGenre = 'Ficção';
         if (cats.includes('business') || cats.includes('economics')) detectedGenre = 'Finanças';
         if (cats.includes('history')) detectedGenre = 'História';
@@ -272,9 +259,8 @@ export default function App() {
                     <div>
                       <div className="flex justify-between items-start gap-2">
                          <div className="flex flex-col gap-1 min-w-0">
-                            {/* ETIQUETA DE GÊNERO NO CARD */}
+                            {/* TAG DE GÊNERO */}
                             <span className={`w-fit px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider border mb-1 ${genreColors[genre] || genreColors['Outros']}`}>{genre}</span>
-                            
                             <h3 className="text-lg font-bold text-slate-900 leading-tight truncate pr-2" title={book.title}>{book.title}</h3>
                             <div className="flex items-center gap-2 text-sm text-slate-500">
                                 {(() => {
@@ -292,7 +278,7 @@ export default function App() {
                       
                       <div className="flex flex-wrap items-center gap-2 mt-3">
                          <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${book.status === 'Concluído' ? 'bg-emerald-100 text-emerald-700' : book.status === 'Lendo' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'}`}>{book.status}</span>
-                         {book.rating > 0 && <div className="flex gap-0.5">{[...Array(5)].map((_, i) => <Star key={i} className={`w-3 h-3 ${i < book.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}`} />)}</div>}
+                         {(book.rating ?? 0) > 0 && <div className="flex gap-0.5">{[...Array(5)].map((_, i) => <Star key={i} className={`w-3 h-3 ${i < (book.rating ?? 0) ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}`} />)}</div>}
                          
                          {book.status === 'Lendo' && daysCount !== null && (
                             <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-amber-50 text-amber-700 text-[10px] font-bold uppercase tracking-wider border border-amber-100"><Timer className="w-3 h-3" /> Há {daysCount} dias</span>

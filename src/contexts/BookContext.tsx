@@ -1,4 +1,5 @@
-import { createContext, useState, useEffect, useContext, ReactNode } from 'react'
+import { createContext, useState, useEffect, useContext } from 'react'
+import type { ReactNode } from 'react'
 import { supabase } from '../lib/supabase'
 
 export interface Book {
@@ -13,7 +14,9 @@ export interface Book {
   format: string
   status: 'Lendo' | 'Na Fila' | 'Concluído'
   rating?: number
-  finished_at?: string
+  finished_at?: string | null
+  started_at?: string | null // Adicionado
+  genre?: string // Adicionado
 }
 
 interface BookContextData {
