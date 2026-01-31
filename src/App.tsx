@@ -3,8 +3,8 @@ import { useBooks } from './contexts/BookContext'
 import { supabase } from './lib/supabase'
 import { 
   Library, Plus, Trash2, CheckCircle2, 
-  BookMarked, X, Pencil, Search, ArrowUpDown, Sparkles, Star, Trophy, Globe, Link as LinkIcon, Image as ImageIcon,
-  Layers, Book, PlayCircle, StopCircle, Timer, Award, PieChart, LayoutGrid, Calendar, MapPin, User, Hash, AlertTriangle, Monitor, TrendingUp, Tag
+  BookMarked, X, Pencil, Search, ArrowUpDown, Sparkles, Star, Trophy, Globe,
+  Layers, Book, PlayCircle, StopCircle, Timer, Award, PieChart, LayoutGrid, Calendar, User, Hash, Monitor, Tag
 } from 'lucide-react'
 
 // 🌍 MAPA-MÚNDI COMPLETO (RESTAURADO)
@@ -91,7 +91,6 @@ export default function App() {
     books.forEach(b => {
       if (b.author) counters.authors[b.author] = (counters.authors[b.author] || 0) + 1;
       if (b.author_nationality) {
-        // ✅ Proteção contra NULL restaura funcionamento
         const nat = b.author_nationality.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         counters.countries[nat] = (counters.countries[nat] || 0) + 1;
       }
@@ -117,7 +116,7 @@ export default function App() {
     return {
       totalLidosAno: finishedThisYear,
       paginasLidasAno: pagesThisYear,
-      mediaPaginas: books.length > 0 ? Math.round(books.reduce((acc, b) => acc + b.total_pages, 0) / books.length) : 0,
+      mediaPaginas: books.length > 0 ? Math.round(books.reduce((acc, b) => acc + (b.total_pages || 0), 0) / books.length) : 0,
       tempoMedio: booksWithDuration > 0 ? Math.round(totalDuration / booksWithDuration) : 0,
       topAuthors: Object.entries(counters.authors).sort((a,b) => b[1] - a[1]).slice(0, 3),
       topCountries: Object.entries(counters.countries).sort((a,b) => b[1] - a[1]).slice(0, 3),
@@ -149,7 +148,6 @@ export default function App() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     try {
-      // ✅ Converte strings vazias em NULL para o banco aceitar
       const payload = { 
         ...formData, 
         rating: editingBookId ? formData.rating : 0,
@@ -177,7 +175,7 @@ export default function App() {
           <button onClick={() => setCurrentView('library')} className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all ${currentView === 'library' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}><LayoutGrid className="w-4 h-4 inline mr-2"/> Biblioteca</button>
           <button onClick={() => setCurrentView('analytics')} className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all ${currentView === 'analytics' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}><PieChart className="w-4 h-4 inline mr-2"/> Relatórios</button>
         </div>
-        <button onClick={() => { setEditingBookId(null); setFormData({ title: '', author: '', author_nationality: '', publisher: '', total_pages: 0, read_pages: 0, cover_url: '', format: 'Físico', status: 'Na Fila', rating: 0, finished_at: '', started_at: '', genre: 'Outros', is_bestseller: false, platform: 'Físico', interruption_reason: '' }); setIsModalOpen(true); }} className="bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-600 transition-all"><Plus /> Novo</button>
+        <button onClick={() => { setEditingBookId(null); setIsModalOpen(true); }} className="bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-600 transition-all"><Plus /> Novo</button>
       </header>
 
       <main className="max-w-7xl mx-auto p-6 space-y-8">
@@ -201,7 +199,7 @@ export default function App() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-500">
               {books.filter(b => (b.title.toLowerCase().includes(searchTerm.toLowerCase()) || b.author.toLowerCase().includes(searchTerm.toLowerCase())) && (filterStatus === 'Todos' || b.status === filterStatus)).map(book => (
                 <div key={book.id} className="bg-white p-5 rounded-[2rem] border border-slate-100 flex gap-6 relative group shadow-sm hover:shadow-md transition-all">
-                  <div className="w-24 h-36 bg-slate-50 rounded-xl overflow-hidden shrink-0 shadow-inner">{book.cover_url ? <img src={book.cover_url} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center bg-slate-100"><BookMarked className="text-slate-300 w-8 h-8"/></div>}</div>
+                  <div className="w-24 h-36 bg-slate-50 rounded-xl overflow-hidden shrink-0 shadow-inner">{book.cover_url ? <img src={book.cover_url} className="w-full h-full object-cover" alt={book.title}/> : <div className="w-full h-full flex items-center justify-center bg-slate-100"><BookMarked className="text-slate-300 w-8 h-8"/></div>}</div>
                   <div className="flex-1 py-1 min-w-0">
                     <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-md border mb-1 block w-fit ${genreColors[book.genre || 'Outros'] || genreColors['Outros']}`}>{book.genre}</span>
                     <h3 className="font-bold text-lg truncate text-slate-900">{book.title}</h3>
@@ -227,14 +225,12 @@ export default function App() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="bg-white p-8 rounded-[2.5rem] border shadow-sm"><h2 className="text-sm font-black uppercase text-slate-900 mb-6 flex items-center gap-2"><User size={16} className="text-blue-600"/> Top Autores</h2>{analytics.topAuthors.map(([n, c]) => (<div key={n} className="flex justify-between items-center mb-4 font-bold text-sm bg-slate-50 p-3 rounded-2xl"><span>{n}</span><span className="bg-white px-2 py-1 rounded-lg shadow-sm text-xs font-black">{c} livros</span></div>))}</div>
               <div className="bg-white p-8 rounded-[2.5rem] border shadow-sm"><h2 className="text-sm font-black uppercase text-slate-900 mb-6 flex items-center gap-2"><Globe size={16} className="text-emerald-600"/> Origens</h2>{analytics.topCountries.map(([n, c]) => (<div key={n} className="flex justify-between items-center mb-4 font-medium text-sm"><span>{countryFlags[n] || '🏳️'} {n.toUpperCase()}</span><span className="text-slate-400 font-bold">{c}</span></div>))}</div>
-              {/* ✅ RELATÓRIO DE FORMATOS CORRIGIDO */}
               <div className="bg-white p-8 rounded-[2.5rem] border shadow-sm"><h2 className="text-sm font-black uppercase text-slate-900 mb-6 flex items-center gap-2"><Monitor size={16} className="text-orange-600"/> Formatos</h2>{Object.entries(analytics.formatos).map(([n, c]) => (<div key={n} className="mb-6"><div className="flex justify-between text-[10px] font-black uppercase mb-2"><span>{n}</span><span>{Math.round((c / (books.length || 1)) * 100)}%</span></div><div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden shadow-inner"><div className="bg-slate-800 h-full rounded-full transition-all duration-1000" style={{ width: `${(c / (books.length || 1)) * 100}%` }}></div></div></div>))}</div>
             </div>
           </div>
         )}
       </main>
 
-      {/* ✅ MODAL COMPLETO COM SELECT DE GÊNERO */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <div className="bg-white w-full max-w-xl rounded-[2.5rem] p-8 max-h-[90vh] overflow-y-auto shadow-2xl">
