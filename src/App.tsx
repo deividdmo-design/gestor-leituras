@@ -65,14 +65,13 @@ export default function App() {
     genre: 'Outros', is_bestseller: false
   })
 
-  // 📊 DASHBOARD CORRIGIDO (O Erro estava aqui!)
+  // 📊 DASHBOARD (Corrigido para evitar erro de queueBooks)
   const stats = useMemo(() => ({
     totalBooks: books.length,
     totalReadPages: books.reduce((acc, b) => acc + (b.read_pages || 0), 0),
     completedBooks: books.filter(b => b.status === 'Concluído').length,
     readingBooks: books.filter(b => b.status === 'Lendo').length,
-    // ADICIONEI ESTA LINHA QUE FALTAVA:
-    queueBooks: books.filter(b => b.status === 'Na Fila').length, 
+    queueBooks: books.filter(b => b.status === 'Na Fila').length,
     bestSellers: books.filter(b => b.is_bestseller).length
   }), [books]);
 
@@ -199,7 +198,6 @@ export default function App() {
           </div>
           <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between hover:border-slate-300 transition-colors group">
             <div className="flex justify-between items-start mb-2"><div className="bg-slate-100 p-2.5 rounded-xl text-slate-600 group-hover:bg-slate-600 group-hover:text-white transition-colors"><Layers className="w-5 h-5" /></div></div>
-            {/* O ERRO ESTAVA AQUI: AGORA stats.queueBooks EXISTE! */}
             <div><p className="text-2xl font-black text-slate-800 tracking-tight">{stats.queueBooks}</p><p className="text-xs font-bold text-slate-400 uppercase tracking-wide">Na Fila</p></div>
           </div>
           <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between hover:border-emerald-100 transition-colors group">
