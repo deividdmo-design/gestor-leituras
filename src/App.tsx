@@ -7,6 +7,13 @@ import {
   Layers, Book, PlayCircle, StopCircle, Timer, Award, PieChart, LayoutGrid, Calendar, MapPin, User, Hash, AlertTriangle, TrendingUp, Tag
 } from 'lucide-react'
 
+// Adicione isso logo após as importações, antes da função App
+console.log('=== DEBUG AMBIENTE ===');
+console.log('VITE_GOOGLE_BOOKS_KEY existe?', 'VITE_GOOGLE_BOOKS_KEY' in import.meta.env);
+console.log('Valor:', import.meta.env.VITE_GOOGLE_BOOKS_KEY);
+console.log('Comprimento:', import.meta.env.VITE_GOOGLE_BOOKS_KEY?.length);
+console.log('=== FIM DEBUG ===');
+
 // 🌍 MAPA-MÚNDI COMPLETO (RESTAURADO)
 const countryFlags: Record<string, string> = {
   'brasil': '🇧🇷', 'brasileira': '🇧🇷', 'argentina': '🇦🇷', 'chile': '🇨🇱', 'colombia': '🇨🇴',
@@ -170,59 +177,99 @@ export default function App() {
     });
 
   async function searchGoogleBooks() {
-  const query = formData.title.trim();
-  console.log('🔍 Buscando livro com título:', query);
-  console.log('🔑 Chave da API:', import.meta.env.VITE_GOOGLE_BOOKS_KEY ? 'PRESENTE' : 'AUSENTE');
+  console.log('=== INÍCIO DA BUSCA ===');
   
-  if (!query) {
-    alert('Digite o título!');
-    return;
-  }
-
+  const query = formData.title.trim();
+  console.log('🔍 Buscando:', query);
+  
+  // Obter a chave CORRETAMENTE
   const API_KEY = import.meta.env.VITE_GOOGLE_BOOKS_KEY;
+  console.log('🔑 API Key (raw):', API_KEY);
+  console.log('🔑 API Key (typeof):', typeof API_KEY);
+  
+  // Verificação EXTRA rigorosa
   if (!API_KEY) {
-    alert('Erro: Chave da API do Google Books não configurada!');
-    console.error('❌ VITE_GOOGLE_BOOKS_KEY está vazia ou não carregada.');
+    console.error('❌ ERRO: API_KEY está vazia ou undefined');
+    alert('Erro: Chave da API não encontrada. Verifique o console.');
     return;
   }
-
+  
+  if (API_KEY.includes('VITE_GOOGLE_BOOKS_KEY')) {
+    console.error('❌ ERRO CRÍTICO: A variável não foi substituída!');
+    console.error('Valor atual:', API_KEY);
+    alert('ERRO: Variável de ambiente mal configurada. A chave contém o nome da variável!');
+    return;
+  }
+  
+  if (API_KEY.length < 30) {
+    console.error('❌ ERRO: Chave muito curta:', API_KEY.length, 'caracteres');
+    alert('Chave da API parece inválida (muito curta).');
+    return;
+  }
+  
+  console.log('✅ Chave válida detectada');
+  
+  // Testar URL manualmente
+  const testUrl = `https://www.googleapis.com/books/v1/volumes?q=teste&key=${API_KEY.substring(0, 10)}...`;
+  console.log('🌐 URL (parcial):', testUrl);
+  
   const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&key=${API_KEY}&maxResults=1`;
-  console.log('🌐 URL da requisição:', url);
-
+  console.log('🌐 URL completa (primeiros 100 chars):', url.substring(0, 100) + '...');
+  
   try {
-    console.log('🔄 Fazendo fetch...');
-    const response = await fetch(url);
-    console.log('📊 Status da resposta:', response.status, response.statusText);
+    console.log('🔄 Fazendo requisição...');
     
-    if (!response.ok) {
-      throw new Error(`Erro HTTP: ${response.status} ${response.statusText}`);
-    }
+    // Fazer a requisição com timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    
+    console.log('📡 Status:', response.status, response.statusText);
     
     const data = await response.json();
-    console.log('📦 Dados brutos da API:', data);
+    console.log('📦 Resposta recebida');
     
-    if (data.items && data.items.length > 0) {
+    if (data.error) {
+      console.error('❌ Erro da API Google:', data.error);
+      alert(`Erro da API: ${data.error.message}`);
+      return;
+    }
+    
+    if (data.items?.[0]) {
       const info = data.items[0].volumeInfo;
-      console.log('✅ Livro encontrado:', info.title);
+      console.log('✅ SUCESSO! Livro encontrado:', info.title);
       
+      // Atualizar formulário
       setFormData(prev => ({
-        ...prev, 
-        title: info.title || prev.title, 
+        ...prev,
+        title: info.title || prev.title,
         author: info.authors?.join(', ') || '',
-        publisher: info.publisher || '', 
+        publisher: info.publisher || '',
         total_pages: info.pageCount || 0,
         cover_url: info.imageLinks?.thumbnail?.replace('http:', 'https:') || '',
       }));
       
-      console.log('🎉 Formulário atualizado com sucesso!');
+      alert(`✅ "${info.title}" encontrado!`);
     } else {
-      console.log('⚠️ Nenhum livro encontrado para:', query);
-      alert('Nenhum livro encontrado para: ' + query);
+      console.log('⚠️ Nenhum resultado');
+      alert('Nenhum livro encontrado. Tente outro título.');
     }
+    
   } catch (error: any) {
-    console.error('❌ Erro na busca Google Books:', error);
-    alert('Erro na busca: ' + error.message);
+    console.error('💥 ERRO CAPTURADO:', error);
+    
+    if (error.name === 'AbortError') {
+      alert('Timeout: A requisição demorou muito (>10s)');
+    } else if (error.message.includes('400')) {
+      alert('Erro 400: URL mal formada. Verifique a chave da API.');
+    } else {
+      alert(`Erro: ${error.message}`);
+    }
   }
+  
+  console.log('=== FIM DA BUSCA ===');
 }
 
   async function handleSubmit(e: React.FormEvent) {
