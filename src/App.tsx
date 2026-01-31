@@ -151,6 +151,12 @@ export default function App() {
     return Math.ceil(Math.abs(endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
   }
 
+  // Função para calcular porcentagem lida
+  function calculateReadPercentage(totalPages: number, readPages: number): number {
+    if (totalPages <= 0) return 0;
+    return Math.min(100, Math.round((readPages / totalPages) * 100));
+  }
+
   // LISTAGEM FILTRADA
   const processedBooks = books
     .filter(b => 
@@ -348,6 +354,8 @@ export default function App() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-500">
               {processedBooks.map(book => {
                 const daysCount = calculateDays(book.started_at, book.finished_at);
+                const readPercentage = calculateReadPercentage(book.total_pages, book.read_pages);
+                
                 return (
                   <div key={book.id} className="bg-white p-5 rounded-[2rem] border border-slate-100 flex gap-6 relative overflow-hidden group shadow-sm hover:shadow-md transition-all">
                     {book.is_bestseller && (
@@ -380,8 +388,32 @@ export default function App() {
                         })()}
                         {book.author}
                       </p>
+                      
+                      {/* BARRA DE PROGRESSO */}
+                      <div className="mt-4">
+                        <div className="flex justify-between text-[10px] font-bold text-slate-500 mb-1">
+                          <span>Progresso</span>
+                          <span>{book.read_pages}/{book.total_pages} páginas ({readPercentage}%)</span>
+                        </div>
+                        <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full rounded-full transition-all duration-300 ${
+                              readPercentage === 100 ? 'bg-emerald-500' :
+                              readPercentage >= 50 ? 'bg-blue-500' :
+                              readPercentage >= 25 ? 'bg-amber-500' :
+                              'bg-slate-400'
+                            }`}
+                            style={{ width: `${readPercentage}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                      
                       <div className="flex flex-wrap gap-2 mt-4 items-center">
-                        <span className={`text-[10px] font-black px-2 py-1 rounded uppercase ${book.status === 'Concluído' ? 'bg-emerald-50 text-emerald-600' : book.status === 'Abandonado' ? 'bg-red-50 text-red-600' : 'bg-slate-100 text-slate-600'}`}>
+                        <span className={`text-[10px] font-black px-2 py-1 rounded uppercase ${
+                          book.status === 'Concluído' ? 'bg-emerald-50 text-emerald-600' : 
+                          book.status === 'Abandonado' ? 'bg-red-50 text-red-600' : 
+                          'bg-slate-100 text-slate-600'
+                        }`}>
                           {book.status}
                         </span>
                         {(book.rating || 0) > 0 && (
