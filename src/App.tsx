@@ -4,7 +4,7 @@ import { supabase } from './lib/supabase'
 import { 
   Library, Plus, Trash2, CheckCircle2, 
   BookMarked, X, Pencil, Search, ArrowUpDown, Sparkles, Star, Trophy, Globe, Link as LinkIcon, Image as ImageIcon,
-  Layers, Book, PlayCircle, StopCircle, Timer, Award, PieChart, LayoutGrid, Calendar, MapPin, User, Hash, AlertTriangle, Monitor, TrendingUp
+  Layers, Book, PlayCircle, StopCircle, Timer, Award, PieChart, LayoutGrid, Calendar, MapPin, User, Hash, AlertTriangle, Monitor, TrendingUp, Tag
 } from 'lucide-react'
 
 // 🌍 MAPA-MÚNDI COMPLETO (RESTAURADO)
@@ -530,7 +530,7 @@ export default function App() {
               </div>
               <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
                 <h2 className="text-sm font-black uppercase text-slate-900 mb-6 flex items-center gap-2">
-                  <Monitor className="w-4 h-4 text-orange-600"/> Formatos
+                  <Tag className="w-4 h-4 text-emerald-600"/> Gêneros
                 </h2>
                 <div className="space-y-6">
                   {analytics.genres.slice(0, 4).map(([name, count]) => (
@@ -559,7 +559,7 @@ export default function App() {
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <div className="bg-white w-full max-w-xl rounded-[2.5rem] shadow-2xl p-8 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-black text-slate-900">{editingBookId ? 'Editar BI' : 'Novo Livro'}</h2>
+              <h2 className="text-xl font-black text-slate-900">{editingBookId ? 'Editar Livro' : 'Novo Livro'}</h2>
               <button onClick={() => setIsModalOpen(false)} className="p-2 bg-slate-50 rounded-full">
                 <X className="w-5 h-5"/>
               </button>
@@ -598,4 +598,150 @@ export default function App() {
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 ml-1 flex items-center gap-1
+                <label className="text-xs font-bold text-slate-500 ml-1 flex items-center gap-1">
+                  <ImageIcon className="w-3 h-3"/> Capa
+                </label>
+                <div className="flex gap-4">
+                  {formData.cover_url && (
+                    <img src={formData.cover_url} className="w-12 h-16 rounded-md object-cover border border-slate-200 shadow-sm" alt="Preview" />
+                  )}
+                  <div className="relative flex-1">
+                    <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+                    <input 
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-blue-500 focus:bg-white rounded-xl pl-10 pr-4 py-3 text-xs font-medium text-slate-600 outline-none transition-all" 
+                      value={formData.cover_url} 
+                      onChange={e => setFormData({...formData, cover_url: e.target.value})} 
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 ml-1 flex items-center gap-1">
+                    <PlayCircle className="w-3 h-3"/> Início
+                  </label>
+                  <input 
+                    type="date" 
+                    className="w-full bg-slate-50 border-none rounded-2xl px-4 py-3 text-sm font-bold outline-none" 
+                    value={formData.started_at} 
+                    onChange={e => setFormData({...formData, started_at: e.target.value})} 
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 ml-1 flex items-center gap-1">
+                    <StopCircle className="w-3 h-3"/> Fim
+                  </label>
+                  <input 
+                    type="date" 
+                    className="w-full bg-slate-50 border-none rounded-2xl px-4 py-3 text-sm font-bold outline-none" 
+                    value={formData.finished_at} 
+                    onChange={e => setFormData({...formData, finished_at: e.target.value})} 
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 ml-1 block mb-1">Formato</label>
+                  <select 
+                    className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm font-bold appearance-none outline-none" 
+                    value={formData.format} 
+                    onChange={e => setFormData({...formData, format: e.target.value})}
+                  >
+                    <option value="Físico">Físico</option>
+                    <option value="E-book">E-book</option>
+                    <option value="Audiobook">Audiobook</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 ml-1 block mb-1">Status</label>
+                  <select 
+                    className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm font-bold appearance-none outline-none" 
+                    value={formData.status} 
+                    onChange={e => setFormData({...formData, status: e.target.value as BookStatus})}
+                  >
+                    <option value="Na Fila">Na Fila</option>
+                    <option value="Lendo">Lendo</option>
+                    <option value="Concluído">Concluído</option>
+                    <option value="Abandonado">Abandonado</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 ml-1 block mb-1">Gênero</label>
+                  <select 
+                    className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm font-bold appearance-none outline-none" 
+                    value={formData.genre} 
+                    onChange={e => setFormData({...formData, genre: e.target.value})}
+                  >
+                    <option value="Outros">Outros</option>
+                    <option value="Ficção">Ficção</option>
+                    <option value="Romance">Romance</option>
+                    <option value="Fantasia">Fantasia</option>
+                    <option value="Sci-Fi">Sci-Fi</option>
+                    <option value="Clássicos">Clássicos</option>
+                    <option value="Gestão">Gestão</option>
+                    <option value="Estratégia">Estratégia</option>
+                    <option value="Liderança">Liderança</option>
+                    <option value="Vendas">Vendas</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="RH">RH</option>
+                    <option value="Processos">Processos</option>
+                    <option value="Startups">Startups</option>
+                    <option value="Finanças">Finanças</option>
+                    <option value="Negociação">Negociação</option>
+                    <option value="Tecnologia">Tecnologia</option>
+                    <option value="Data Science">Data Science</option>
+                    <option value="História">História</option>
+                    <option value="Biografia">Biografia</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 ml-1 block mb-1">Best Seller?</label>
+                  <select 
+                    className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm font-bold appearance-none outline-none" 
+                    value={formData.is_bestseller ? 'sim' : 'não'} 
+                    onChange={e => setFormData({...formData, is_bestseller: e.target.value === 'sim'})}
+                  >
+                    <option value="não">Não</option>
+                    <option value="sim">Sim</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <input 
+                  type="number" 
+                  className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 font-bold outline-none" 
+                  placeholder="Total Páginas" 
+                  value={formData.total_pages} 
+                  onChange={e => setFormData({...formData, total_pages: Number(e.target.value)})} 
+                />
+                <input 
+                  type="number" 
+                  className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 font-bold outline-none" 
+                  placeholder="Lidas" 
+                  value={formData.read_pages} 
+                  onChange={e => setFormData({...formData, read_pages: Number(e.target.value)})} 
+                />
+              </div>
+              {formData.status === 'Abandonado' && (
+                <input 
+                  className="w-full bg-red-50 border-none rounded-2xl px-5 py-4 text-sm font-bold text-red-600 outline-none" 
+                  placeholder="Motivo da interrupção?" 
+                  value={formData.interruption_reason} 
+                  onChange={e => setFormData({...formData, interruption_reason: e.target.value})} 
+                />
+              )}
+              <button 
+                type="submit" 
+                className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-slate-200 hover:bg-blue-600 transition-colors"
+              >
+                Salvar Dados
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
