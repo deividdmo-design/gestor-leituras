@@ -69,11 +69,12 @@ export default function App() {
   const [sortBy, setSortBy] = useState<'recent' | 'rating'>('recent')
 
   const [formData, setFormData] = useState({
-    title: '', author: '', author_nationality: '', publisher: '',
+    title: '', author: '', author_nationality: '', publisher: '', translator: '',
     total_pages: 0, read_pages: 0, cover_url: '', format: 'Físico',
     status: 'Na Fila' as BookStatus,
-    rating: 0, finished_at: '', started_at: '',
-    genre: 'Outros', is_bestseller: false, platform: 'Físico', interruption_reason: ''
+    rating: 0, finished_at: '', started_at: '', abandoned_at: '',
+    genre: 'Outros', is_bestseller: false, platform: 'Físico', 
+    interruption_reason: '', tags: ''
   })
 
   // 📊 DASHBOARD
@@ -261,30 +262,37 @@ export default function App() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     console.log('🔄 Tentando salvar livro...');
-    console.log('📊 Dados do formulário:', formData);
     
     try {
-      // PREPARAR DADOS - converter valores vazios para null/undefined
+      // PREPARAR DADOS EXATAMENTE como a tabela espera
       const payload = {
-        title: formData.title.trim(),
+        // Campos que existem na tabela
+        title: formData.title.trim() || '[Sem título]',
         author: formData.author.trim() || null,
         author_nationality: formData.author_nationality.trim() || null,
         publisher: formData.publisher.trim() || null,
-        total_pages: parseInt(formData.total_pages.toString()) || 0,
-        read_pages: parseInt(formData.read_pages.toString()) || 0,
+        total_pages: Math.max(0, parseInt(formData.total_pages.toString()) || 0),
+        read_pages: Math.max(0, parseInt(formData.read_pages.toString()) || 0),
         cover_url: formData.cover_url.trim() || null,
-        format: formData.format,
-        status: formData.status,
-        rating: editingBookId ? parseInt(formData.rating.toString()) || 0 : 0,
+        format: formData.format || 'Físico',
+        status: formData.status || 'Na Fila',
+        rating: editingBookId ? Math.max(0, Math.min(5, parseInt(formData.rating.toString()) || 0)) : 0,
         finished_at: formData.finished_at.trim() || null,
         started_at: formData.started_at.trim() || null,
-        genre: formData.genre,
+        genre: formData.genre || 'Outros',
         is_bestseller: Boolean(formData.is_bestseller),
-        platform: formData.platform,
-        interruption_reason: formData.interruption_reason.trim() || null
+        platform: formData.platform || 'Físico',
+        interruption_reason: formData.interruption_reason.trim() || null,
+        
+        // Campos que existem na tabela mas não no formulário
+        translator: formData.translator.trim() || null,
+        tags: formData.tags.trim() || null,
+        abandoned_at: formData.status === 'Abandonado' && formData.finished_at 
+          ? formData.finished_at 
+          : null
       };
       
-      console.log('📤 Payload para Supabase:', payload);
+      console.log('📤 Payload CORRIGIDO para Supabase:', payload);
       
       if (editingBookId) {
         console.log('✏️ Editando livro ID:', editingBookId);
@@ -312,8 +320,13 @@ export default function App() {
       
     } catch (e: any) {
       console.error('❌ ERRO ao salvar:', e);
-      console.error('Detalhes do erro:', e.message, e.details, e.hint);
-      alert(`❌ Erro ao salvar:\n\n${e.message}\n\nVerifique o console para detalhes.`);
+      console.error('Detalhes:', e.message, e.details, e.hint);
+      
+      let errorMessage = e.message || 'Erro desconhecido';
+      if (e.details) errorMessage += `\nDetalhes: ${e.details}`;
+      if (e.hint) errorMessage += `\nSugestão: ${e.hint}`;
+      
+      alert(`❌ Erro ao salvar:\n\n${errorMessage}`);
     }
   }
 
@@ -351,6 +364,7 @@ export default function App() {
                 author: '', 
                 author_nationality: '', 
                 publisher: '', 
+                translator: '',
                 total_pages: 0, 
                 read_pages: 0, 
                 cover_url: '', 
@@ -359,10 +373,12 @@ export default function App() {
                 rating: 0, 
                 finished_at: '', 
                 started_at: '', 
+                abandoned_at: '',
                 genre: 'Outros', 
                 is_bestseller: false, 
                 platform: 'Físico', 
-                interruption_reason: '' 
+                interruption_reason: '',
+                tags: ''
               }); 
               setIsModalOpen(true); 
             }} 
@@ -544,7 +560,12 @@ export default function App() {
                       <button 
                         onClick={() => { 
                           setEditingBookId(book.id); 
-                          setFormData(book as any); 
+                          setFormData({
+                            ...book,
+                            translator: book.translator || '',
+                            tags: book.tags || '',
+                            abandoned_at: book.abandoned_at || ''
+                          }); 
                           setIsModalOpen(true); 
                         }} 
                         className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
