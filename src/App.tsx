@@ -4,10 +4,10 @@ import { supabase } from './lib/supabase'
 import { 
   Library, Plus, Trash2, CheckCircle2, 
   BookMarked, X, Pencil, Search, ArrowUpDown, Sparkles, Star, Trophy, Globe, Link as LinkIcon, Image as ImageIcon,
-  Layers, Book, PieChart, LayoutGrid, Tag, Shuffle, Sparkle
+  Layers, Book, PlayCircle, StopCircle, Timer, Award, PieChart, LayoutGrid, Calendar, User, Hash, Monitor, Tag, Shuffle, Sparkle
 } from 'lucide-react'
 
-// 🌍 MAPA-MÚNDI COMPLETO (INTEGRAL)
+// 🌍 MAPA-MÚNDI COMPLETO (RESTAURADO)
 const countryFlags: Record<string, string> = {
   'brasil': '🇧🇷', 'brasileira': '🇧🇷', 'argentina': '🇦🇷', 'chile': '🇨🇱', 'colombia': '🇨🇴',
   'mexico': '🇲🇽', 'estados unidos': '🇺🇸', 'eua': '🇺🇸', 'canada': '🇨🇦', 'peru': '🇵🇪',
@@ -23,6 +23,20 @@ const countryFlags: Record<string, string> = {
   'mali': '🇲🇱', 'congo': '🇨🇩', 'japao': '🇯🇵', 'china': '🇨🇳', 'coreia do sul': '🇰🇷', 
   'india': '🇮🇳', 'israel': '🇮🇱', 'palestina': '🇵🇸', 'iraque': '🇮🇶', 'ira': '🇮🇷', 
   'afeganistao': '🇦🇫', 'vietna': '🇻🇳', 'australia': '🇦🇺', 'timor leste': '🇹🇱'
+};
+
+const genreColors: Record<string, string> = {
+  'Ficção': 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-100',
+  'Suspense & Mistério': 'bg-slate-100 text-slate-700 border-slate-200',
+  'Terror & Horror': 'bg-red-50 text-red-700 border-red-100',
+  'Literatura Clássica': 'bg-amber-50 text-amber-700 border-amber-200',
+  'Não Ficção': 'bg-stone-100 text-stone-700 border-stone-200',
+  'Ciências Humanas': 'bg-indigo-50 text-indigo-700 border-indigo-100',
+  'Ciências Sociais Aplicadas': 'bg-emerald-50 text-emerald-700 border-emerald-100',
+  'Ciências Exatas': 'bg-blue-50 text-blue-700 border-blue-100',
+  'Tecnologia & Computação': 'bg-cyan-50 text-cyan-700 border-cyan-100',
+  'Desenvolvimento Pessoal': 'bg-orange-50 text-orange-700 border-orange-100',
+  'Outros': 'bg-gray-50 text-gray-600 border-gray-100'
 };
 
 type BookStatus = 'Lendo' | 'Na Fila' | 'Concluído' | 'Abandonado';
@@ -55,10 +69,7 @@ export default function App() {
   async function startReadingShuffled() {
     if (!shuffledBook) return;
     try {
-      const { error } = await supabase.from('books').update({ 
-        status: 'Lendo', 
-        started_at: new Date().toISOString().split('T')[0] 
-      }).eq('id', shuffledBook.id);
+      const { error } = await supabase.from('books').update({ status: 'Lendo', started_at: new Date().toISOString().split('T')[0] }).eq('id', shuffledBook.id);
       if (error) throw error;
       setIsShuffleOpen(false); refreshBooks();
     } catch (e: any) { alert(e.message); }
@@ -68,8 +79,47 @@ export default function App() {
     totalBooks: books.length,
     totalReadPages: books.reduce((acc, b) => acc + (b.read_pages || 0), 0),
     completedBooks: books.filter(b => b.status === 'Concluído').length,
+    readingBooks: books.filter(b => b.status === 'Lendo').length,
     queueBooks: books.filter(b => b.status === 'Na Fila').length,
   }), [books]);
+
+  const analytics = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    const counters = { authors: {} as Record<string, number>, countries: {} as Record<string, number>, formats: {} as Record<string, number>, monthly: Array(12).fill(0) };
+    let finishedThisYear = 0; let pagesThisYear = 0; let totalDuration = 0; let booksWithDuration = 0;
+
+    books.forEach(b => {
+      if (b.author) counters.authors[b.author] = (counters.authors[b.author] || 0) + 1;
+      if (b.format) counters.formats[b.format] = (counters.formats[b.format] || 0) + 1;
+      if (b.author_nationality) {
+        const nat = b.author_nationality.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        counters.countries[nat] = (counters.countries[nat] || 0) + 1;
+      }
+      if (b.status === 'Concluído' && b.finished_at) {
+        const date = new Date(b.finished_at);
+        if (date.getFullYear() === currentYear) {
+            counters.monthly[date.getMonth()]++;
+            finishedThisYear++;
+            pagesThisYear += (b.total_pages || 0);
+        }
+        if (b.started_at) {
+          const start = new Date(b.started_at);
+          totalDuration += Math.ceil(Math.abs(date.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+          booksWithDuration++;
+        }
+      }
+    });
+
+    return {
+      totalLidosAno: finishedThisYear,
+      paginasLidasAno: pagesThisYear,
+      tempoMedio: booksWithDuration > 0 ? Math.round(totalDuration / booksWithDuration) : 0,
+      formatos: counters.formats,
+      mensal: counters.monthly,
+      topAuthor: Object.entries(counters.authors).sort((a,b) => b[1] - a[1])[0]?.[0] || '-',
+      topCountry: Object.entries(counters.countries).sort((a,b) => b[1] - a[1])[0]?.[0] || '-'
+    };
+  }, [books]);
 
   async function searchGoogleBooks() {
     const query = formData.title.trim();
@@ -91,8 +141,8 @@ export default function App() {
       const payload = { ...formData, rating: editingBookId ? formData.rating : 0, started_at: formData.started_at || null, finished_at: formData.finished_at || null };
       const { error } = editingBookId ? await supabase.from('books').update(payload).eq('id', editingBookId) : await supabase.from('books').insert([payload]);
       if (error) throw error;
-      setIsModalOpen(false); refreshBooks();
-    } catch (e: any) { alert(e.message); }
+      setIsModalOpen(false); refreshBooks(); alert('✅ Salvo com sucesso!');
+    } catch (e: any) { alert('❌ Erro: ' + e.message); }
   }
 
   return (
@@ -123,38 +173,44 @@ export default function App() {
             <div className="bg-white p-2 rounded-[1.5rem] border border-slate-200 flex flex-col lg:flex-row gap-2 shadow-sm">
               <div className="relative flex-1"><Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5"/><input className="w-full pl-12 pr-4 font-semibold outline-none text-slate-700" placeholder="Pesquisar..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)}/></div>
               <div className="flex gap-2 p-1">
-                {['Todos', 'Na Fila', 'Lendo', 'Concluído'].map((s) => (<button key={s} onClick={() => setFilterStatus(s as any)} className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase transition-all ${filterStatus === s ? 'bg-slate-900 text-white' : 'text-slate-500'}`}>{s}</button>))}
+                {['Todos', 'Na Fila', 'Lendo', 'Concluído', 'Abandonado'].map((s) => (<button key={s} onClick={() => setFilterStatus(s as any)} className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase transition-all ${filterStatus === s ? 'bg-slate-900 text-white' : 'text-slate-500'}`}>{s}</button>))}
                 <button onClick={handleShuffle} className="p-3 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all shadow-sm group"><Shuffle size={18} className="group-hover:rotate-12 transition-transform" /></button>
                 <div className="relative ml-1"><select className="appearance-none bg-slate-50 pl-4 pr-10 py-3 rounded-xl text-xs font-bold uppercase text-slate-600 outline-none" value={sortBy} onChange={e => setSortBy(e.target.value as any)}><option value="recent">Recentes</option><option value="rating">Notas</option></select><ArrowUpDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" /></div>
               </div>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-500">
-              {books.filter(b => b.title.toLowerCase().includes(searchTerm.toLowerCase())).map(book => (
+              {books.filter(b => b.title.toLowerCase().includes(searchTerm.toLowerCase()) && (filterStatus === 'Todos' || b.status === filterStatus)).map(book => (
                 <div key={book.id} className="bg-white p-5 rounded-[2rem] border border-slate-100 flex gap-6 relative group shadow-sm hover:shadow-md transition-all">
-                  <div className="w-24 h-36 bg-slate-100 rounded-xl overflow-hidden shrink-0 shadow-inner">{book.cover_url ? <img src={book.cover_url} className="w-full h-full object-cover" alt={book.title}/> : <div className="w-full h-full flex items-center justify-center bg-slate-100"><BookMarked className="text-slate-300 w-8 h-8"/></div>}</div>
+                  <div className="w-24 h-36 bg-slate-100 rounded-xl overflow-hidden shrink-0 shadow-inner">{book.cover_url ? <img src={book.cover_url} className="w-full h-full object-cover" alt={book.title}/> : <div className="w-full h-full flex items-center justify-center bg-slate-50"><BookMarked className="text-slate-300 w-8 h-8"/></div>}</div>
                   <div className="flex-1 py-1 min-w-0">
                     <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded-md border mb-1 block w-fit bg-slate-50 text-slate-600 border-slate-100">{book.genre}</span>
                     <h3 className="font-bold text-lg truncate text-slate-900">{book.title}</h3>
-                    <p className="text-sm text-slate-500 flex items-center gap-2">
-                        {book.author_nationality ? (countryFlags[book.author_nationality.toLowerCase().trim()] || <Globe size={12}/>) : <Globe size={12}/>} {book.author}
-                    </p>
-                    <div className="mt-4"><div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden"><div className="h-full bg-blue-600 transition-all duration-500" style={{ width: `${Math.round(((book.read_pages || 0) / (book.total_pages || 1)) * 100)}%` }}></div></div></div>
+                    <p className="text-sm text-slate-500 flex items-center gap-2">{book.author_nationality ? (countryFlags[book.author_nationality.toLowerCase().trim()] || <Globe size={12}/>) : <Globe size={12}/>} {book.author}</p>
+                    <div className="mt-4"><div className="flex justify-between text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider"><span>Progresso</span><span>{Math.round(((book.read_pages || 0) / (book.total_pages || 1)) * 100)}%</span></div><div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden"><div className="h-full bg-blue-600 rounded-full transition-all duration-500" style={{ width: `${Math.round(((book.read_pages || 0) / (book.total_pages || 1)) * 100)}%` }}></div></div></div>
                     <div className="flex gap-2 mt-4"><span className={`text-[10px] font-black px-2 py-1 rounded uppercase ${book.status === 'Concluído' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-600'}`}>{book.status}</span>{(book.rating || 0) > 0 && <div className="flex items-center gap-1 bg-amber-50 px-2 rounded text-amber-600 text-[10px] font-bold"><Star size={10} className="fill-amber-400 text-amber-400"/> {book.rating}</div>}</div>
                   </div>
-                  <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-all"><button onClick={() => { setEditingBookId(book.id); setFormData(book as any); setIsModalOpen(true); }} className="p-2 text-slate-400 hover:text-blue-600 bg-slate-50 rounded-lg"><Pencil size={16}/></button><button onClick={() => { if(confirm('Excluir?')) supabase.from('books').delete().eq('id', book.id).then(refreshBooks); }} className="p-2 text-slate-400 hover:text-red-600 bg-slate-50 rounded-lg"><Trash2 size={16}/></button></div>
+                  <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-all"><button onClick={() => { setEditingBookId(book.id); setFormData(book as any); setIsModalOpen(true); }} className="p-2 text-slate-400 hover:text-blue-600 bg-slate-50 rounded-lg"><Pencil size={16}/></button><button onClick={() => { if(confirm('Excluir livro?')) supabase.from('books').delete().eq('id', book.id).then(refreshBooks); }} className="p-2 text-slate-400 hover:text-red-600 bg-slate-50 rounded-lg"><Trash2 size={16}/></button></div>
                 </div>
               ))}
             </div>
           </>
         ) : (
-          <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500 text-center py-20">
-             <PieChart size={64} className="mx-auto text-slate-200 mb-4" />
-             <h2 className="text-xl font-black">Refinando relatórios...</h2>
+          <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-white p-6 rounded-3xl border shadow-sm"><Calendar className="text-blue-600 mb-2"/><p className="text-xs font-bold text-slate-400 uppercase mb-1">Lidos no Ano</p><p className="text-3xl font-black text-slate-900">{analytics.totalLidosAno}</p></div>
+              <div className="bg-white p-6 rounded-3xl border shadow-sm"><Hash className="text-emerald-600 mb-2"/><p className="text-xs font-bold text-slate-400 uppercase mb-1">Páginas no Ano</p><p className="text-3xl font-black text-slate-900">{analytics.paginasLidasAno.toLocaleString()}</p></div>
+              <div className="bg-white p-6 rounded-3xl border shadow-sm"><Timer className="text-orange-600 mb-2"/><p className="text-xs font-bold text-slate-400 uppercase mb-1">Média Dias/Livro</p><p className="text-3xl font-black text-slate-900">{analytics.tempoMedio}d</p></div>
+              <div className="bg-white p-6 rounded-3xl border shadow-sm"><Award className="text-purple-600 mb-2"/><p className="text-xs font-bold text-slate-400 uppercase mb-1">Top Autor</p><p className="text-xl font-black text-slate-900 truncate">{analytics.topAuthor}</p></div>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-white p-8 rounded-[2.5rem] border shadow-sm"><h2 className="text-sm font-black uppercase text-slate-900 mb-6 flex items-center gap-2"><Monitor size={16} className="text-orange-600"/> Formatos</h2>{Object.entries(analytics.formatos).map(([n, c]) => (<div key={n} className="mb-6"><div className="flex justify-between text-[10px] font-black uppercase mb-2"><span>{n}</span><span>{Math.round((c / (books.length || 1)) * 100)}%</span></div><div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden shadow-inner"><div className="bg-slate-800 h-full rounded-full transition-all duration-1000" style={{ width: `${(c / (books.length || 1)) * 100}%` }}></div></div></div>))}</div>
+              <div className="bg-white p-8 rounded-[2.5rem] border shadow-sm"><h2 className="text-sm font-black uppercase text-slate-900 mb-8 flex items-center gap-2"><Sparkles className="w-4 h-4 text-blue-600"/> Evolução Mensal</h2><div className="flex items-end justify-between h-32 gap-2">{analytics.mensal.map((count, i) => (<div key={i} className="flex-1 flex flex-col items-center gap-2"><div className="w-full bg-blue-100 rounded-t-lg transition-all hover:bg-blue-600 relative group" style={{ height: `${(count / (Math.max(...analytics.mensal) || 1)) * 100}%`, minHeight: '4px' }}></div><span className="text-[9px] font-bold text-slate-400 uppercase">{['J','F','M','A','M','J','J','A','S','O','N','D'][i]}</span></div>))}</div></div>
+            </div>
           </div>
         )}
       </main>
 
-      {/* 🎲 SORTEADOR VISUAL */}
+      {/* 🎲 SORTEADOR VISUAL PREMIUM */}
       {isShuffleOpen && shuffledBook && (
         <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-xl flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
           <div className="bg-white w-full max-w-sm rounded-[3rem] p-10 shadow-2xl text-center relative overflow-hidden">
@@ -171,15 +227,16 @@ export default function App() {
         </div>
       )}
 
-      {/* MODAL DE CADASTRO */}
+      {/* MODAL DE CADASTRO COM TODOS OS GÊNEROS SOLICITADOS */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <div className="bg-white w-full max-w-xl rounded-[2.5rem] p-8 max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="flex justify-between items-center mb-6"><h2 className="text-xl font-black text-slate-900">{editingBookId ? 'Editar BI' : 'Novo Registro'}</h2><button onClick={() => setIsModalOpen(false)} className="p-2 bg-slate-50 rounded-full hover:bg-slate-100 transition-colors"><X/></button></div>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="flex gap-2"><input className="flex-1 bg-slate-50 rounded-2xl px-5 py-4 font-bold outline-none border-2 border-transparent focus:border-blue-100" placeholder="Título" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required/><button type="button" onClick={searchGoogleBooks} className="bg-blue-600 text-white px-5 rounded-2xl hover:bg-blue-700 shadow-lg transition-colors"><Sparkles/></button></div>
-              <div className="grid grid-cols-2 gap-4"><input className="bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none" placeholder="Autor" value={formData.author} onChange={e => setFormData({...formData, author: e.target.value})}/><input className="bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none" placeholder="País (Ex: Brasil)" value={formData.author_nationality} onChange={e => setFormData({...formData, author_nationality: e.target.value})}/></div>
+              <div className="flex gap-2"><input className="flex-1 bg-slate-50 rounded-2xl px-5 py-4 font-bold outline-none border-2 border-transparent focus:border-blue-100" placeholder="Título" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} required/><button type="button" onClick={searchGoogleBooks} className="bg-blue-600 text-white px-5 rounded-2xl hover:bg-blue-700 shadow-lg transition-colors"><Sparkles/></button></div>
+              <div className="grid grid-cols-2 gap-4"><input className="bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none" placeholder="Autor" value={formData.author} onChange={e => setFormData({ ...formData, author: e.target.value })}/><input className="bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none" placeholder="País (Ex: Brasil)" value={formData.author_nationality} onChange={e => setFormData({ ...formData, author_nationality: e.target.value })}/></div>
               <div className="space-y-1"><label className="text-xs font-bold text-slate-400 ml-1 flex items-center gap-1"><ImageIcon size={12}/> URL da Capa (Manual)</label><div className="relative"><LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"/><input className="w-full bg-slate-50 rounded-2xl pl-12 pr-4 py-4 text-xs font-bold outline-none border-2 border-transparent focus:border-blue-100" placeholder="Link da imagem..." value={formData.cover_url} onChange={e => setFormData({ ...formData, cover_url: e.target.value })}/></div></div>
+              
               <div className="space-y-1"><label className="text-xs font-bold text-slate-400 ml-1 flex items-center gap-1"><Tag size={12}/> Gênero Literário / Área</label>
                 <select className="w-full bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none appearance-none cursor-pointer border-2 border-transparent focus:border-blue-100" value={formData.genre} onChange={e => setFormData({...formData, genre: e.target.value})}>
                   <optgroup label="Ficção">
@@ -188,23 +245,60 @@ export default function App() {
                   <optgroup label="Suspense & Mistério">
                     <option>Suspense</option><option>Policial</option><option>Thriller</option>
                   </optgroup>
+                  <optgroup label="Terror & Horror">
+                    <option>Terror</option><option>Horror Cósmico</option>
+                  </optgroup>
+                  <optgroup label="Literatura Clássica">
+                    <option>Clássico Universal</option><option>Clássico Nacional</option>
+                  </optgroup>
+                  <optgroup label="Não Ficção">
+                    <option>Biografia</option><option>Autobiografia</option><option>Ensaio</option><option>Reportagem Literária</option>
+                  </optgroup>
                   <optgroup label="Ciências Humanas">
-                    <option>Filosofia</option><option>História</option><option>Sociologia</option><option>Antropologia</option><option>Ciência Política</option><option>Economia</option>
+                    <option>Filosofia</option><option>História</option><option>Sociologia</option><option>Antropologia</option><option>Ciência Política</option><option>Economia</option><option>Geografia Humana</option>
+                  </optgroup>
+                  <optgroup label="Ciências Sociais Aplicadas">
+                    <option>Administração</option><option>Contabilidade</option><option>Direito</option><option>Relações Internacionais</option><option>Comunicação Social</option>
+                  </optgroup>
+                  <optgroup label="Ciências Exatas">
+                    <option>Matemática</option><option>Estatística</option><option>Física</option><option>Química</option><option>Ciência de Dados</option>
+                  </optgroup>
+                  <optgroup label="Ciências da Natureza">
+                    <option>Biologia</option><option>Ecologia</option><option>Geologia</option><option>Astronomia</option>
+                  </optgroup>
+                  <optgroup label="Ciências da Saúde">
+                    <option>Medicina</option><option>Psicologia</option><option>Psiquiatria</option><option>Neurociência</option><option>Nutrição</option>
+                  </optgroup>
+                  <optgroup label="Tecnologia & Computação">
+                    <option>Tecnologia da Informação</option><option>Programação</option><option>Inteligência Artificial</option><option>Segurança da Informação</option>
+                  </optgroup>
+                  <optgroup label="Religião & Espiritualidade">
+                    <option>Teologia</option><option>Espiritualidade</option><option>Mitologia</option>
+                  </optgroup>
+                  <optgroup label="Desenvolvimento Pessoal">
+                    <option>Autoajuda</option><option>Liderança</option><option>Produtividade</option>
+                  </optgroup>
+                  <optgroup label="Infantojuvenil">
+                    <option>Infantil</option><option>Juvenil</option>
                   </optgroup>
                   <optgroup label="Outros">
-                    <option>Autoajuda</option><option>Outros</option>
+                    <option>Poesia</option><option>Teatro</option><option>Crônica</option><option>HQ / Graphic Novel</option><option>Outros</option>
                   </optgroup>
                 </select>
               </div>
+
               <div className="grid grid-cols-2 gap-4">
-                <input type="date" className="w-full bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none" value={formData.started_at} onChange={e => setFormData({...formData, started_at: e.target.value})}/>
-                <input type="date" className="w-full bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none" value={formData.finished_at} onChange={e => setFormData({...formData, finished_at: e.target.value})}/>
+                <div className="space-y-1"><label className="text-xs font-bold text-slate-400 ml-1 flex items-center gap-1"><PlayCircle size={12}/> Início</label><input type="date" className="w-full bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none" value={formData.started_at} onChange={e => setFormData({ ...formData, started_at: e.target.value })}/></div>
+                <div className="space-y-1"><label className="text-xs font-bold text-slate-400 ml-1 flex items-center gap-1"><StopCircle size={12}/> Conclusão</label><input type="date" className="w-full bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none" value={formData.finished_at} onChange={e => setFormData({ ...formData, finished_at: e.target.value })}/></div>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <select className="bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none appearance-none" value={formData.format} onChange={e => setFormData({...formData, format: e.target.value})}><option>Físico</option><option>E-book</option><option>Audiobook</option></select>
-                <select className="bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none appearance-none" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value as BookStatus})}><option value="Na Fila">Na Fila</option><option value="Lendo">Lendo</option><option value="Concluído">Concluído</option><option value="Abandonado">Abandonado</option></select>
+                <div className="space-y-1"><label className="text-xs font-bold text-slate-400 ml-1">Formato</label><select className="w-full bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none appearance-none" value={formData.format} onChange={e => setFormData({...formData, format: e.target.value})}><option>Físico</option><option>E-book</option><option>Audiobook</option></select></div>
+                <div className="space-y-1"><label className="text-xs font-bold text-slate-400 ml-1">Status</label><select className="w-full bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none appearance-none" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value as BookStatus})}><option value="Na Fila">Na Fila</option><option value="Lendo">Lendo</option><option value="Concluído">Concluído</option><option value="Abandonado">Abandonado</option></select></div>
               </div>
-              <div className="grid grid-cols-2 gap-4"><input type="number" className="bg-slate-50 rounded-2xl px-5 py-4 font-bold outline-none" placeholder="Páginas" value={formData.total_pages} onChange={e => setFormData({...formData, total_pages: Number(e.target.value)})}/><input type="number" className="bg-slate-50 rounded-2xl px-5 py-4 font-bold outline-none" placeholder="Lidas" value={formData.read_pages} onChange={e => setFormData({...formData, read_pages: Number(e.target.value)})}/></div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1"><label className="text-xs font-bold text-slate-400 ml-1">Total de Páginas</label><input type="number" className="w-full bg-slate-50 rounded-2xl px-5 py-4 font-bold outline-none" value={formData.total_pages} onChange={e => setFormData({...formData, total_pages: Number(e.target.value)})}/></div>
+                <div className="space-y-1"><label className="text-xs font-bold text-slate-400 ml-1">Páginas Lidas</label><input type="number" className="w-full bg-slate-50 rounded-2xl px-5 py-4 font-bold outline-none" value={formData.read_pages} onChange={e => setFormData({...formData, read_pages: Number(e.target.value)})}/></div>
+              </div>
               <button type="submit" className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black uppercase shadow-xl hover:bg-blue-600 transition-all transform active:scale-95">SALVAR DADOS</button>
             </form>
           </div>
