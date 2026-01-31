@@ -12,8 +12,8 @@ export interface Book {
   read_pages: number
   cover_url: string
   format: string
-  // AQUI ESTÁ A CORREÇÃO: Adicionamos 'Abandonado' na lista de tipos permitidos
-  status: 'Lendo' | 'Na Fila' | 'Concluído' | 'Abandonado' 
+  // AQUI: Adicionei 'Abandonado' para o sistema aceitar
+  status: 'Lendo' | 'Na Fila' | 'Concluído' | 'Abandonado'
   rating?: number
   finished_at?: string | null
   started_at?: string | null
