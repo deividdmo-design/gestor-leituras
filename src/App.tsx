@@ -4,17 +4,10 @@ import { supabase } from './lib/supabase'
 import { 
   Library, Plus, Trash2, CheckCircle2, 
   BookMarked, X, Pencil, Search, ArrowUpDown, Sparkles, Star, Trophy, Globe, Link as LinkIcon, Image as ImageIcon,
-  Layers, Book, PlayCircle, StopCircle, Timer, Award, PieChart, LayoutGrid, Calendar, MapPin, User, Hash, AlertTriangle, TrendingUp, Tag
+  Layers, Book, PlayCircle, StopCircle, Timer, Award, PieChart, LayoutGrid, Calendar, MapPin, User, Hash, AlertTriangle, Monitor, TrendingUp, Tag
 } from 'lucide-react'
 
-// Adicione isso logo após as importações, antes da função App
-console.log('=== DEBUG AMBIENTE ===');
-console.log('VITE_GOOGLE_BOOKS_KEY existe?', 'VITE_GOOGLE_BOOKS_KEY' in import.meta.env);
-console.log('Valor:', import.meta.env.VITE_GOOGLE_BOOKS_KEY);
-console.log('Comprimento:', import.meta.env.VITE_GOOGLE_BOOKS_KEY?.length);
-console.log('=== FIM DEBUG ===');
-
-// 🌍 MAPA-MÚNDI COMPLETO (RESTAURADO)
+// 🌍 MAPA-MÚNDI COMPLETO
 const countryFlags: Record<string, string> = {
   'brasil': '🇧🇷', 'brasileira': '🇧🇷', 'argentina': '🇦🇷', 'chile': '🇨🇱', 'colombia': '🇨🇴',
   'mexico': '🇲🇽', 'estados unidos': '🇺🇸', 'eua': '🇺🇸', 'canada': '🇨🇦', 'peru': '🇵🇪',
@@ -119,7 +112,6 @@ export default function App() {
       if (b.genre) counters.genres[b.genre] = (counters.genres[b.genre] || 0) + 1;
       if (b.format) counters.formats[b.format] = (counters.formats[b.format] || 0) + 1;
       
-      // CORREÇÃO DO ERRO TS2367: Usar type assertion
       const s = b.status || 'Na Fila';
       if (isBookStatus(s) && counters.status[s] !== undefined) {
         counters.status[s]++;
@@ -177,114 +169,50 @@ export default function App() {
     });
 
   async function searchGoogleBooks() {
-  console.log('=== INÍCIO DA BUSCA ===');
-  
-  const query = formData.title.trim();
-  console.log('🔍 Buscando:', query);
-  
-  // Obter a chave CORRETAMENTE
-  const API_KEY = import.meta.env.VITE_GOOGLE_BOOKS_KEY;
-  console.log('🔑 API Key (raw):', API_KEY);
-  console.log('🔑 API Key (typeof):', typeof API_KEY);
-  
-  // Verificação EXTRA rigorosa
-  if (!API_KEY) {
-    console.error('❌ ERRO: API_KEY está vazia ou undefined');
-    alert('Erro: Chave da API não encontrada. Verifique o console.');
-    return;
+    const query = formData.title.trim();
+    if (!query) return alert('Digite o título!');
+    const API_KEY = import.meta.env.VITE_GOOGLE_BOOKS_KEY;
+    try {
+      const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&key=${API_KEY}&maxResults=1`);
+      const data = await response.json();
+      if (data.items?.[0]) {
+        const info = data.items[0].volumeInfo;
+        setFormData(prev => ({
+          ...prev, title: info.title || prev.title, author: info.authors?.join(', ') || '',
+          publisher: info.publisher || '', total_pages: info.pageCount || 0,
+          cover_url: info.imageLinks?.thumbnail?.replace('http:', 'https:') || '',
+        }));
+      }
+    } catch (e) { alert('Erro na busca.'); }
   }
-  
-  if (API_KEY.includes('VITE_GOOGLE_BOOKS_KEY')) {
-    console.error('❌ ERRO CRÍTICO: A variável não foi substituída!');
-    console.error('Valor atual:', API_KEY);
-    alert('ERRO: Variável de ambiente mal configurada. A chave contém o nome da variável!');
-    return;
-  }
-  
-  if (API_KEY.length < 30) {
-    console.error('❌ ERRO: Chave muito curta:', API_KEY.length, 'caracteres');
-    alert('Chave da API parece inválida (muito curta).');
-    return;
-  }
-  
-  console.log('✅ Chave válida detectada');
-  
-  // Testar URL manualmente
-  const testUrl = `https://www.googleapis.com/books/v1/volumes?q=teste&key=${API_KEY.substring(0, 10)}...`;
-  console.log('🌐 URL (parcial):', testUrl);
-  
-  const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&key=${API_KEY}&maxResults=1`;
-  console.log('🌐 URL completa (primeiros 100 chars):', url.substring(0, 100) + '...');
-  
-  try {
-    console.log('🔄 Fazendo requisição...');
-    
-    // Fazer a requisição com timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
-    
-    const response = await fetch(url, { signal: controller.signal });
-    clearTimeout(timeoutId);
-    
-    console.log('📡 Status:', response.status, response.statusText);
-    
-    const data = await response.json();
-    console.log('📦 Resposta recebida');
-    
-    if (data.error) {
-      console.error('❌ Erro da API Google:', data.error);
-      alert(`Erro da API: ${data.error.message}`);
-      return;
-    }
-    
-    if (data.items?.[0]) {
-      const info = data.items[0].volumeInfo;
-      console.log('✅ SUCESSO! Livro encontrado:', info.title);
-      
-      // Atualizar formulário
-      setFormData(prev => ({
-        ...prev,
-        title: info.title || prev.title,
-        author: info.authors?.join(', ') || '',
-        publisher: info.publisher || '',
-        total_pages: info.pageCount || 0,
-        cover_url: info.imageLinks?.thumbnail?.replace('http:', 'https:') || '',
-      }));
-      
-      alert(`✅ "${info.title}" encontrado!`);
-    } else {
-      console.log('⚠️ Nenhum resultado');
-      alert('Nenhum livro encontrado. Tente outro título.');
-    }
-    
-  } catch (error: any) {
-    console.error('💥 ERRO CAPTURADO:', error);
-    
-    if (error.name === 'AbortError') {
-      alert('Timeout: A requisição demorou muito (>10s)');
-    } else if (error.message.includes('400')) {
-      alert('Erro 400: URL mal formada. Verifique a chave da API.');
-    } else {
-      alert(`Erro: ${error.message}`);
-    }
-  }
-  
-  console.log('=== FIM DA BUSCA ===');
-}
 
+  // AQUI ESTAVA O PROBLEMA DO SALVAMENTO!
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     try {
-      const payload = { ...formData, rating: editingBookId ? formData.rating : 0 };
+      // FIX: Tratar datas vazias para NULL antes de enviar para o banco
+      const payload = { 
+        ...formData, 
+        rating: editingBookId ? formData.rating : 0,
+        // O banco recusa "" (string vazia), tem que ser null ou data válida
+        started_at: formData.started_at === '' ? null : formData.started_at,
+        finished_at: formData.finished_at === '' ? null : formData.finished_at,
+      };
+
       if (editingBookId) {
-        await supabase.from('books').update(payload).eq('id', editingBookId);
+        const { error } = await supabase.from('books').update(payload).eq('id', editingBookId);
+        if (error) throw error;
       } else {
-        await supabase.from('books').insert([payload]);
+        const { error } = await supabase.from('books').insert([payload]);
+        if (error) throw error;
       }
       setIsModalOpen(false);
       refreshBooks();
+      alert('Livro salvo com sucesso!');
     } catch (e: any) { 
-      alert(e.message); 
+      console.error(e);
+      // Mostra o erro real na tela
+      alert('Erro ao salvar: ' + e.message + '. Detalhes no console.'); 
     }
   }
 
@@ -644,10 +572,10 @@ export default function App() {
               </div>
               <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
                 <h2 className="text-sm font-black uppercase text-slate-900 mb-6 flex items-center gap-2">
-                  <Tag className="w-4 h-4 text-emerald-600"/> Gêneros
+                  <Monitor className="w-4 h-4 text-orange-600"/> Formatos
                 </h2>
                 <div className="space-y-6">
-                  {analytics.genres.slice(0, 4).map(([name, count]) => (
+                  {Object.entries(analytics.formatos).map(([name, count]) => (
                     <div key={name}>
                       <div className="flex justify-between text-[10px] font-black uppercase mb-1">
                         <span>{name}</span>
