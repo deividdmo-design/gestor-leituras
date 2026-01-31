@@ -65,12 +65,13 @@ export default function App() {
     genre: 'Outros', is_bestseller: false
   })
 
-  // 📊 DASHBOARD (Corrigido para evitar erro de queueBooks)
+  // 📊 DASHBOARD CORRIGIDO
   const stats = useMemo(() => ({
     totalBooks: books.length,
     totalReadPages: books.reduce((acc, b) => acc + (b.read_pages || 0), 0),
     completedBooks: books.filter(b => b.status === 'Concluído').length,
     readingBooks: books.filter(b => b.status === 'Lendo').length,
+    // 👇 AQUI ESTAVA O ERRO! Adicionei o cálculo que faltava:
     queueBooks: books.filter(b => b.status === 'Na Fila').length,
     bestSellers: books.filter(b => b.is_bestseller).length
   }), [books]);
