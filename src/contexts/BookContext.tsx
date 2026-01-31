@@ -2,6 +2,9 @@ import { createContext, useState, useEffect, useContext } from 'react'
 import type { ReactNode } from 'react'
 import { supabase } from '../lib/supabase'
 
+// TIPO PARA STATUS DOS LIVROS
+type BookStatus = 'Lendo' | 'Na Fila' | 'Concluído' | 'Abandonado';
+
 export interface Book {
   id: string
   title: string
@@ -12,8 +15,7 @@ export interface Book {
   read_pages: number
   cover_url: string
   format: string
-  // AQUI ESTÁ A CORREÇÃO QUE O ERRO PEDE:
-  status: 'Lendo' | 'Na Fila' | 'Concluído' | 'Abandonado'
+  status: BookStatus
   rating?: number
   finished_at?: string | null
   started_at?: string | null
