@@ -25,16 +25,13 @@ const countryFlags: Record<string, string> = {
   'afeganistao': '🇦🇫', 'vietna': '🇻🇳', 'australia': '🇦🇺', 'timor leste': '🇹🇱'
 };
 
-// 🏷️ CORES DAS CATEGORIAS (Expandido para Gestão)
+// 🏷️ CORES DAS CATEGORIAS
 const genreColors: Record<string, string> = {
-  // LITERATURA
   'Ficção': 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-100',
   'Romance': 'bg-rose-50 text-rose-700 border-rose-100',
   'Fantasia': 'bg-purple-50 text-purple-700 border-purple-100',
   'Sci-Fi': 'bg-indigo-50 text-indigo-700 border-indigo-100',
   'Clássicos': 'bg-amber-100 text-amber-800 border-amber-200',
-  
-  // GESTÃO & NEGÓCIOS (Foco do Analista)
   'Gestão': 'bg-emerald-50 text-emerald-700 border-emerald-100',
   'Estratégia': 'bg-emerald-100 text-emerald-800 border-emerald-200',
   'Liderança': 'bg-blue-50 text-blue-800 border-blue-200',
@@ -45,12 +42,8 @@ const genreColors: Record<string, string> = {
   'Startups': 'bg-violet-50 text-violet-700 border-violet-100',
   'Finanças': 'bg-yellow-50 text-yellow-700 border-yellow-100',
   'Negociação': 'bg-red-50 text-red-700 border-red-100',
-
-  // TÉCNICO
   'Tecnologia': 'bg-cyan-50 text-cyan-700 border-cyan-100',
   'Data Science': 'bg-sky-50 text-sky-700 border-sky-100',
-  
-  // OUTROS
   'História': 'bg-stone-100 text-stone-700 border-stone-200',
   'Biografia': 'bg-gray-100 text-gray-700 border-gray-200',
   'Outros': 'bg-gray-50 text-gray-600 border-gray-100'
@@ -69,16 +62,17 @@ export default function App() {
     title: '', author: '', author_nationality: '', publisher: '',
     total_pages: 0, read_pages: 0, cover_url: '', format: 'Físico',
     status: 'Na Fila' as const, rating: 0, finished_at: '', started_at: '',
-    genre: 'Outros', is_bestseller: false // NOVO CAMPO
+    genre: 'Outros', is_bestseller: false
   })
 
-  // 📊 DASHBOARD
+  // 📊 DASHBOARD CORRIGIDO
   const stats = useMemo(() => ({
     totalBooks: books.length,
     totalReadPages: books.reduce((acc, b) => acc + (b.read_pages || 0), 0),
     completedBooks: books.filter(b => b.status === 'Concluído').length,
     readingBooks: books.filter(b => b.status === 'Lendo').length,
-    bestSellers: books.filter(b => b.is_bestseller).length // Nova métrica
+    queueBooks: books.filter(b => b.status === 'Na Fila').length, // Corrigido: Agora existe!
+    bestSellers: books.filter(b => b.is_bestseller).length
   }), [books]);
 
   function calculateDays(start?: string | null, end?: string | null) {
@@ -188,14 +182,13 @@ export default function App() {
 
       <main className="max-w-7xl mx-auto p-6 space-y-8">
         
-        {/* DASHBOARD (Com Card de Best Sellers) */}
+        {/* DASHBOARD */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between hover:border-violet-100 transition-colors group">
             <div className="flex justify-between items-start mb-2"><div className="bg-violet-50 p-2.5 rounded-xl text-violet-600 group-hover:bg-violet-600 group-hover:text-white transition-colors"><Book className="w-5 h-5" /></div></div>
             <div><p className="text-2xl font-black text-slate-800 tracking-tight">{stats.totalBooks}</p><p className="text-xs font-bold text-slate-400 uppercase tracking-wide">Acervo Total</p></div>
           </div>
           <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between hover:border-amber-100 transition-colors group">
-             {/* Card Best Sellers */}
             <div className="flex justify-between items-start mb-2"><div className="bg-amber-50 p-2.5 rounded-xl text-amber-600 group-hover:bg-amber-500 group-hover:text-white transition-colors"><Award className="w-5 h-5" /></div></div>
             <div><p className="text-2xl font-black text-slate-800 tracking-tight">{stats.bestSellers}</p><p className="text-xs font-bold text-slate-400 uppercase tracking-wide">Best Sellers</p></div>
           </div>
@@ -203,6 +196,7 @@ export default function App() {
             <div className="flex justify-between items-start mb-2"><div className="bg-blue-50 p-2.5 rounded-xl text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors"><Trophy className="w-5 h-5" /></div></div>
             <div><p className="text-2xl font-black text-slate-800 tracking-tight">{stats.totalReadPages.toLocaleString()}</p><p className="text-xs font-bold text-slate-400 uppercase tracking-wide">Páginas Lidas</p></div>
           </div>
+          {/* CARD DA FILA - Onde estava o erro */}
           <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between hover:border-slate-300 transition-colors group">
             <div className="flex justify-between items-start mb-2"><div className="bg-slate-100 p-2.5 rounded-xl text-slate-600 group-hover:bg-slate-600 group-hover:text-white transition-colors"><Layers className="w-5 h-5" /></div></div>
             <div><p className="text-2xl font-black text-slate-800 tracking-tight">{stats.queueBooks}</p><p className="text-xs font-bold text-slate-400 uppercase tracking-wide">Na Fila</p></div>
@@ -244,7 +238,6 @@ export default function App() {
               return (
                 <div key={book.id} className="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-100 transition-all duration-300 flex gap-6 group relative overflow-hidden">
                   
-                  {/* FAIXA BEST SELLER (Se aplicável) */}
                   {book.is_bestseller && (
                      <div className="absolute top-0 right-0 bg-gradient-to-l from-amber-400 to-amber-200 text-amber-900 text-[9px] font-black uppercase px-3 py-1 rounded-bl-2xl shadow-sm z-10 flex items-center gap-1">
                         <Award className="w-3 h-3" /> Best Seller
@@ -259,7 +252,6 @@ export default function App() {
                     <div>
                       <div className="flex justify-between items-start gap-2">
                          <div className="flex flex-col gap-1 min-w-0">
-                            {/* TAG DE GÊNERO */}
                             <span className={`w-fit px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider border mb-1 ${genreColors[genre] || genreColors['Outros']}`}>{genre}</span>
                             <h3 className="text-lg font-bold text-slate-900 leading-tight truncate pr-2" title={book.title}>{book.title}</h3>
                             <div className="flex items-center gap-2 text-sm text-slate-500">
@@ -316,7 +308,6 @@ export default function App() {
             
             <form onSubmit={handleSubmit} className="p-6 space-y-5">
               
-              {/* CHECKBOX BEST SELLER */}
               <div className="bg-gradient-to-r from-amber-50 to-orange-50 p-4 rounded-2xl border border-amber-100 flex items-center gap-3">
                  <div className="bg-white p-2 rounded-full shadow-sm text-amber-500"><Award className="w-5 h-5" /></div>
                  <div className="flex-1">
