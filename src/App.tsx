@@ -678,20 +678,20 @@ export default function App() {
                     <option value="Ficção">Ficção</option>
                     <option value="Romance">Romance</option>
                     <option value="Fantasia">Fantasia</option>
-                    <option value="Sci-Fi">Sci-Fi</option>
+                    <option value="Ciência">Ciência</option>
                     <option value="Clássicos">Clássicos</option>
                     <option value="Gestão">Gestão</option>
                     <option value="Estratégia">Estratégia</option>
                     <option value="Liderança">Liderança</option>
-                    <option value="Vendas">Vendas</option>
-                    <option value="Marketing">Marketing</option>
+                    <option value="Filosofia">Filosofia</option>
+                    <option value="Autoajuda">Autoajuda</option>
                     <option value="RH">RH</option>
-                    <option value="Processos">Processos</option>
-                    <option value="Startups">Startups</option>
+                    <option value="Sociologia">Sociologia</option>
+                    <option value="Economia">Economia</option>
                     <option value="Finanças">Finanças</option>
                     <option value="Negociação">Negociação</option>
                     <option value="Tecnologia">Tecnologia</option>
-                    <option value="Data Science">Data Science</option>
+                    <option value="Direito">Direito</option>
                     <option value="História">História</option>
                     <option value="Biografia">Biografia</option>
                   </select>
