@@ -12,7 +12,7 @@ export interface Book {
   read_pages: number
   cover_url: string
   format: string
-  // AQUI: Adicionei 'Abandonado' para o sistema aceitar
+  // AQUI ESTÁ A CORREÇÃO QUE O ERRO PEDE:
   status: 'Lendo' | 'Na Fila' | 'Concluído' | 'Abandonado'
   rating?: number
   finished_at?: string | null

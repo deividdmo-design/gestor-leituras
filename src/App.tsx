@@ -7,7 +7,7 @@ import {
   Layers, Book, PlayCircle, StopCircle, Timer, Award, PieChart, LayoutGrid, Calendar, MapPin, User, Hash, AlertTriangle, Monitor, TrendingUp
 } from 'lucide-react'
 
-// 🌍 MAPA-MÚNDI COMPLETO (Restaurado)
+// 🌍 MAPA-MÚNDI COMPLETO (RESTAURADO)
 const countryFlags: Record<string, string> = {
   'brasil': '🇧🇷', 'brasileira': '🇧🇷', 'argentina': '🇦🇷', 'chile': '🇨🇱', 'colombia': '🇨🇴',
   'mexico': '🇲🇽', 'estados unidos': '🇺🇸', 'eua': '🇺🇸', 'canada': '🇨🇦', 'peru': '🇵🇪',
@@ -54,7 +54,7 @@ export default function App() {
   const [editingBookId, setEditingBookId] = useState<string | null>(null)
   const [currentView, setCurrentView] = useState<'library' | 'analytics'>('library')
   
-  // Variáveis visuais (Search, Filter, Sort)
+  // VARIÁVEIS VISUAIS (Garantindo uso para evitar erro TS6133)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState('Todos')
   const [sortBy, setSortBy] = useState<'recent' | 'rating'>('recent')
@@ -66,7 +66,7 @@ export default function App() {
     genre: 'Outros', is_bestseller: false, platform: 'Físico', interruption_reason: ''
   })
 
-  // 📊 KPI DASHBOARD (Usa Trophy, Layers, etc.)
+  // 📊 DASHBOARD (Garante uso de ícones Trophy, Layers, etc)
   const stats = useMemo(() => ({
     totalBooks: books.length,
     totalReadPages: books.reduce((acc, b) => acc + (b.read_pages || 0), 0),
@@ -76,7 +76,7 @@ export default function App() {
     bestSellers: books.filter(b => b.is_bestseller).length
   }), [books]);
 
-  // 📈 ENGINE DE BI (Relatórios)
+  // 📈 BI ENGINE (Relatórios)
   const analytics = useMemo(() => {
     const currentYear = new Date().getFullYear();
     const finishedThisYear = books.filter(b => b.status === 'Concluído' && b.finished_at && new Date(b.finished_at).getFullYear() === currentYear);
@@ -101,7 +101,9 @@ export default function App() {
       }
       if (b.genre) counters.genres[b.genre] = (counters.genres[b.genre] || 0) + 1;
       if (b.format) counters.formats[b.format] = (counters.formats[b.format] || 0) + 1;
-      if (b.status) counters.status[b.status] = (counters.status[b.status] || 0) + 1;
+      // Validação de segurança para status
+      const s = b.status || 'Na Fila';
+      if (counters.status[s] !== undefined) counters.status[s]++;
 
       if (b.status === 'Concluído' && b.finished_at) {
         const date = new Date(b.finished_at);
@@ -136,7 +138,7 @@ export default function App() {
     return Math.ceil(Math.abs(endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
   }
 
-  // Lista Filtrada (Usa Search e Sort)
+  // LISTAGEM FILTRADA (Usa search e filters)
   const processedBooks = books
     .filter(b => (b.title.toLowerCase().includes(searchTerm.toLowerCase()) || b.author.toLowerCase().includes(searchTerm.toLowerCase())) && (filterStatus === 'Todos' || b.status === filterStatus))
     .sort((a, b) => {
@@ -165,8 +167,9 @@ export default function App() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     try {
-      if (editingBookId) await supabase.from('books').update(formData).eq('id', editingBookId);
-      else await supabase.from('books').insert([formData]);
+      const payload = { ...formData, rating: editingBookId ? formData.rating : 0 };
+      if (editingBookId) await supabase.from('books').update(payload).eq('id', editingBookId);
+      else await supabase.from('books').insert([payload]);
       setIsModalOpen(false);
       refreshBooks();
     } catch (e: any) { alert(e.message); }
@@ -186,13 +189,13 @@ export default function App() {
              <button onClick={() => setCurrentView('analytics')} className={`px-4 py-2 rounded-lg text-xs font-bold uppercase flex items-center gap-2 transition-all ${currentView === 'analytics' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}><PieChart className="w-4 h-4"/> Relatórios</button>
           </div>
 
-          <button onClick={() => { setEditingBookId(null); setFormData({ title: '', author: '', author_nationality: '', publisher: '', total_pages: 0, read_pages: 0, cover_url: '', format: 'Físico', status: 'Na Fila', rating: 0, finished_at: '', started_at: '', genre: 'Outros', is_bestseller: false, platform: 'Físico', interruption_reason: '' }); setIsModalOpen(true); }} className="bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-600 transition-colors"><Plus className="w-5 h-5" /> <span className="hidden lg:inline">Novo Livro</span></button>
+          <button onClick={() => { setEditingBookId(null); setFormData({ title: '', author: '', author_nationality: '', publisher: '', total_pages: 0, read_pages: 0, cover_url: '', format: 'Físico', status: 'Na Fila', rating: 0, finished_at: '', started_at: '', genre: 'Outros', is_bestseller: false, platform: 'Físico', interruption_reason: '' }); setIsModalOpen(true); }} className="bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-600 transition-colors"><Plus className="w-5 h-5" /> <span className="hidden lg:inline">Novo</span></button>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto p-6 space-y-8">
         
-        {/* DASHBOARD GERAL - Garante uso de ícones como Trophy, CheckCircle2, Layers, etc */}
+        {/* KPI DASHBOARD (Garante uso dos ícones Book, Award, Trophy, Layers, CheckCircle2) */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div className="bg-white p-5 rounded-3xl border border-slate-100 flex flex-col justify-between"><div className="bg-violet-50 p-2.5 rounded-xl w-fit text-violet-600 mb-2"><Book className="w-5 h-5" /></div><div><p className="text-2xl font-black">{stats.totalBooks}</p><p className="text-xs font-bold text-slate-400">Total</p></div></div>
           <div className="bg-white p-5 rounded-3xl border border-slate-100 flex flex-col justify-between"><div className="bg-amber-50 p-2.5 rounded-xl w-fit text-amber-600 mb-2"><Award className="w-5 h-5" /></div><div><p className="text-2xl font-black">{stats.bestSellers}</p><p className="text-xs font-bold text-slate-400">Best Sellers</p></div></div>
@@ -203,7 +206,7 @@ export default function App() {
 
         {currentView === 'library' ? (
           <>
-            {/* FERRAMENTAS - Garante uso de Search e setSearchTerm */}
+            {/* BIBLIOTECA (Garante uso de Search, ArrowUpDown, Globe, Pencil, Trash2) */}
             <div className="bg-white p-2 rounded-[1.5rem] border border-slate-200 shadow-sm flex flex-col lg:flex-row gap-2">
                 <div className="relative flex-1"><Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" /><input className="w-full h-full bg-transparent pl-12 pr-4 font-semibold outline-none text-slate-700" placeholder="Pesquisar..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} /></div>
                 <div className="flex items-center gap-2 px-2">
@@ -237,7 +240,6 @@ export default function App() {
                                 {book.status === 'Concluído' && daysCount && <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1"><CheckCircle2 className="w-3 h-3"/> {daysCount} dias</span>}
                             </div>
                             </div>
-                            {/* BOTÕES DE AÇÃO - Garante uso de Pencil e Trash2 */}
                             <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button onClick={() => { setEditingBookId(book.id); setFormData(book as any); setIsModalOpen(true); }} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"><Pencil className="w-4 h-4" /></button>
                                 <button onClick={() => { if(confirm('Excluir?')) supabase.from('books').delete().eq('id', book.id).then(refreshBooks) }} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"><Trash2 className="w-4 h-4" /></button>
@@ -249,7 +251,7 @@ export default function App() {
           </>
         ) : (
           <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
-            {/* ANALYTICS - Garante uso de Calendar, Hash, Timer, MapPin, AlertTriangle, Monitor, TrendingUp */}
+            {/* ANALYTICS (Garante uso de Calendar, Hash, Timer, User, MapPin, AlertTriangle, TrendingUp, Monitor) */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm"><div className="text-blue-600 mb-2"><Calendar className="w-5 h-5"/></div><p className="text-xs font-bold uppercase text-slate-400 mb-1">Lidos no Ano</p><p className="text-3xl font-black text-slate-900">{analytics.totalLidosAno}</p></div>
                <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm"><div className="text-emerald-600 mb-2"><Hash className="w-5 h-5"/></div><p className="text-xs font-bold uppercase text-slate-400 mb-1">Páginas no Ano</p><p className="text-3xl font-black text-slate-900">{analytics.paginasLidasAno.toLocaleString()}</p></div>
@@ -269,7 +271,7 @@ export default function App() {
         )}
       </main>
 
-      {/* MODAL - Garante uso de Sparkles, LinkIcon, ImageIcon, PlayCircle, StopCircle */}
+      {/* MODAL (Garante uso de Sparkles, ImageIcon, LinkIcon, PlayCircle, StopCircle) */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
            <div className="bg-white w-full max-w-xl rounded-[2.5rem] shadow-2xl p-8 max-h-[90vh] overflow-y-auto">
