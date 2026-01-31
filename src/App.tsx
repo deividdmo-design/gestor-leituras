@@ -4,7 +4,7 @@ import { supabase } from './lib/supabase'
 import { 
   Library, Plus, Trash2, CheckCircle2, 
   BookMarked, X, Pencil, Search, ArrowUpDown, Sparkles, Star, Trophy, Globe, Link as LinkIcon, Image as ImageIcon,
-  BookOpen, Layers, Book, PlayCircle, StopCircle, Timer
+  BookOpen, Layers, Book, PlayCircle, StopCircle, Timer, Award
 } from 'lucide-react'
 
 // 🌍 MAPA-MÚNDI
@@ -25,40 +25,34 @@ const countryFlags: Record<string, string> = {
   'afeganistao': '🇦🇫', 'vietna': '🇻🇳', 'australia': '🇦🇺', 'timor leste': '🇹🇱'
 };
 
-// 🏷️ CORES DAS CATEGORIAS
+// 🏷️ CORES DAS CATEGORIAS (Expandido para Gestão)
 const genreColors: Record<string, string> = {
+  // LITERATURA
   'Ficção': 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-100',
   'Romance': 'bg-rose-50 text-rose-700 border-rose-100',
   'Fantasia': 'bg-purple-50 text-purple-700 border-purple-100',
   'Sci-Fi': 'bg-indigo-50 text-indigo-700 border-indigo-100',
-  'Terror': 'bg-slate-900 text-slate-50 border-slate-700',
   'Clássicos': 'bg-amber-100 text-amber-800 border-amber-200',
-  'HQ/Mangá': 'bg-pink-50 text-pink-700 border-pink-100',
-  'Tecnologia': 'bg-cyan-50 text-cyan-700 border-cyan-100',
-  'Programação': 'bg-blue-50 text-blue-700 border-blue-100',
-  'Data Science': 'bg-sky-50 text-sky-700 border-sky-100',
-  'Design': 'bg-violet-50 text-violet-700 border-violet-100',
-  'Ciência': 'bg-teal-50 text-teal-700 border-teal-100',
-  'Finanças': 'bg-emerald-50 text-emerald-700 border-emerald-100',
-  'Economia': 'bg-green-50 text-green-700 border-green-100',
-  'Gestão': 'bg-lime-50 text-lime-700 border-lime-100',
-  'Marketing': 'bg-orange-50 text-orange-700 border-orange-100',
-  'Empreendedorismo': 'bg-yellow-50 text-yellow-700 border-yellow-100',
+  
+  // GESTÃO & NEGÓCIOS (Foco do Analista)
+  'Gestão': 'bg-emerald-50 text-emerald-700 border-emerald-100',
+  'Estratégia': 'bg-emerald-100 text-emerald-800 border-emerald-200',
   'Liderança': 'bg-blue-50 text-blue-800 border-blue-200',
-  'Produtividade': 'bg-red-50 text-red-700 border-red-100',
-  'Filosofia': 'bg-amber-50 text-amber-700 border-amber-100',
+  'Vendas': 'bg-green-50 text-green-700 border-green-100',
+  'Marketing': 'bg-orange-50 text-orange-700 border-orange-100',
+  'RH': 'bg-pink-50 text-pink-700 border-pink-100',
+  'Processos': 'bg-slate-200 text-slate-700 border-slate-300',
+  'Startups': 'bg-violet-50 text-violet-700 border-violet-100',
+  'Finanças': 'bg-yellow-50 text-yellow-700 border-yellow-100',
+  'Negociação': 'bg-red-50 text-red-700 border-red-100',
+
+  // TÉCNICO
+  'Tecnologia': 'bg-cyan-50 text-cyan-700 border-cyan-100',
+  'Data Science': 'bg-sky-50 text-sky-700 border-sky-100',
+  
+  // OUTROS
   'História': 'bg-stone-100 text-stone-700 border-stone-200',
-  'Psicologia': 'bg-rose-100 text-rose-800 border-rose-200',
-  'Política': 'bg-slate-200 text-slate-700 border-slate-300',
-  'Direito': 'bg-slate-100 text-slate-800 border-slate-200',
-  'Educação': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  'Espiritualidade': 'bg-violet-100 text-violet-800 border-violet-200',
   'Biografia': 'bg-gray-100 text-gray-700 border-gray-200',
-  'Autoajuda': 'bg-orange-100 text-orange-800 border-orange-200',
-  'Saúde': 'bg-green-100 text-green-800 border-green-200',
-  'Esportes': 'bg-blue-100 text-blue-800 border-blue-200',
-  'Viagem': 'bg-sky-100 text-sky-800 border-sky-200',
-  'Arte': 'bg-fuchsia-100 text-fuchsia-800 border-fuchsia-200',
   'Outros': 'bg-gray-50 text-gray-600 border-gray-100'
 };
 
@@ -75,7 +69,7 @@ export default function App() {
     title: '', author: '', author_nationality: '', publisher: '',
     total_pages: 0, read_pages: 0, cover_url: '', format: 'Físico',
     status: 'Na Fila' as const, rating: 0, finished_at: '', started_at: '',
-    genre: 'Outros'
+    genre: 'Outros', is_bestseller: false // NOVO CAMPO
   })
 
   // 📊 DASHBOARD
@@ -84,7 +78,7 @@ export default function App() {
     totalReadPages: books.reduce((acc, b) => acc + (b.read_pages || 0), 0),
     completedBooks: books.filter(b => b.status === 'Concluído').length,
     readingBooks: books.filter(b => b.status === 'Lendo').length,
-    queueBooks: books.filter(b => b.status === 'Na Fila').length
+    bestSellers: books.filter(b => b.is_bestseller).length // Nova métrica
   }), [books]);
 
   function calculateDays(start?: string | null, end?: string | null) {
@@ -107,16 +101,12 @@ export default function App() {
       const data = await response.json();
       if (data.items?.[0]) {
         const info = data.items[0].volumeInfo;
-        
         let detectedGenre = 'Outros';
         const cats = info.categories ? info.categories[0].toLowerCase() : '';
-        if (cats.includes('fiction')) detectedGenre = 'Ficção';
-        if (cats.includes('business') || cats.includes('economics')) detectedGenre = 'Finanças';
-        if (cats.includes('history')) detectedGenre = 'História';
-        if (cats.includes('biography')) detectedGenre = 'Biografia';
-        if (cats.includes('psychology')) detectedGenre = 'Psicologia';
-        if (cats.includes('computer') || cats.includes('technology')) detectedGenre = 'Tecnologia';
-
+        if (cats.includes('business') || cats.includes('management')) detectedGenre = 'Gestão';
+        if (cats.includes('marketing')) detectedGenre = 'Marketing';
+        if (cats.includes('finance')) detectedGenre = 'Finanças';
+        
         setFormData(prev => ({
           ...prev, 
           title: info.title || prev.title, 
@@ -127,7 +117,7 @@ export default function App() {
           cover_url: info.imageLinks?.thumbnail?.replace('http:', 'https:') || '',
         }));
       } else {
-        alert('Livro não encontrado. Tente ser mais específico (Título + Autor).');
+        alert('Livro não encontrado.');
       }
     } catch (e) { console.error(e); alert('Erro na conexão com o Google.'); }
   }
@@ -147,7 +137,7 @@ export default function App() {
       read_pages: book.read_pages || 0, cover_url: book.cover_url || '', 
       format: book.format || 'Físico', status: book.status, 
       rating: Number(book.rating) || 0, finished_at: book.finished_at || '', started_at: book.started_at || '',
-      genre: book.genre || 'Outros'
+      genre: book.genre || 'Outros', is_bestseller: book.is_bestseller || false
     });
     setIsModalOpen(true);
   }
@@ -169,7 +159,7 @@ export default function App() {
       }
       setIsModalOpen(false); 
       setEditingBookId(null); 
-      setFormData({ title: '', author: '', author_nationality: '', publisher: '', total_pages: 0, read_pages: 0, cover_url: '', format: 'Físico', status: 'Na Fila', rating: 0, finished_at: '', started_at: '', genre: 'Outros' });
+      setFormData({ title: '', author: '', author_nationality: '', publisher: '', total_pages: 0, read_pages: 0, cover_url: '', format: 'Físico', status: 'Na Fila', rating: 0, finished_at: '', started_at: '', genre: 'Outros', is_bestseller: false });
       refreshBooks();
     } catch (e: any) { alert(`Erro ao salvar: ${e.message}`); }
   }
@@ -198,19 +188,20 @@ export default function App() {
 
       <main className="max-w-7xl mx-auto p-6 space-y-8">
         
-        {/* DASHBOARD */}
+        {/* DASHBOARD (Com Card de Best Sellers) */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between hover:border-violet-100 transition-colors group">
             <div className="flex justify-between items-start mb-2"><div className="bg-violet-50 p-2.5 rounded-xl text-violet-600 group-hover:bg-violet-600 group-hover:text-white transition-colors"><Book className="w-5 h-5" /></div></div>
             <div><p className="text-2xl font-black text-slate-800 tracking-tight">{stats.totalBooks}</p><p className="text-xs font-bold text-slate-400 uppercase tracking-wide">Acervo Total</p></div>
           </div>
+          <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between hover:border-amber-100 transition-colors group">
+             {/* Card Best Sellers */}
+            <div className="flex justify-between items-start mb-2"><div className="bg-amber-50 p-2.5 rounded-xl text-amber-600 group-hover:bg-amber-500 group-hover:text-white transition-colors"><Award className="w-5 h-5" /></div></div>
+            <div><p className="text-2xl font-black text-slate-800 tracking-tight">{stats.bestSellers}</p><p className="text-xs font-bold text-slate-400 uppercase tracking-wide">Best Sellers</p></div>
+          </div>
           <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between hover:border-blue-100 transition-colors group">
             <div className="flex justify-between items-start mb-2"><div className="bg-blue-50 p-2.5 rounded-xl text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors"><Trophy className="w-5 h-5" /></div></div>
             <div><p className="text-2xl font-black text-slate-800 tracking-tight">{stats.totalReadPages.toLocaleString()}</p><p className="text-xs font-bold text-slate-400 uppercase tracking-wide">Páginas Lidas</p></div>
-          </div>
-          <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between hover:border-amber-100 transition-colors group">
-            <div className="flex justify-between items-start mb-2"><div className="bg-amber-50 p-2.5 rounded-xl text-amber-600 group-hover:bg-amber-500 group-hover:text-white transition-colors"><BookOpen className="w-5 h-5" /></div></div>
-            <div><p className="text-2xl font-black text-slate-800 tracking-tight">{stats.readingBooks}</p><p className="text-xs font-bold text-slate-400 uppercase tracking-wide">Lendo Agora</p></div>
           </div>
           <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between hover:border-slate-300 transition-colors group">
             <div className="flex justify-between items-start mb-2"><div className="bg-slate-100 p-2.5 rounded-xl text-slate-600 group-hover:bg-slate-600 group-hover:text-white transition-colors"><Layers className="w-5 h-5" /></div></div>
@@ -251,7 +242,15 @@ export default function App() {
               const genre = book.genre || 'Outros';
               
               return (
-                <div key={book.id} className="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-100 transition-all duration-300 flex gap-6 group">
+                <div key={book.id} className="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-100 transition-all duration-300 flex gap-6 group relative overflow-hidden">
+                  
+                  {/* FAIXA BEST SELLER (Se aplicável) */}
+                  {book.is_bestseller && (
+                     <div className="absolute top-0 right-0 bg-gradient-to-l from-amber-400 to-amber-200 text-amber-900 text-[9px] font-black uppercase px-3 py-1 rounded-bl-2xl shadow-sm z-10 flex items-center gap-1">
+                        <Award className="w-3 h-3" /> Best Seller
+                     </div>
+                  )}
+
                   <div className="w-28 h-40 rounded-xl shadow-lg shadow-slate-200 overflow-hidden shrink-0 transform group-hover:-translate-y-1 transition-transform duration-300 relative bg-slate-100">
                     {book.cover_url ? <img src={book.cover_url} className="w-full h-full object-cover" alt={book.title} /> : <div className="w-full h-full flex items-center justify-center bg-slate-50"><BookMarked className="text-slate-200 w-8 h-8" /></div>}
                   </div>
@@ -317,6 +316,21 @@ export default function App() {
             
             <form onSubmit={handleSubmit} className="p-6 space-y-5">
               
+              {/* CHECKBOX BEST SELLER */}
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50 p-4 rounded-2xl border border-amber-100 flex items-center gap-3">
+                 <div className="bg-white p-2 rounded-full shadow-sm text-amber-500"><Award className="w-5 h-5" /></div>
+                 <div className="flex-1">
+                    <p className="text-sm font-bold text-slate-800">É um Best Seller?</p>
+                    <p className="text-[10px] text-slate-500">Livros de alto impacto ou mais vendidos.</p>
+                 </div>
+                 <input 
+                    type="checkbox" 
+                    className="w-6 h-6 rounded-md border-slate-300 text-amber-500 focus:ring-amber-500 cursor-pointer"
+                    checked={formData.is_bestseller}
+                    onChange={e => setFormData({...formData, is_bestseller: e.target.checked})}
+                 />
+              </div>
+
               {editingBookId && (
                 <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-4">
                   <div className="flex items-center gap-3">
@@ -366,20 +380,17 @@ export default function App() {
                  <div className="space-y-1">
                     <label className="text-xs font-bold text-slate-500 ml-1">Gênero</label>
                     <select className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-semibold text-slate-700 outline-none cursor-pointer" value={formData.genre} onChange={e => setFormData({...formData, genre: e.target.value})}>
-                        <optgroup label="Literatura">
-                            <option>Ficção</option><option>Romance</option><option>Fantasia</option><option>Sci-Fi</option><option>Terror</option><option>Clássicos</option><option>HQ/Mangá</option>
+                        <optgroup label="Gestão & Negócios">
+                            <option>Gestão</option><option>Estratégia</option><option>Liderança</option><option>Vendas</option><option>Marketing</option><option>RH</option><option>Processos</option><option>Startups</option><option>Finanças</option><option>Negociação</option>
                         </optgroup>
                         <optgroup label="Técnico & Tech">
-                            <option>Tecnologia</option><option>Programação</option><option>Data Science</option><option>Design</option><option>Ciência</option>
+                            <option>Tecnologia</option><option>Data Science</option>
                         </optgroup>
-                        <optgroup label="Negócios">
-                            <option>Finanças</option><option>Economia</option><option>Gestão</option><option>Marketing</option><option>Empreendedorismo</option><option>Liderança</option><option>Produtividade</option>
+                        <optgroup label="Literatura">
+                            <option>Ficção</option><option>Romance</option><option>Fantasia</option><option>Sci-Fi</option><option>Clássicos</option>
                         </optgroup>
-                        <optgroup label="Humanas">
-                            <option>Filosofia</option><option>História</option><option>Psicologia</option><option>Política</option><option>Direito</option><option>Educação</option><option>Espiritualidade</option>
-                        </optgroup>
-                        <optgroup label="Vida & Outros">
-                            <option>Biografia</option><option>Autoajuda</option><option>Saúde</option><option>Esportes</option><option>Viagem</option><option>Arte</option><option>Outros</option>
+                        <optgroup label="Outros">
+                            <option>História</option><option>Biografia</option><option>Outros</option>
                         </optgroup>
                     </select>
                  </div>

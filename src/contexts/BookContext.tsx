@@ -15,8 +15,9 @@ export interface Book {
   status: 'Lendo' | 'Na Fila' | 'Concluído'
   rating?: number
   finished_at?: string | null
-  started_at?: string | null // Adicionado
-  genre?: string // Adicionado
+  started_at?: string | null
+  genre?: string
+  is_bestseller?: boolean // Novo campo adicionado aqui
 }
 
 interface BookContextData {
