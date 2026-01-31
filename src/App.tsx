@@ -4,10 +4,10 @@ import { supabase } from './lib/supabase'
 import { 
   Library, Plus, Trash2, CheckCircle2, 
   BookMarked, X, Pencil, Search, ArrowUpDown, Sparkles, Star, Trophy, Globe, Link as LinkIcon, Image as ImageIcon,
-  Layers, Book, PlayCircle, StopCircle, Timer, Award, PieChart, LayoutGrid, Calendar, MapPin, User, Hash, AlertTriangle, Monitor, TrendingUp, Tag
+  Layers, Book, PlayCircle, StopCircle, Timer, Award, PieChart, LayoutGrid, Calendar, MapPin, User, Hash, AlertTriangle, TrendingUp, Tag
 } from 'lucide-react'
 
-// 🌍 MAPA-MÚNDI COMPLETO (TODAS AS NACIONALIDADES)
+// 🌍 MAPA-MÚNDI COMPLETO (RESTAURADO)
 const countryFlags: Record<string, string> = {
   'brasil': '🇧🇷', 'brasileira': '🇧🇷', 'argentina': '🇦🇷', 'chile': '🇨🇱', 'colombia': '🇨🇴',
   'mexico': '🇲🇽', 'estados unidos': '🇺🇸', 'eua': '🇺🇸', 'canada': '🇨🇦', 'peru': '🇵🇪',
@@ -48,9 +48,11 @@ const genreColors: Record<string, string> = {
   'Outros': 'bg-gray-50 text-gray-600 border-gray-100'
 };
 
+// TIPOS PARA O STATUS
 type BookStatus = 'Lendo' | 'Na Fila' | 'Concluído' | 'Abandonado';
 type FilterStatus = BookStatus | 'Todos';
 
+// Função auxiliar para verificar se uma string é um BookStatus válido
 function isBookStatus(status: string): status is BookStatus {
   return ['Lendo', 'Na Fila', 'Concluído', 'Abandonado'].includes(status);
 }
@@ -61,6 +63,7 @@ export default function App() {
   const [editingBookId, setEditingBookId] = useState<string | null>(null)
   const [currentView, setCurrentView] = useState<'library' | 'analytics'>('library')
   
+  // VARIÁVEIS VISUAIS
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('Todos')
   const [sortBy, setSortBy] = useState<'recent' | 'rating'>('recent')
@@ -73,6 +76,7 @@ export default function App() {
     genre: 'Outros', is_bestseller: false, platform: 'Físico', interruption_reason: ''
   })
 
+  // 📊 DASHBOARD
   const stats = useMemo(() => ({
     totalBooks: books.length,
     totalReadPages: books.reduce((acc, b) => acc + (b.read_pages || 0), 0),
@@ -82,6 +86,7 @@ export default function App() {
     bestSellers: books.filter(b => b.is_bestseller).length
   }), [books]);
 
+  // 📈 BI ENGINE (Relatórios)
   const analytics = useMemo(() => {
     const currentYear = new Date().getFullYear();
     const finishedThisYear = books.filter(b => b.status === 'Concluído' && b.finished_at && new Date(b.finished_at).getFullYear() === currentYear);
@@ -95,6 +100,9 @@ export default function App() {
       monthly: Array(12).fill(0)
     };
 
+    let totalDuration = 0;
+    let booksWithDuration = 0;
+
     books.forEach(b => {
       if (b.author) counters.authors[b.author] = (counters.authors[b.author] || 0) + 1;
       if (b.author_nationality) {
@@ -104,25 +112,22 @@ export default function App() {
       if (b.genre) counters.genres[b.genre] = (counters.genres[b.genre] || 0) + 1;
       if (b.format) counters.formats[b.format] = (counters.formats[b.format] || 0) + 1;
       
+      // CORREÇÃO DO ERRO TS2367: Usar type assertion
       const s = b.status || 'Na Fila';
-      if (isBookStatus(s) && counters.status[s] !== undefined) counters.status[s]++;
+      if (isBookStatus(s) && counters.status[s] !== undefined) {
+        counters.status[s]++;
+      }
 
       if (b.status === 'Concluído' && b.finished_at) {
         const date = new Date(b.finished_at);
         if (date.getFullYear() === currentYear) counters.monthly[date.getMonth()]++;
-      }
-    });
-
-    let totalDuration = 0;
-    let booksWithDuration = 0;
-    books.forEach(b => {
-        if (b.status === 'Concluído' && b.finished_at && b.started_at) {
-            const start = new Date(b.started_at);
-            const end = new Date(b.finished_at);
-            const diff = Math.ceil(Math.abs(end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-            totalDuration += diff;
-            booksWithDuration++;
+        if (b.started_at) {
+          const start = new Date(b.started_at);
+          const diff = Math.ceil(Math.abs(date.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+          totalDuration += diff;
+          booksWithDuration++;
         }
+      }
     });
 
     return {
@@ -146,95 +151,417 @@ export default function App() {
     return Math.ceil(Math.abs(endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
   }
 
+  // Função para calcular porcentagem lida
   function calculateReadPercentage(totalPages: number, readPages: number): number {
     if (totalPages <= 0) return 0;
     return Math.min(100, Math.round((readPages / totalPages) * 100));
   }
 
+  // LISTAGEM FILTRADA
   const processedBooks = books
-    .filter(b => (b.title.toLowerCase().includes(searchTerm.toLowerCase()) || b.author.toLowerCase().includes(searchTerm.toLowerCase())) && (filterStatus === 'Todos' || b.status === filterStatus))
-    .sort((a, b) => sortBy === 'rating' ? (Number(b.rating) || 0) - (Number(a.rating) || 0) : 0);
+    .filter(b => 
+      (b.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+       b.author.toLowerCase().includes(searchTerm.toLowerCase())) && 
+      (filterStatus === 'Todos' || b.status === filterStatus)
+    )
+    .sort((a, b) => {
+      if (sortBy === 'rating') return (Number(b.rating) || 0) - (Number(a.rating) || 0);
+      return 0; 
+    });
 
   async function searchGoogleBooks() {
+    console.clear();
+    console.log('=== BUSCA GOOGLE BOOKS INICIADA ===');
+    
     const query = formData.title.trim();
-    if (!query) return alert('Digite o título!');
-    const API_KEY = import.meta.env.VITE_GOOGLE_BOOKS_KEY;
+    console.log('🔍 Buscando título:', query);
+    
+    if (!query) {
+      alert('Digite o título do livro!');
+      return;
+    }
+
+    // PEGAR CHAVE - FORÇAR VERIFICAÇÃO
+    const API_KEY = (import.meta.env.VITE_GOOGLE_BOOKS_KEY || '').trim();
+    console.log('🔑 Chave API (primeiros 10 chars):', API_KEY.substring(0, 10) + '...');
+    console.log('🔑 Chave completa:', API_KEY);
+    
+    if (!API_KEY) {
+      alert('ERRO: Chave da API não configurada!');
+      console.error('VITE_GOOGLE_BOOKS_KEY está vazia');
+      return;
+    }
+    
+    if (API_KEY.includes('VITE_GOOGLE_BOOKS_KEY')) {
+      alert('ERRO: Variável de ambiente mal configurada!');
+      console.error('A chave contém o nome da variável:', API_KEY);
+      return;
+    }
+    
+    console.log('✅ Chave válida detectada');
+    
+    const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&key=${API_KEY}&maxResults=1`;
+    console.log('🌐 URL:', url);
+    
     try {
-      const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&key=${API_KEY}&maxResults=1`);
+      console.log('🔄 Fazendo requisição para Google Books API...');
+      const response = await fetch(url);
+      console.log('📡 Status da resposta:', response.status, response.statusText);
+      
+      if (!response.ok) {
+        throw new Error(`Erro HTTP ${response.status}: ${response.statusText}`);
+      }
+      
       const data = await response.json();
-      if (data.items?.[0]) {
+      console.log('📦 Dados recebidos:', data);
+      
+      if (data.error) {
+        console.error('❌ Erro da API Google:', data.error);
+        alert(`Erro da API: ${data.error.message}`);
+        return;
+      }
+      
+      if (data.items && data.items.length > 0) {
         const info = data.items[0].volumeInfo;
+        console.log('✅ LIVRO ENCONTRADO!');
+        console.log('📖 Título:', info.title);
+        console.log('✍️ Autor(es):', info.authors);
+        console.log('🏢 Editora:', info.publisher);
+        console.log('📄 Páginas:', info.pageCount);
+        console.log('🖼️ Capa:', info.imageLinks?.thumbnail);
+        
         setFormData(prev => ({
-          ...prev, title: info.title || prev.title, author: info.authors?.join(', ') || '',
-          publisher: info.publisher || '', total_pages: info.pageCount || 0,
+          ...prev, 
+          title: info.title || prev.title, 
+          author: info.authors?.join(', ') || '',
+          publisher: info.publisher || '', 
+          total_pages: info.pageCount || 0,
           cover_url: info.imageLinks?.thumbnail?.replace('http:', 'https:') || '',
         }));
+        
+        console.log('🎉 Formulário atualizado com sucesso!');
+        alert(`✅ "${info.title}" encontrado!\n\nDados preenchidos automaticamente.`);
+      } else {
+        console.log('⚠️ Nenhum livro encontrado para:', query);
+        alert(`Nenhum livro encontrado para: "${query}"\nTente um título mais específico.`);
       }
-    } catch (e) { alert('Erro na busca.'); }
+    } catch (error: any) {
+      console.error('💥 ERRO NA BUSCA:', error);
+      
+      if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+        alert('Erro de rede: Não foi possível conectar à API do Google Books.\nVerifique sua conexão de internet.');
+      } else {
+        alert('Erro na busca: ' + error.message);
+      }
+    }
+    
+    console.log('=== FIM DA BUSCA ===');
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    console.log('🔄 Tentando salvar livro...');
+    console.log('📊 Dados do formulário:', formData);
+    
     try {
-      const payload = { 
-        ...formData, 
-        rating: editingBookId ? formData.rating : 0,
-        started_at: formData.started_at === '' ? null : formData.started_at,
-        finished_at: formData.finished_at === '' ? null : formData.finished_at,
+      // PREPARAR DADOS - converter valores vazios para null/undefined
+      const payload = {
+        title: formData.title.trim(),
+        author: formData.author.trim() || null,
+        author_nationality: formData.author_nationality.trim() || null,
+        publisher: formData.publisher.trim() || null,
+        total_pages: parseInt(formData.total_pages.toString()) || 0,
+        read_pages: parseInt(formData.read_pages.toString()) || 0,
+        cover_url: formData.cover_url.trim() || null,
+        format: formData.format,
+        status: formData.status,
+        rating: editingBookId ? parseInt(formData.rating.toString()) || 0 : 0,
+        finished_at: formData.finished_at.trim() || null,
+        started_at: formData.started_at.trim() || null,
+        genre: formData.genre,
+        is_bestseller: Boolean(formData.is_bestseller),
+        platform: formData.platform,
+        interruption_reason: formData.interruption_reason.trim() || null
       };
-      let result;
-      if (editingBookId) result = await supabase.from('books').update(payload).eq('id', editingBookId);
-      else result = await supabase.from('books').insert([payload]);
-      if (result.error) throw result.error;
-      setIsModalOpen(false); refreshBooks(); alert('Livro salvo!');
-    } catch (e: any) { alert('Erro ao salvar: ' + e.message); }
+      
+      console.log('📤 Payload para Supabase:', payload);
+      
+      if (editingBookId) {
+        console.log('✏️ Editando livro ID:', editingBookId);
+        const { error } = await supabase
+          .from('books')
+          .update(payload)
+          .eq('id', editingBookId);
+        
+        if (error) throw error;
+        console.log('✅ Livro atualizado!');
+        alert('✅ Livro atualizado com sucesso!');
+      } else {
+        console.log('➕ Criando novo livro');
+        const { error } = await supabase
+          .from('books')
+          .insert([payload]);
+        
+        if (error) throw error;
+        console.log('✅ Livro criado!');
+        alert('✅ Livro adicionado com sucesso!');
+      }
+      
+      setIsModalOpen(false);
+      refreshBooks();
+      
+    } catch (e: any) {
+      console.error('❌ ERRO ao salvar:', e);
+      console.error('Detalhes do erro:', e.message, e.details, e.hint);
+      alert(`❌ Erro ao salvar:\n\n${e.message}\n\nVerifique o console para detalhes.`);
+    }
   }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans">
-      <header className="bg-white border-b border-slate-200 h-20 flex items-center justify-between px-6 sticky top-0 z-30">
-        <div className="flex items-center gap-3">
-          <div className="bg-blue-600 p-2 rounded-xl text-white"><Library /></div>
-          <h1 className="text-xl font-bold">Gestor de Leituras</h1>
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-30 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-blue-600 p-2.5 rounded-xl shadow-lg shadow-blue-200">
+              <Library className="text-white w-6 h-6" />
+            </div>
+            <h1 className="text-xl font-bold text-slate-900 hidden md:block">Gestor de Leituras</h1>
+          </div>
+          
+          <div className="flex bg-slate-100 p-1 rounded-xl">
+            <button 
+              onClick={() => setCurrentView('library')} 
+              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase flex items-center gap-2 transition-all ${currentView === 'library' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
+            >
+              <LayoutGrid className="w-4 h-4"/> Biblioteca
+            </button>
+            <button 
+              onClick={() => setCurrentView('analytics')} 
+              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase flex items-center gap-2 transition-all ${currentView === 'analytics' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}
+            >
+              <PieChart className="w-4 h-4"/> Relatórios
+            </button>
+          </div>
+
+          <button 
+            onClick={() => { 
+              setEditingBookId(null); 
+              setFormData({ 
+                title: '', 
+                author: '', 
+                author_nationality: '', 
+                publisher: '', 
+                total_pages: 0, 
+                read_pages: 0, 
+                cover_url: '', 
+                format: 'Físico', 
+                status: 'Na Fila' as BookStatus,
+                rating: 0, 
+                finished_at: '', 
+                started_at: '', 
+                genre: 'Outros', 
+                is_bestseller: false, 
+                platform: 'Físico', 
+                interruption_reason: '' 
+              }); 
+              setIsModalOpen(true); 
+            }} 
+            className="bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-600 transition-colors"
+          >
+            <Plus className="w-5 h-5" /> 
+            <span className="hidden lg:inline">Novo</span>
+          </button>
         </div>
-        <div className="flex bg-slate-100 p-1 rounded-xl">
-          <button onClick={() => setCurrentView('library')} className={`px-4 py-2 rounded-lg text-xs font-bold ${currentView === 'library' ? 'bg-white shadow-sm' : 'text-slate-500'}`}>BIBLIOTECA</button>
-          <button onClick={() => setCurrentView('analytics')} className={`px-4 py-2 rounded-lg text-xs font-bold ${currentView === 'analytics' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500'}`}>RELATÓRIOS</button>
-        </div>
-        <button onClick={() => { setEditingBookId(null); setIsModalOpen(true); }} className="bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-600 transition-all"><Plus /> Novo</button>
       </header>
 
       <main className="max-w-7xl mx-auto p-6 space-y-8">
+        
+        {/* KPI DASHBOARD */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <div className="bg-white p-5 rounded-3xl border border-slate-100"><Book className="text-violet-600 mb-2"/><p className="text-2xl font-black">{stats.totalBooks}</p><p className="text-xs text-slate-400 font-bold">Total</p></div>
-          <div className="bg-white p-5 rounded-3xl border border-slate-100"><Award className="text-amber-600 mb-2"/><p className="text-2xl font-black">{stats.bestSellers}</p><p className="text-xs text-slate-400 font-bold">Best Sellers</p></div>
-          <div className="bg-white p-5 rounded-3xl border border-slate-100"><Trophy className="text-blue-600 mb-2"/><p className="text-2xl font-black">{stats.totalReadPages}</p><p className="text-xs text-slate-400 font-bold">Páginas</p></div>
-          <div className="bg-white p-5 rounded-3xl border border-slate-100"><Layers className="text-slate-600 mb-2"/><p className="text-2xl font-black">{stats.queueBooks}</p><p className="text-xs text-slate-400 font-bold">Na Fila</p></div>
-          <div className="bg-white p-5 rounded-3xl border border-slate-100"><CheckCircle2 className="text-emerald-600 mb-2"/><p className="text-2xl font-black">{stats.completedBooks}</p><p className="text-xs text-slate-400 font-bold">Concluídos</p></div>
+          <div className="bg-white p-5 rounded-3xl border border-slate-100 flex flex-col justify-between">
+            <div className="bg-violet-50 p-2.5 rounded-xl w-fit text-violet-600 mb-2">
+              <Book className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-2xl font-black">{stats.totalBooks}</p>
+              <p className="text-xs font-bold text-slate-400">Total</p>
+            </div>
+          </div>
+          <div className="bg-white p-5 rounded-3xl border border-slate-100 flex flex-col justify-between">
+            <div className="bg-amber-50 p-2.5 rounded-xl w-fit text-amber-600 mb-2">
+              <Award className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-2xl font-black">{stats.bestSellers}</p>
+              <p className="text-xs font-bold text-slate-400">Best Sellers</p>
+            </div>
+          </div>
+          <div className="bg-white p-5 rounded-3xl border border-slate-100 flex flex-col justify-between">
+            <div className="bg-blue-50 p-2.5 rounded-xl w-fit text-blue-600 mb-2">
+              <Trophy className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-2xl font-black">{stats.totalReadPages.toLocaleString()}</p>
+              <p className="text-xs font-bold text-slate-400">Páginas</p>
+            </div>
+          </div>
+          <div className="bg-white p-5 rounded-3xl border border-slate-100 flex flex-col justify-between">
+            <div className="bg-slate-100 p-2.5 rounded-xl w-fit text-slate-600 mb-2">
+              <Layers className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-2xl font-black">{stats.queueBooks}</p>
+              <p className="text-xs font-bold text-slate-400">Na Fila</p>
+            </div>
+          </div>
+          <div className="bg-white p-5 rounded-3xl border border-slate-100 flex flex-col justify-between">
+            <div className="bg-emerald-50 p-2.5 rounded-xl w-fit text-emerald-600 mb-2">
+              <CheckCircle2 className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-2xl font-black">{stats.completedBooks}</p>
+              <p className="text-xs font-bold text-slate-400">Concluídos</p>
+            </div>
+          </div>
         </div>
 
         {currentView === 'library' ? (
           <>
-            <div className="bg-white p-2 rounded-[1.5rem] border border-slate-200 flex flex-col lg:flex-row gap-2">
-              <div className="relative flex-1"><Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5"/><input className="w-full pl-12 pr-4 font-semibold outline-none" placeholder="Pesquisar..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)}/></div>
-              <div className="flex gap-2">
-                {['Todos', 'Na Fila', 'Lendo', 'Concluído', 'Abandonado'].map((s) => (<button key={s} onClick={() => setFilterStatus(s as any)} className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase ${filterStatus === s ? 'bg-slate-900 text-white' : 'text-slate-500'}`}>{s}</button>))}
-                <select className="bg-slate-50 px-4 rounded-xl text-xs font-bold uppercase outline-none" value={sortBy} onChange={e => setSortBy(e.target.value as any)}><option value="recent">Recentes</option><option value="rating">Melhores Notas</option></select>
+            {/* BIBLIOTECA */}
+            <div className="bg-white p-2 rounded-[1.5rem] border border-slate-200 shadow-sm flex flex-col lg:flex-row gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                <input 
+                  className="w-full h-full bg-transparent pl-12 pr-4 font-semibold outline-none text-slate-700" 
+                  placeholder="Pesquisar..." 
+                  value={searchTerm} 
+                  onChange={e => setSearchTerm(e.target.value)} 
+                />
+              </div>
+              <div className="flex items-center gap-2 px-2">
+                {(['Todos', 'Na Fila', 'Lendo', 'Concluído', 'Abandonado'] as FilterStatus[]).map((s) => (
+                  <button 
+                    key={s} 
+                    onClick={() => setFilterStatus(s)} 
+                    className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase ${filterStatus === s ? 'bg-slate-900 text-white' : 'text-slate-500'}`}
+                  >
+                    {s}
+                  </button>
+                ))}
+                <div className="relative">
+                  <select 
+                    className="appearance-none bg-slate-50 pl-4 pr-10 py-3 rounded-xl text-xs font-bold uppercase text-slate-600 outline-none" 
+                    value={sortBy} 
+                    onChange={e => setSortBy(e.target.value as 'recent' | 'rating')}
+                  >
+                    <option value="recent">Recentes</option>
+                    <option value="rating">Melhores Notas</option>
+                  </select>
+                  <ArrowUpDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                </div>
               </div>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-500">
               {processedBooks.map(book => {
-                const perc = calculateReadPercentage(book.total_pages, book.read_pages);
+                const daysCount = calculateDays(book.started_at, book.finished_at);
+                const readPercentage = calculateReadPercentage(book.total_pages, book.read_pages);
+                
                 return (
-                  <div key={book.id} className="bg-white p-5 rounded-[2rem] border border-slate-100 flex gap-6 relative group shadow-sm hover:shadow-md transition-all">
-                    <div className="w-24 h-36 bg-slate-100 rounded-xl overflow-hidden shrink-0">{book.cover_url && <img src={book.cover_url} className="w-full h-full object-cover" />}</div>
-                    <div className="flex-1 py-1">
-                      <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-md border mb-1 block w-fit ${genreColors[book.genre || 'Outros'] || genreColors['Outros']}`}>{book.genre}</span>
-                      <h3 className="font-bold text-lg truncate">{book.title}</h3>
-                      <p className="text-sm text-slate-500">{countryFlags[book.author_nationality?.toLowerCase()] || '🏳️'} {book.author}</p>
-                      <div className="mt-4"><div className="flex justify-between text-[10px] font-bold text-slate-500 mb-1"><span>Progresso</span><span>{perc}%</span></div><div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden"><div className="h-full bg-blue-500" style={{ width: `${perc}%` }}></div></div></div>
+                  <div key={book.id} className="bg-white p-5 rounded-[2rem] border border-slate-100 flex gap-6 relative overflow-hidden group shadow-sm hover:shadow-md transition-all">
+                    {book.is_bestseller && (
+                      <div className="absolute top-0 right-0 bg-amber-400 text-amber-900 text-[9px] font-black px-3 py-1 rounded-bl-xl flex items-center gap-1">
+                        <Award className="w-3 h-3"/> Best Seller
+                      </div>
+                    )}
+                    <div className="w-24 h-36 bg-slate-100 rounded-xl overflow-hidden shrink-0 shadow-sm">
+                      {book.cover_url ? (
+                        <img src={book.cover_url} className="w-full h-full object-cover" alt={book.title} />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <BookMarked className="text-slate-300 w-8 h-8"/>
+                        </div>
+                      )}
                     </div>
-                    <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-all"><button onClick={() => { setEditingBookId(book.id); setFormData(book as any); setIsModalOpen(true); }} className="p-2 text-slate-400 hover:text-blue-600"><Pencil size={16}/></button><button onClick={() => { if(confirm('Excluir?')) supabase.from('books').delete().eq('id', book.id).then(refreshBooks); }} className="p-2 text-slate-400 hover:text-red-600"><Trash2 size={16}/></button></div>
+                    <div className="flex-1 py-1 min-w-0">
+                      <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md border mb-1 block w-fit ${genreColors[book.genre || 'Outros'] || genreColors['Outros']}`}>
+                        {book.genre}
+                      </span>
+                      <h3 className="font-bold text-lg leading-tight truncate">{book.title}</h3>
+                      <p className="text-sm text-slate-500 flex items-center gap-1 mt-1">
+                        {(() => {
+                          const nat = book.author_nationality?.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "") || '';
+                          return countryFlags[nat] ? (
+                            <span title={book.author_nationality}>{countryFlags[nat]}</span>
+                          ) : (
+                            <Globe className="w-3 h-3" />
+                          );
+                        })()}
+                        {book.author}
+                      </p>
+                      
+                      {/* BARRA DE PROGRESSO */}
+                      <div className="mt-4">
+                        <div className="flex justify-between text-[10px] font-bold text-slate-500 mb-1">
+                          <span>Progresso</span>
+                          <span>{book.read_pages}/{book.total_pages} páginas ({readPercentage}%)</span>
+                        </div>
+                        <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full rounded-full transition-all duration-300 ${
+                              readPercentage === 100 ? 'bg-emerald-500' :
+                              readPercentage >= 50 ? 'bg-blue-500' :
+                              readPercentage >= 25 ? 'bg-amber-500' :
+                              'bg-slate-400'
+                            }`}
+                            style={{ width: `${readPercentage}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex flex-wrap gap-2 mt-4 items-center">
+                        <span className={`text-[10px] font-black px-2 py-1 rounded uppercase ${
+                          book.status === 'Concluído' ? 'bg-emerald-50 text-emerald-600' : 
+                          book.status === 'Abandonado' ? 'bg-red-50 text-red-600' : 
+                          'bg-slate-100 text-slate-600'
+                        }`}>
+                          {book.status}
+                        </span>
+                        {(book.rating || 0) > 0 && (
+                          <div className="flex gap-0.5 items-center bg-amber-50 px-2 rounded">
+                            <Star className="w-3 h-3 fill-amber-400 text-amber-400"/>
+                            <span className="text-[10px] font-bold text-amber-600">{book.rating}</span>
+                          </div>
+                        )}
+                        {book.status === 'Concluído' && daysCount && (
+                          <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3"/> {daysCount} dias
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button 
+                        onClick={() => { 
+                          setEditingBookId(book.id); 
+                          setFormData(book as any); 
+                          setIsModalOpen(true); 
+                        }} 
+                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => { 
+                          if(confirm('Excluir este livro permanentemente?')) {
+                            supabase.from('books').delete().eq('id', book.id).then(refreshBooks);
+                          }
+                        }} 
+                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 )
               })}
@@ -242,34 +569,319 @@ export default function App() {
           </>
         ) : (
           <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+            {/* ANALYTICS */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-white p-6 rounded-3xl border shadow-sm"><Calendar className="text-blue-600 mb-2"/><p className="text-xs font-bold text-slate-400 uppercase">Lidos no Ano</p><p className="text-3xl font-black">{analytics.totalLidosAno}</p></div>
-              <div className="bg-white p-6 rounded-3xl border shadow-sm"><Hash className="text-emerald-600 mb-2"/><p className="text-xs font-bold text-slate-400 uppercase">Páginas no Ano</p><p className="text-3xl font-black">{analytics.paginasLidasAno}</p></div>
-              <div className="bg-white p-6 rounded-3xl border shadow-sm"><Timer className="text-orange-600 mb-2"/><p className="text-xs font-bold text-slate-400 uppercase">Média Dias/Livro</p><p className="text-3xl font-black">{analytics.tempoMedio}d</p></div>
-              <div className="bg-white p-6 rounded-3xl border shadow-sm"><Book className="text-purple-600 mb-2"/><p className="text-xs font-bold text-slate-400 uppercase">Média Páginas</p><p className="text-3xl font-black">{analytics.mediaPaginas}</p></div>
+              <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                <div className="text-blue-600 mb-2">
+                  <Calendar className="w-5 h-5"/>
+                </div>
+                <p className="text-xs font-bold uppercase text-slate-400 mb-1">Lidos no Ano</p>
+                <p className="text-3xl font-black text-slate-900">{analytics.totalLidosAno}</p>
+              </div>
+              <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                <div className="text-emerald-600 mb-2">
+                  <Hash className="w-5 h-5"/>
+                </div>
+                <p className="text-xs font-bold uppercase text-slate-400 mb-1">Páginas no Ano</p>
+                <p className="text-3xl font-black text-slate-900">{analytics.paginasLidasAno.toLocaleString()}</p>
+              </div>
+              <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                <div className="text-orange-600 mb-2">
+                  <Timer className="w-5 h-5"/>
+                </div>
+                <p className="text-xs font-bold uppercase text-slate-400 mb-1">Média Dias/Livro</p>
+                <p className="text-3xl font-black text-slate-900">{analytics.tempoMedio}d</p>
+              </div>
+              <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                <div className="text-purple-600 mb-2">
+                  <Book className="w-5 h-5"/>
+                </div>
+                <p className="text-xs font-bold uppercase text-slate-400 mb-1">Média Páginas</p>
+                <p className="text-3xl font-black text-slate-900">{analytics.mediaPaginas}</p>
+              </div>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="bg-white p-8 rounded-[2.5rem] border shadow-sm"><h2 className="text-sm font-black uppercase mb-6 flex items-center gap-2"><User size={16} className="text-blue-600"/> Autores</h2>{analytics.topAuthors.map(([name, count]) => (<div key={name} className="flex justify-between items-center mb-4"><span className="text-sm font-bold">{name}</span><span className="bg-slate-50 px-2 py-1 rounded text-xs font-black">{count}</span></div>))}</div>
-              <div className="bg-white p-8 rounded-[2.5rem] border shadow-sm"><h2 className="text-sm font-black uppercase mb-6 flex items-center gap-2"><Globe size={16} className="text-emerald-600"/> Países</h2>{analytics.topCountries.map(([name, count]) => (<div key={name} className="flex justify-between items-center mb-4"><span className="text-sm font-medium">{countryFlags[name] || '🏳️'} {name.toUpperCase()}</span><span className="font-bold text-slate-400">{count}</span></div>))}</div>
-              <div className="bg-white p-8 rounded-[2.5rem] border shadow-sm"><h2 className="text-sm font-black uppercase mb-6 flex items-center gap-2"><Monitor size={16} className="text-orange-600"/> Formatos</h2>{Object.entries(analytics.formatos).map(([name, count]) => (<div key={name} className="mb-4"><div className="flex justify-between text-[10px] font-black uppercase mb-1"><span>{name}</span><span>{count}</span></div><div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden"><div className="bg-slate-800 h-full" style={{ width: `${(count / books.length) * 100}%` }}></div></div></div>))}</div>
+              <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                <h2 className="text-sm font-black uppercase text-slate-900 mb-6 flex items-center gap-2">
+                  <User className="w-4 h-4 text-blue-600"/> Autores Favoritos
+                </h2>
+                <div className="space-y-4">
+                  {analytics.topAuthors.map(([name, count]) => (
+                    <div key={name} className="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100">
+                      <span className="font-bold text-sm truncate pr-2">{name}</span>
+                      <span className="bg-white px-2 py-1 rounded-md text-xs font-black shadow-sm">{count}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                <h2 className="text-sm font-black uppercase text-slate-900 mb-6 flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-emerald-600"/> Países de Origem
+                </h2>
+                <div className="space-y-4">
+                  {analytics.topCountries.map(([name, count]) => (
+                    <div key={name} className="flex justify-between items-center">
+                      <span className="text-sm font-medium flex items-center gap-2">
+                        {countryFlags[name] || '🏳️'} {name.toUpperCase()}
+                      </span>
+                      <span className="font-bold text-slate-400">{count} livros</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                <h2 className="text-sm font-black uppercase text-slate-900 mb-6 flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-red-600"/> Status Geral
+                </h2>
+                <div className="space-y-4">
+                  {Object.entries(analytics.statusDist).map(([name, count]) => (
+                    <div key={name} className="flex justify-between items-center text-sm">
+                      <span className="font-medium text-slate-500">{name}</span>
+                      <span className="font-bold">{count}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                <h2 className="text-sm font-black uppercase text-slate-900 mb-8 flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-blue-600"/> Evolução Mensal
+                </h2>
+                <div className="flex items-end justify-between h-32 gap-2">
+                  {analytics.mensal.map((count, i) => (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                      <div 
+                        className="w-full bg-blue-100 rounded-t-lg transition-all hover:bg-blue-600 relative group" 
+                        style={{ 
+                          height: `${(count / (Math.max(...analytics.mensal) || 1)) * 100}%`, 
+                          minHeight: '4px' 
+                        }}
+                      >
+                        {count > 0 && (
+                          <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-black opacity-0 group-hover:opacity-100 transition-opacity">
+                            {count}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-[9px] font-bold text-slate-400 uppercase">
+                        {['J','F','M','A','M','J','J','A','S','O','N','D'][i]}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                <h2 className="text-sm font-black uppercase text-slate-900 mb-6 flex items-center gap-2">
+                  <Tag className="w-4 h-4 text-emerald-600"/> Gêneros
+                </h2>
+                <div className="space-y-6">
+                  {analytics.genres.slice(0, 4).map(([name, count]) => (
+                    <div key={name}>
+                      <div className="flex justify-between text-[10px] font-black uppercase mb-1">
+                        <span>{name}</span>
+                        <span>{Math.round((count / books.length) * 100)}%</span>
+                      </div>
+                      <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                        <div 
+                          className="bg-slate-800 h-full rounded-full" 
+                          style={{ width: `${(count / books.length) * 100}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         )}
       </main>
 
+      {/* MODAL */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-white w-full max-w-xl rounded-[2.5rem] p-8 max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div className="flex justify-between items-center mb-6"><h2 className="text-xl font-black">{editingBookId ? 'Editar Livro' : 'Novo Livro'}</h2><button onClick={() => setIsModalOpen(false)} className="p-2 bg-slate-50 rounded-full"><X/></button></div>
+          <div className="bg-white w-full max-w-xl rounded-[2.5rem] shadow-2xl p-8 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-black text-slate-900">{editingBookId ? 'Editar Livro' : 'Novo Livro'}</h2>
+              <button onClick={() => setIsModalOpen(false)} className="p-2 bg-slate-50 rounded-full">
+                <X className="w-5 h-5"/>
+              </button>
+            </div>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="flex gap-2"><input className="flex-1 bg-slate-50 rounded-2xl px-5 py-4 font-bold outline-none" placeholder="Título" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required/><button type="button" onClick={searchGoogleBooks} className="bg-blue-600 text-white px-4 rounded-2xl"><Sparkles/></button></div>
-              <div className="grid grid-cols-2 gap-4"><input className="bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none" placeholder="Autor" value={formData.author} onChange={e => setFormData({...formData, author: e.target.value})}/><input className="bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none" placeholder="País (Ex: Brasil)" value={formData.author_nationality} onChange={e => setFormData({...formData, author_nationality: e.target.value})}/></div>
-              <div className="space-y-1"><label className="text-xs font-bold text-slate-500 ml-1 flex items-center gap-1"><Tag size={12}/> Gênero</label><select className="w-full bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none appearance-none" value={formData.genre} onChange={e => setFormData({...formData, genre: e.target.value})}><optgroup label="Negócios"><option>Gestão</option><option>Estratégia</option><option>Vendas</option><option>Finanças</option></optgroup><optgroup label="Literatura"><option>Ficção</option><option>Romance</option><option>História</option><option>Outros</option></optgroup></select></div>
-              <div className="grid grid-cols-2 gap-4"><div className="space-y-1"><label className="text-xs font-bold text-slate-500 ml-1 flex items-center gap-1"><PlayCircle size={12}/> Início</label><input type="date" className="w-full bg-slate-50 rounded-2xl px-4 py-3 text-sm font-bold outline-none" value={formData.started_at} onChange={e => setFormData({...formData, started_at: e.target.value})}/></div><div className="space-y-1"><label className="text-xs font-bold text-slate-500 ml-1 flex items-center gap-1"><StopCircle size={12}/> Fim</label><input type="date" className="w-full bg-slate-50 rounded-2xl px-4 py-3 text-sm font-bold outline-none" value={formData.finished_at} onChange={e => setFormData({...formData, finished_at: e.target.value})}/></div></div>
-              <div className="grid grid-cols-2 gap-4"><select className="bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none" value={formData.format} onChange={e => setFormData({...formData, format: e.target.value})}><option>Físico</option><option>E-book</option><option>Audiobook</option></select><select className="bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value as any})}><option>Na Fila</option><option>Lendo</option><option>Concluído</option><option>Abandonado</option></select></div>
-              <div className="grid grid-cols-2 gap-4"><input type="number" className="bg-slate-50 rounded-2xl px-5 py-4 font-bold outline-none" placeholder="Páginas" value={formData.total_pages} onChange={e => setFormData({...formData, total_pages: Number(e.target.value)})}/><input type="number" className="bg-slate-50 rounded-2xl px-5 py-4 font-bold outline-none" placeholder="Lidas" value={formData.read_pages} onChange={e => setFormData({...formData, read_pages: Number(e.target.value)})}/></div>
-              {formData.status === 'Abandonado' && <input className="w-full bg-red-50 text-red-600 rounded-2xl px-5 py-4 text-sm font-bold outline-none" placeholder="Motivo?" value={formData.interruption_reason} onChange={e => setFormData({...formData, interruption_reason: e.target.value})}/>}
-              <button type="submit" className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black uppercase shadow-xl hover:bg-blue-600 transition-all">Salvar Dados</button>
+              <div className="flex gap-2">
+                <input 
+                  className="flex-1 bg-slate-50 border-none rounded-2xl px-5 py-4 font-bold outline-none" 
+                  placeholder="Título do Livro" 
+                  value={formData.title} 
+                  onChange={e => setFormData({...formData, title: e.target.value})} 
+                  required 
+                />
+                {!editingBookId && (
+                  <button 
+                    type="button" 
+                    onClick={searchGoogleBooks} 
+                    className="bg-blue-600 text-white px-4 rounded-2xl hover:bg-blue-700 transition-colors"
+                    title="Buscar livro no Google Books"
+                  >
+                    <Sparkles className="w-5 h-5"/>
+                  </button>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <input 
+                  className="bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm font-bold outline-none" 
+                  placeholder="Autor" 
+                  value={formData.author} 
+                  onChange={e => setFormData({...formData, author: e.target.value})} 
+                />
+                <input 
+                  className="bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm font-bold outline-none" 
+                  placeholder="País (Ex: Brasil)" 
+                  value={formData.author_nationality} 
+                  onChange={e => setFormData({...formData, author_nationality: e.target.value})} 
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-500 ml-1 flex items-center gap-1">
+                  <ImageIcon className="w-3 h-3"/> Capa
+                </label>
+                <div className="flex gap-4">
+                  {formData.cover_url && (
+                    <img src={formData.cover_url} className="w-12 h-16 rounded-md object-cover border border-slate-200 shadow-sm" alt="Preview" />
+                  )}
+                  <div className="relative flex-1">
+                    <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+                    <input 
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-blue-500 focus:bg-white rounded-xl pl-10 pr-4 py-3 text-xs font-medium text-slate-600 outline-none transition-all" 
+                      value={formData.cover_url} 
+                      onChange={e => setFormData({...formData, cover_url: e.target.value})} 
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 ml-1 flex items-center gap-1">
+                    <PlayCircle className="w-3 h-3"/> Início
+                  </label>
+                  <input 
+                    type="date" 
+                    className="w-full bg-slate-50 border-none rounded-2xl px-4 py-3 text-sm font-bold outline-none" 
+                    value={formData.started_at} 
+                    onChange={e => setFormData({...formData, started_at: e.target.value})} 
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 ml-1 flex items-center gap-1">
+                    <StopCircle className="w-3 h-3"/> Fim
+                  </label>
+                  <input 
+                    type="date" 
+                    className="w-full bg-slate-50 border-none rounded-2xl px-4 py-3 text-sm font-bold outline-none" 
+                    value={formData.finished_at} 
+                    onChange={e => setFormData({...formData, finished_at: e.target.value})} 
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 ml-1 block mb-1">Formato</label>
+                  <select 
+                    className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm font-bold appearance-none outline-none" 
+                    value={formData.format} 
+                    onChange={e => setFormData({...formData, format: e.target.value})}
+                  >
+                    <option value="Físico">Físico</option>
+                    <option value="E-book">E-book</option>
+                    <option value="Audiobook">Audiobook</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 ml-1 block mb-1">Status</label>
+                  <select 
+                    className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm font-bold appearance-none outline-none" 
+                    value={formData.status} 
+                    onChange={e => setFormData({...formData, status: e.target.value as BookStatus})}
+                  >
+                    <option value="Na Fila">Na Fila</option>
+                    <option value="Lendo">Lendo</option>
+                    <option value="Concluído">Concluído</option>
+                    <option value="Abandonado">Abandonado</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 ml-1 block mb-1">Gênero</label>
+                  <select 
+                    className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm font-bold appearance-none outline-none" 
+                    value={formData.genre} 
+                    onChange={e => setFormData({...formData, genre: e.target.value})}
+                  >
+                    <option value="Outros">Outros</option>
+                    <option value="Ficção">Ficção</option>
+                    <option value="Romance">Romance</option>
+                    <option value="Fantasia">Fantasia</option>
+                    <option value="Ciência">Ciência</option>
+                    <option value="Clássicos">Clássicos</option>
+                    <option value="Gestão">Gestão</option>
+                    <option value="Estratégia">Estratégia</option>
+                    <option value="Liderança">Liderança</option>
+                    <option value="Filosofia">Filosofia</option>
+                    <option value="Autoajuda">Autoajuda</option>
+                    <option value="RH">RH</option>
+                    <option value="Sociologia">Sociologia</option>
+                    <option value="Economia">Economia</option>
+                    <option value="Finanças">Finanças</option>
+                    <option value="Negociação">Negociação</option>
+                    <option value="Tecnologia">Tecnologia</option>
+                    <option value="Direito">Direito</option>
+                    <option value="História">História</option>
+                    <option value="Biografia">Biografia</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 ml-1 block mb-1">Best Seller?</label>
+                  <select 
+                    className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm font-bold appearance-none outline-none" 
+                    value={formData.is_bestseller ? 'sim' : 'não'} 
+                    onChange={e => setFormData({...formData, is_bestseller: e.target.value === 'sim'})}
+                  >
+                    <option value="não">Não</option>
+                    <option value="sim">Sim</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <input 
+                  type="number" 
+                  className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 font-bold outline-none" 
+                  placeholder="Total Páginas" 
+                  value={formData.total_pages} 
+                  onChange={e => setFormData({...formData, total_pages: Number(e.target.value)})} 
+                />
+                <input 
+                  type="number" 
+                  className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 font-bold outline-none" 
+                  placeholder="Lidas" 
+                  value={formData.read_pages} 
+                  onChange={e => setFormData({...formData, read_pages: Number(e.target.value)})} 
+                />
+              </div>
+              {formData.status === 'Abandonado' && (
+                <input 
+                  className="w-full bg-red-50 border-none rounded-2xl px-5 py-4 text-sm font-bold text-red-600 outline-none" 
+                  placeholder="Motivo da interrupção?" 
+                  value={formData.interruption_reason} 
+                  onChange={e => setFormData({...formData, interruption_reason: e.target.value})} 
+                />
+              )}
+              <button 
+                type="submit" 
+                className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-slate-200 hover:bg-blue-600 transition-colors"
+              >
+                Salvar Dados
+              </button>
             </form>
           </div>
         </div>
