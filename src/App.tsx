@@ -4,10 +4,10 @@ import { supabase } from './lib/supabase'
 import { 
   Library, Plus, Trash2, CheckCircle2, 
   BookMarked, X, Pencil, Search, ArrowUpDown, Sparkles, Star, Trophy, Globe, Link as LinkIcon, Image as ImageIcon,
-  Book, Timer, Award, PieChart, LayoutGrid, Calendar, Hash, Monitor, Tag, Shuffle, Sparkle
+  Layers, Book, Timer, Award, PieChart, LayoutGrid, Calendar, Hash, Monitor, Tag, Shuffle, Sparkle
 } from 'lucide-react'
 
-// 🌍 MAPA-MÚNDI COMPLETO (CORRIGIDO: SEM DUPLICADOS)
+// 🌍 MAPA-MÚNDI COMPLETO (INTEGRAL)
 const countryFlags: Record<string, string> = {
   'brasil': '🇧🇷', 'brasileira': '🇧🇷', 'argentina': '🇦🇷', 'chile': '🇨🇱', 'colombia': '🇨🇴', 'mexico': '🇲🇽', 'estados unidos': '🇺🇸', 'eua': '🇺🇸', 'canada': '🇨🇦', 'peru': '🇵🇪', 'uruguai': '🇺🇾', 'paraguai': '🇵🇾', 'bolivia': '🇧🇴', 'equador': '🇪🇨', 'venezuela': '🇻🇪', 'cuba': '🇨🇺', 'jamaica': '🇯🇲', 'haiti': '🇭🇹', 'republica dominicana': '🇩🇴', 'guatemala': '🇬🇹', 'honduras': '🇭🇳', 'el salvador': '🇸🇻', 'nicaragua': '🇳🇮', 'costa rica': '🇨🇷', 'panama': '🇵🇦', 'portugal': '🇵🇹', 'espanha': '🇪🇸', 'franca': '🇫🇷', 'italia': '🇮🇹', 'alemanha': '🇩🇪', 'reino unido': '🇬🇧', 'inglaterra': '🇬🇧', 'irlanda': '🇮🇪', 'russia': '🇷🇺', 'grecia': '🇬🇷', 'suica': '🇨🇭', 'austria': '🇦🇹', 'suecia': '🇸🇪', 'noruega': '🇳🇴', 'dinamarca': '🇩🇰', 'finlandia': '🇫🇮', 'polonia': '🇵🇱', 'belgica': '🇧🇪', 'holanda': '🇳🇱', 'paises baixos': '🇳🇱', 'ucrania': '🇺🇦', 'turquia': '🇹🇷', 'checa': '🇨🇿', 'hungria': '🇭🇺', 'romenia': '🇷🇴', 'bulgaria': '🇧🇬', 'croacia': '🇭🇷', 'servia': '🇷🇸', 'eslovaquia': '🇸🇰', 'eslovenia': '🇸🇮', 'estonia': '🇪🇪', 'letonia': '🇱🇻', 'lituania': '🇱🇹', 'islandia': '🇮🇸', 'luxemburgo': '🇱🇺', 'monaco': '🇲🇨', 'angola': '🇦🇴', 'mocambique': '🇲🇿', 'africa do sul': '🇿🇦', 'egito': '🇪🇬', 'nigeria': '🇳🇬', 'marrocos': '🇲🇦', 'argelia': '🇩🇿', 'quenia': '🇰🇪', 'etiopia': '🇪🇹', 'tanzania': '🇹🇿', 'mali': '🇲🇱', 'congo': '🇨🇩', 'gana': '🇬🇭', 'camaroes': '🇨🇲', 'costa do marfim': '🇨🇮', 'senegal': '🇸🇳', 'tunisia': '🇹🇳', 'madagascar': '🇲🇬', 'japao': '🇯🇵', 'china': '🇨🇳', 'coreia do sul': '🇰🇷', 'india': '🇮🇳', 'israel': '🇮🇱', 'palestina': '🇵🇸', 'iraque': '🇮🇶', 'ira': '🇮🇷', 'afeganistao': '🇦🇫', 'vietna': '🇻🇳', 'tailandia': '🇹🇭', 'indonesia': '🇮🇩', 'filipinas': '🇵🇭', 'malasia': '🇲🇾', 'singapura': '🇸🇬', 'paquistao': '🇵🇰', 'bangladesh': '🇧🇩', 'arabia saudita': '🇸🇦', 'emirados arabes': '🇦🇪', 'catar': '🇶🇦', 'libano': '🇱🇧', 'jordania': '🇯🇴', 'siria': '🇸🇾', 'australia': '🇦🇺', 'nova zelandia': '🇳🇿', 'timor leste': '🇹🇱', 'fiji': '🇫🇯', 'niger': '🇳🇪', 'chade': '🇹🇩', 'sudan': '🇸🇩', 'libia': '🇱🇾', 'somalia': '🇸🇴', 'zambia': '🇿🇲', 'zimbabue': '🇿🇼', 'namibia': '🇳🇦', 'botsuana': '🇧🇼', 'guiana': '🇬🇾', 'suriname': '🇸🇷'
 };
@@ -15,11 +15,18 @@ const countryFlags: Record<string, string> = {
 const genreColors: Record<string, string> = {
   'Ficção': 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-100',
   'Suspense & Mistério': 'bg-slate-100 text-slate-700 border-slate-200',
-  'Ciências Humanas': 'bg-indigo-50 text-indigo-700 border-indigo-100',
-  'Ciências Sociais Aplicadas': 'bg-emerald-50 text-emerald-700 border-emerald-100',
-  'Tecnologia & Computação': 'bg-cyan-50 text-cyan-700 border-cyan-100',
-  'Desenvolvimento Pessoal': 'bg-amber-50 text-amber-700 border-amber-100',
-  'Outros': 'bg-gray-50 text-gray-600 border-gray-100'
+  'Terror & Horror': 'bg-red-50 text-red-700 border-red-100',
+  'Literatura Clássica': 'bg-amber-50 text-amber-700 border-amber-200',
+  'Não Ficção': 'bg-stone-100 text-stone-700 border-stone-200',
+  'Ciências Humanas': 'bg-indigo-50 text-indigo-700 border-indigo-200',
+  'Ciências Sociais Aplicadas': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  'Ciências Exatas': 'bg-blue-50 text-blue-700 border-blue-200',
+  'Ciências da Natureza': 'bg-green-50 text-green-700 border-green-200',
+  'Ciências da Saúde': 'bg-rose-50 text-rose-700 border-rose-200',
+  'Tecnologia & Computação': 'bg-cyan-50 text-cyan-700 border-cyan-200',
+  'Religião & Espiritualidade': 'bg-violet-50 text-violet-700 border-violet-200',
+  'Desenvolvimento Pessoal': 'bg-orange-50 text-orange-700 border-orange-200',
+  'Outros': 'bg-gray-50 text-gray-600 border-gray-200'
 };
 
 type BookStatus = 'Lendo' | 'Na Fila' | 'Concluído' | 'Abandonado';
@@ -37,12 +44,14 @@ export default function App() {
 
   const currentYear = new Date().getFullYear();
 
-  const [formData, setFormData] = useState({
+  const emptyFormData = {
     title: '', author: '', author_nationality: '', publisher: '',
     total_pages: 0, read_pages: 0, cover_url: '', format: 'Físico',
     status: 'Na Fila' as BookStatus, rating: 0, finished_at: '', started_at: '',
     genre: 'Outros', is_bestseller: false, platform: 'Físico', interruption_reason: ''
-  })
+  };
+
+  const [formData, setFormData] = useState(emptyFormData);
 
   function handleShuffle() {
     const queue = books.filter(b => b.status === 'Na Fila');
@@ -123,8 +132,14 @@ export default function App() {
     try {
       const payload = { ...formData, rating: editingBookId ? formData.rating : 0, started_at: formData.started_at || null, finished_at: formData.finished_at || null };
       const { error } = editingBookId ? await supabase.from('books').update(payload).eq('id', editingBookId) : await supabase.from('books').insert([payload]);
+      
       if (error) throw error;
-      setIsModalOpen(false); refreshBooks(); alert('✅ Livro salvo!');
+      
+      // ✅ LIMPEZA DO FORMULÁRIO APÓS SALVAR
+      setFormData(emptyFormData);
+      setIsModalOpen(false); 
+      refreshBooks(); 
+      alert('✅ Livro salvo com sucesso!');
     } catch (e: any) { alert('❌ Erro: ' + e.message); }
   }
 
@@ -139,7 +154,7 @@ export default function App() {
           <button onClick={() => setCurrentView('library')} className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all ${currentView === 'library' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}><LayoutGrid className="w-4 h-4 inline mr-2"/> Biblioteca</button>
           <button onClick={() => setCurrentView('analytics')} className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all ${currentView === 'analytics' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}><PieChart className="w-4 h-4 inline mr-2"/> Relatórios</button>
         </div>
-        <button onClick={() => { setEditingBookId(null); setIsModalOpen(true); }} className="bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-600 transition-all"><Plus /> Novo</button>
+        <button onClick={() => { setEditingBookId(null); setFormData(emptyFormData); setIsModalOpen(true); }} className="bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-600 transition-all"><Plus /> Novo</button>
       </header>
 
       <main className="max-w-7xl mx-auto p-6 space-y-8">
@@ -147,7 +162,7 @@ export default function App() {
           <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm"><Book className="text-violet-600 mb-2"/><p className="text-2xl font-black">{stats.totalBooks}</p><p className="text-xs text-slate-400 font-bold uppercase">Total</p></div>
           <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm"><Trophy className="text-blue-600 mb-2"/><p className="text-2xl font-black">{stats.totalReadPages.toLocaleString()}</p><p className="text-xs text-slate-400 font-bold uppercase">Páginas</p></div>
           <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm"><CheckCircle2 className="text-emerald-600 mb-2"/><p className="text-2xl font-black">{stats.completedBooks}</p><p className="text-xs text-slate-400 font-bold uppercase">Lidos</p></div>
-          <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm"><div className="w-8 h-8 flex items-center justify-center bg-slate-50 rounded-lg mb-2"><BookMarked className="text-slate-600 w-5 h-5"/></div><p className="text-2xl font-black">{stats.queueBooks}</p><p className="text-xs text-slate-400 font-bold uppercase">Na Fila</p></div>
+          <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm"><Layers className="text-slate-600 mb-2"/><p className="text-2xl font-black">{stats.queueBooks}</p><p className="text-xs text-slate-400 font-bold uppercase">Na Fila</p></div>
           <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex items-center justify-center"><Sparkle className="text-amber-400 w-8 h-8"/></div>
         </div>
 
@@ -158,7 +173,7 @@ export default function App() {
               <div className="flex gap-2 p-1">
                 {['Todos', 'Na Fila', 'Lendo', 'Concluído', 'Abandonado'].map((s) => (<button key={s} onClick={() => setFilterStatus(s as any)} className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase transition-all ${filterStatus === s ? 'bg-slate-900 text-white' : 'text-slate-500'}`}>{s}</button>))}
                 <button onClick={handleShuffle} className="p-3 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all shadow-sm group"><Shuffle size={18} className="group-hover:rotate-12 transition-transform" /></button>
-                <div className="relative ml-2"><select className="appearance-none bg-slate-50 pl-4 pr-10 py-3 rounded-xl text-xs font-bold uppercase text-slate-600 outline-none" value={sortBy} onChange={e => setSortBy(e.target.value as any)}><option value="recent">Recentes</option><option value="rating">Notas</option></select><ArrowUpDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" /></div>
+                <div className="relative ml-1"><select className="appearance-none bg-slate-50 pl-4 pr-10 py-3 rounded-xl text-xs font-bold uppercase text-slate-600 outline-none" value={sortBy} onChange={e => setSortBy(e.target.value as any)}><option value="recent">Recentes</option><option value="rating">Notas</option></select><ArrowUpDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" /></div>
               </div>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-500">
@@ -166,9 +181,11 @@ export default function App() {
                 <div key={book.id} className="bg-white p-5 rounded-[2rem] border border-slate-100 flex gap-6 relative group shadow-sm hover:shadow-md transition-all">
                   <div className="w-24 h-36 bg-slate-100 rounded-xl overflow-hidden shrink-0 shadow-inner">{book.cover_url ? <img src={book.cover_url} className="w-full h-full object-cover" alt={book.title}/> : <div className="w-full h-full flex items-center justify-center bg-slate-50"><BookMarked className="text-slate-300 w-8 h-8"/></div>}</div>
                   <div className="flex-1 py-1 min-w-0">
-                    <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-md border mb-1 block w-fit ${genreColors[book.genre || 'Outros'] || genreColors['Outros']}`}>{book.genre}</span>
+                    <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded-md border mb-1 block w-fit bg-slate-50 text-slate-600 border-slate-100">{book.genre}</span>
                     <h3 className="font-bold text-lg truncate text-slate-900">{book.title}</h3>
-                    <p className="text-sm text-slate-500 flex items-center gap-2">{book.author_nationality ? (countryFlags[book.author_nationality.toLowerCase().trim()] || <Globe size={12}/>) : <Globe size={12}/>} {book.author}</p>
+                    <p className="text-sm text-slate-500 flex items-center gap-2">
+                        {book.author_nationality ? (countryFlags[book.author_nationality.toLowerCase().trim()] || <Globe size={12}/>) : <Globe size={12}/>} {book.author}
+                    </p>
                     <div className="mt-4"><div className="flex justify-between text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider"><span>Progresso</span><span>{Math.round(((book.read_pages || 0) / (book.total_pages || 1)) * 100)}%</span></div><div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden"><div className="h-full bg-blue-600 rounded-full transition-all duration-500" style={{ width: `${Math.round(((book.read_pages || 0) / (book.total_pages || 1)) * 100)}%` }}></div></div></div>
                     <div className="flex gap-2 mt-4"><span className={`text-[10px] font-black px-2 py-1 rounded uppercase ${book.status === 'Concluído' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-600'}`}>{book.status}</span>{(book.rating || 0) > 0 && <div className="flex items-center gap-1 bg-amber-50 px-2 rounded text-amber-600 text-[10px] font-bold"><Star size={10} className="fill-amber-400 text-amber-400"/> {book.rating}</div>}</div>
                   </div>
@@ -218,34 +235,66 @@ export default function App() {
               <div className="flex gap-2"><input className="flex-1 bg-slate-50 rounded-2xl px-5 py-4 font-bold outline-none border-2 border-transparent focus:border-blue-100" placeholder="Título" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required/><button type="button" onClick={searchGoogleBooks} className="bg-blue-600 text-white px-5 rounded-2xl hover:bg-blue-700 shadow-lg transition-colors"><Sparkles/></button></div>
               <div className="grid grid-cols-2 gap-4"><input className="bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none" placeholder="Autor" value={formData.author} onChange={e => setFormData({...formData, author: e.target.value})}/><input className="bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none" placeholder="País (Ex: Brasil)" value={formData.author_nationality} onChange={e => setFormData({...formData, author_nationality: e.target.value})}/></div>
               <div className="space-y-1"><label className="text-xs font-bold text-slate-400 ml-1 flex items-center gap-1"><ImageIcon size={12}/> URL da Capa (Manual)</label><div className="relative"><LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"/><input className="w-full bg-slate-50 rounded-2xl pl-12 pr-4 py-4 text-xs font-bold outline-none border-2 border-transparent focus:border-blue-100" placeholder="Link da imagem..." value={formData.cover_url} onChange={e => setFormData({ ...formData, cover_url: e.target.value })}/></div></div>
+              
               <div className="space-y-1"><label className="text-xs font-bold text-slate-400 ml-1 flex items-center gap-1"><Tag size={12}/> Gênero Literário / Área</label>
                 <select className="w-full bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none appearance-none cursor-pointer border-2 border-transparent focus:border-blue-100" value={formData.genre} onChange={e => setFormData({...formData, genre: e.target.value})}>
-                  <optgroup label="Ficção"><option>Romance</option><option>Conto</option><option>Novela</option><option>Ficção Científica</option><option>Fantasia</option><option>Distopia</option><option>Utopia</option><option>Realismo Mágico</option></optgroup>
-                  <optgroup label="Suspense & Mistério"><option>Suspense</option><option>Policial</option><option>Thriller</option></optgroup>
-                  <optgroup label="Terror & Horror"><option>Terror</option><option>Horror Cósmico</option></optgroup>
-                  <optgroup label="Literatura Clássica"><option>Clássico Universal</option><option>Clássico Nacional</option></optgroup>
-                  <optgroup label="Não Ficção"><option>Biografia</option><option>Autobiografia</option><option>Ensaio</option><option>Reportagem Literária</option></optgroup>
-                  <optgroup label="Ciências Humanas"><option>Filosofia</option><option>História</option><option>Sociologia</option><option>Antropologia</option><option>Ciência Política</option><option>Economia</option><option>Geografia Humana</option></optgroup>
-                  <optgroup label="Ciências Sociais Aplicadas"><option>Administração</option><option>Contabilidade</option><option>Direito</option><option>Relações Internacionais</option><option>Comunicação Social</option></optgroup>
-                  <optgroup label="Ciências Exatas"><option>Matemática</option><option>Estatística</option><option>Física</option><option>Química</option><option>Ciência de Dados</option></optgroup>
-                  <optgroup label="Ciências da Natureza"><option>Biologia</option><option>Ecologia</option><option>Geologia</option><option>Astronomia</option></optgroup>
-                  <optgroup label="Ciências da Saúde"><option>Medicina</option><option>Psicologia</option><option>Psiquiatria</option><option>Neurociência</option><option>Nutrição</option></optgroup>
-                  <optgroup label="Tecnologia & Computação"><option>Tecnologia da Informação</option><option>Programação</option><option>Inteligência Artificial</option><option>Segurança da Informação</option></optgroup>
-                  <optgroup label="Religião & Espiritualidade"><option>Teologia</option><option>Espiritualidade</option><option>Mitologia</option></optgroup>
-                  <optgroup label="Desenvolvimento Pessoal"><option>Autoajuda</option><option>Liderança</option><option>Produtividade</option></optgroup>
-                  <optgroup label="Infantojuvenil"><option>Infantil</option><option>Juvenil</option></optgroup>
-                  <optgroup label="Outros"><option>Poesia</option><option>Teatro</option><option>Crônica</option><option>HQ / Graphic Novel</option><option>Outros</option></optgroup>
+                  <optgroup label="Ficção">
+                    <option>Romance</option><option>Conto</option><option>Novela</option><option>Ficção Científica</option><option>Fantasia</option><option>Distopia</option><option>Utopia</option><option>Realismo Mágico</option>
+                  </optgroup>
+                  <optgroup label="Suspense & Mistério">
+                    <option>Suspense</option><option>Policial</option><option>Thriller</option>
+                  </optgroup>
+                  <optgroup label="Terror & Horror">
+                    <option>Terror</option><option>Horror Cósmico</option>
+                  </optgroup>
+                  <optgroup label="Literatura Clássica">
+                    <option>Clássico Universal</option><option>Clássico Nacional</option>
+                  </optgroup>
+                  <optgroup label="Não Ficção">
+                    <option>Biografia</option><option>Autobiografia</option><option>Ensaio</option><option>Reportagem Literária</option>
+                  </optgroup>
+                  <optgroup label="Ciências Humanas">
+                    <option>Filosofia</option><option>História</option><option>Sociologia</option><option>Antropologia</option><option>Ciência Política</option><option>Economia</option><option>Geografia Humana</option>
+                  </optgroup>
+                  <optgroup label="Ciências Sociais Aplicadas">
+                    <option>Administração</option><option>Contabilidade</option><option>Direito</option><option>Relações Internacionais</option><option>Comunicação Social</option>
+                  </optgroup>
+                  <optgroup label="Ciências Exatas">
+                    <option>Matemática</option><option>Estatística</option><option>Física</option><option>Química</option><option>Ciência de Dados</option>
+                  </optgroup>
+                  <optgroup label="Ciências da Natureza">
+                    <option>Biologia</option><option>Ecologia</option><option>Geologia</option><option>Astronomia</option>
+                  </optgroup>
+                  <optgroup label="Ciências da Saúde">
+                    <option>Medicina</option><option>Psicologia</option><option>Psiquiatria</option><option>Neurociência</option><option>Nutrição</option>
+                  </optgroup>
+                  <optgroup label="Tecnologia & Computação">
+                    <option>Tecnologia da Informação</option><option>Programação</option><option>Inteligência Artificial</option><option>Segurança da Informação</option>
+                  </optgroup>
+                  <optgroup label="Religião & Espiritualidade">
+                    <option>Teologia</option><option>Espiritualidade</option><option>Mitologia</option>
+                  </optgroup>
+                  <optgroup label="Desenvolvimento Pessoal">
+                    <option>Autoajuda</option><option>Liderança</option><option>Produtividade</option>
+                  </optgroup>
+                  <optgroup label="Infantojuvenil">
+                    <option>Infantil</option><option>Juvenil</option>
+                  </optgroup>
+                  <optgroup label="Outros">
+                    <option>Poesia</option><option>Teatro</option><option>Crônica</option><option>HQ / Graphic Novel</option><option>Outros</option>
+                  </optgroup>
                 </select>
               </div>
+
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1"><label className="text-xs font-bold text-slate-400 ml-1">Início</label><input type="date" className="w-full bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none" value={formData.started_at} onChange={e => setFormData({ ...formData, started_at: e.target.value })}/></div>
-                <div className="space-y-1"><label className="text-xs font-bold text-slate-400 ml-1">Conclusão</label><input type="date" className="w-full bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none" value={formData.finished_at} onChange={e => setFormData({ ...formData, finished_at: e.target.value })}/></div>
+                <input type="date" className="w-full bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none" value={formData.started_at} onChange={e => setFormData({ ...formData, started_at: e.target.value })}/>
+                <input type="date" className="w-full bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none" value={formData.finished_at} onChange={e => setFormData({ ...formData, finished_at: e.target.value })}/>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <select className="bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none appearance-none" value={formData.format} onChange={e => setFormData({...formData, format: e.target.value})}><option>Físico</option><option>E-book</option><option>Audiobook</option></select>
                 <select className="bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none appearance-none" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value as BookStatus})}><option value="Na Fila">Na Fila</option><option value="Lendo">Lendo</option><option value="Concluído">Concluído</option><option value="Abandonado">Abandonado</option></select>
               </div>
-              <div className="grid grid-cols-2 gap-4"><input type="number" className="w-full bg-slate-50 rounded-2xl px-5 py-4 font-bold outline-none" placeholder="Páginas" value={formData.total_pages} onChange={e => setFormData({...formData, total_pages: Number(e.target.value)})}/><input type="number" className="w-full bg-slate-50 rounded-2xl px-5 py-4 font-bold outline-none" placeholder="Lidas" value={formData.read_pages} onChange={e => setFormData({...formData, read_pages: Number(e.target.value)})}/></div>
+              <div className="grid grid-cols-2 gap-4"><input type="number" className="bg-slate-50 rounded-2xl px-5 py-4 font-bold outline-none" placeholder="Páginas" value={formData.total_pages} onChange={e => setFormData({...formData, total_pages: Number(e.target.value)})}/><input type="number" className="bg-slate-50 rounded-2xl px-5 py-4 font-bold outline-none" placeholder="Lidas" value={formData.read_pages} onChange={e => setFormData({...formData, read_pages: Number(e.target.value)})}/></div>
               <button type="submit" className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black uppercase shadow-xl hover:bg-blue-600 transition-all transform active:scale-95">SALVAR DADOS</button>
             </form>
           </div>
