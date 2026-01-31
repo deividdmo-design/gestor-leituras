@@ -4,10 +4,9 @@ import { supabase } from './lib/supabase'
 import { 
   Library, Plus, Trash2, CheckCircle2, 
   BookMarked, X, Pencil, Search, ArrowUpDown, Sparkles, Star, Trophy, Globe, Link as LinkIcon, Image as ImageIcon,
-  Layers, Book, PlayCircle, StopCircle, Timer, Award, PieChart, LayoutGrid, Calendar, User, Hash, Monitor, Tag, Shuffle
+  Layers, Book, PlayCircle, StopCircle, Timer, Award, PieChart, LayoutGrid, Calendar, User, Hash, Monitor, Tag, Shuffle, Sparkle
 } from 'lucide-react'
 
-// 🌍 MAPA-MÚNDI COMPLETO
 const countryFlags: Record<string, string> = {
   'brasil': '🇧🇷', 'brasileira': '🇧🇷', 'argentina': '🇦🇷', 'chile': '🇨🇱', 'colombia': '🇨🇴',
   'mexico': '🇲🇽', 'estados unidos': '🇺🇸', 'eua': '🇺🇸', 'canada': '🇨🇦', 'peru': '🇵🇪',
@@ -53,7 +52,9 @@ type BookStatus = 'Lendo' | 'Na Fila' | 'Concluído' | 'Abandonado';
 export default function App() {
   const { books, refreshBooks } = useBooks()
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isShuffleOpen, setIsShuffleOpen] = useState(false)
   const [editingBookId, setEditingBookId] = useState<string | null>(null)
+  const [shuffledBook, setShuffledBook] = useState<any>(null)
   const [currentView, setCurrentView] = useState<'library' | 'analytics'>('library')
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState<BookStatus | 'Todos'>('Todos')
@@ -66,12 +67,26 @@ export default function App() {
     genre: 'Outros', is_bestseller: false, platform: 'Físico', interruption_reason: ''
   })
 
-  // 🎲 FUNÇÃO DE SORTEIO
   function handleShuffle() {
     const queue = books.filter(b => b.status === 'Na Fila');
-    if (queue.length === 0) return alert('Sua fila está vazia! Adicione livros "Na Fila" para sortear.');
-    const randomBook = queue[Math.floor(Math.random() * queue.length)];
-    alert(`📖 Sugestão de leitura:\n\n"${randomBook.title}"\nde ${randomBook.author}`);
+    if (queue.length === 0) return alert('Sua fila está vazia!');
+    const random = queue[Math.floor(Math.random() * queue.length)];
+    setShuffledBook(random);
+    setIsShuffleOpen(true);
+  }
+
+  async function startReadingShuffled() {
+    if (!shuffledBook) return;
+    try {
+      const { error } = await supabase.from('books').update({ 
+        status: 'Lendo', 
+        started_at: new Date().toISOString().split('T')[0] 
+      }).eq('id', shuffledBook.id);
+      if (error) throw error;
+      setIsShuffleOpen(false);
+      refreshBooks();
+      alert('🚀 Boa leitura! Livro movido para "Lendo".');
+    } catch (e: any) { alert(e.message); }
   }
 
   const stats = useMemo(() => ({
@@ -93,7 +108,6 @@ export default function App() {
       status: { 'Na Fila': 0, 'Lendo': 0, 'Concluído': 0, 'Abandonado': 0 } as Record<string, number>,
       monthly: Array(12).fill(0)
     };
-
     let totalDuration = 0; let booksWithDuration = 0; let finishedThisYear = 0; let pagesThisYear = 0;
 
     books.forEach(b => {
@@ -128,7 +142,6 @@ export default function App() {
       tempoMedio: booksWithDuration > 0 ? Math.round(totalDuration / booksWithDuration) : 0,
       topAuthors: Object.entries(counters.authors).sort((a,b) => b[1] - a[1]).slice(0, 3),
       topCountries: Object.entries(counters.countries).sort((a,b) => b[1] - a[1]).slice(0, 3),
-      genres: Object.entries(counters.genres).sort((a,b) => b[1] - a[1]),
       statusDist: counters.status,
       mensal: counters.monthly,
       formatos: counters.formats
@@ -199,10 +212,7 @@ export default function App() {
               <div className="relative flex-1"><Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5"/><input className="w-full pl-12 pr-4 font-semibold outline-none text-slate-700" placeholder="Pesquisar..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)}/></div>
               <div className="flex gap-2 p-1">
                 {['Todos', 'Na Fila', 'Lendo', 'Concluído', 'Abandonado'].map((s) => (<button key={s} onClick={() => setFilterStatus(s as any)} className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase transition-all ${filterStatus === s ? 'bg-slate-900 text-white' : 'text-slate-500'}`}>{s}</button>))}
-                
-                {/* 🎲 BOTÃO SORTEAR REINTRODUZIDO AQUI */}
-                <button onClick={handleShuffle} title="Sortear Próxima Leitura" className="p-3 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all"><Shuffle size={18}/></button>
-                
+                <button onClick={handleShuffle} className="p-3 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all"><Shuffle size={18}/></button>
                 <div className="relative ml-1"><select className="appearance-none bg-slate-50 pl-4 pr-10 py-3 rounded-xl text-xs font-bold uppercase text-slate-600 outline-none" value={sortBy} onChange={e => setSortBy(e.target.value as any)}><option value="recent">Recentes</option><option value="rating">Melhores Notas</option></select><ArrowUpDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" /></div>
               </div>
             </div>
@@ -219,7 +229,7 @@ export default function App() {
                     <div className="mt-4"><div className="flex justify-between text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider"><span>Progresso</span><span>{Math.round(((book.read_pages || 0) / (book.total_pages || 1)) * 100)}%</span></div><div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden"><div className="h-full bg-blue-600 rounded-full transition-all duration-500" style={{ width: `${((book.read_pages || 0) / (book.total_pages || 1)) * 100}%` }}></div></div></div>
                     <div className="flex gap-2 mt-4"><span className={`text-[10px] font-black px-2 py-1 rounded uppercase ${book.status === 'Concluído' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-600'}`}>{book.status}</span>{(book.rating || 0) > 0 && <div className="flex items-center gap-1 bg-amber-50 px-2 rounded text-amber-600 text-[10px] font-bold"><Star size={10} className="fill-amber-400 text-amber-400"/> {book.rating}</div>}</div>
                   </div>
-                  <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-all"><button onClick={() => { setEditingBookId(book.id); setFormData(book as any); setIsModalOpen(true); }} className="p-2 text-slate-400 hover:text-blue-600 bg-slate-50 rounded-lg transition-all"><Pencil size={16}/></button><button onClick={() => { if(confirm('Excluir livro?')) supabase.from('books').delete().eq('id', book.id).then(refreshBooks); }} className="p-2 text-slate-400 hover:text-red-600 bg-slate-50 rounded-lg transition-all"><Trash2 size={16}/></button></div>
+                  <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-all"><button onClick={() => { setEditingBookId(book.id); setFormData(book as any); setIsModalOpen(true); }} className="p-2 text-slate-400 hover:text-blue-600 bg-slate-50 rounded-lg"><Pencil size={16}/></button><button onClick={() => { if(confirm('Excluir livro?')) supabase.from('books').delete().eq('id', book.id).then(refreshBooks); }} className="p-2 text-slate-400 hover:text-red-600 bg-slate-50 rounded-lg"><Trash2 size={16}/></button></div>
                 </div>
               ))}
             </div>
@@ -241,42 +251,39 @@ export default function App() {
         )}
       </main>
 
+      {/* 🎲 MODAL DE SORTEIO VISUAL */}
+      {isShuffleOpen && shuffledBook && (
+        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-xl flex items-center justify-center z-50 p-4">
+          <div className="bg-white w-full max-w-sm rounded-[3rem] p-10 shadow-2xl text-center relative overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-blue-50 to-transparent"></div>
+            <button onClick={() => setIsShuffleOpen(false)} className="absolute top-6 right-6 p-2 bg-slate-100 rounded-full hover:bg-red-50 hover:text-red-500 transition-all"><X size={20}/></button>
+            
+            <div className="relative z-10 space-y-6">
+              <div className="bg-blue-600 w-16 h-16 rounded-3xl mx-auto flex items-center justify-center shadow-xl shadow-blue-200 mb-2 rotate-12"><Sparkle className="text-white w-8 h-8" /></div>
+              <h2 className="text-xs font-black uppercase tracking-[0.2em] text-blue-600">Sua Próxima Aventura</h2>
+              <div className="w-40 h-60 bg-slate-100 rounded-[2rem] mx-auto shadow-2xl overflow-hidden border-4 border-white">
+                {shuffledBook.cover_url ? <img src={shuffledBook.cover_url} className="w-full h-full object-cover" alt={shuffledBook.title}/> : <div className="w-full h-full flex items-center justify-center"><BookMarked size={40} className="text-slate-300"/></div>}
+              </div>
+              <div><h3 className="text-xl font-black text-slate-900 leading-tight mb-2">{shuffledBook.title}</h3><p className="text-sm font-bold text-slate-400">{shuffledBook.author}</p></div>
+              <button onClick={startReadingShuffled} className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-blue-100 hover:bg-slate-900 transition-all">Começar Agora</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <div className="bg-white w-full max-w-xl rounded-[2.5rem] p-8 max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div className="flex justify-between items-center mb-6"><h2 className="text-xl font-black text-slate-900">{editingBookId ? 'Editar Registro' : 'Novo Registro'}</h2><button onClick={() => setIsModalOpen(false)} className="p-2 bg-slate-50 rounded-full hover:bg-slate-100 transition-colors"><X/></button></div>
+            <div className="flex justify-between items-center mb-6"><h2 className="text-xl font-black text-slate-900">{editingBookId ? 'Editar BI' : 'Novo Registro'}</h2><button onClick={() => setIsModalOpen(false)} className="p-2 bg-slate-50 rounded-full hover:bg-slate-100 transition-colors"><X/></button></div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="flex gap-2"><input className="flex-1 bg-slate-50 rounded-2xl px-5 py-4 font-bold outline-none border-2 border-transparent focus:border-blue-100" placeholder="Título do Livro" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required/><button type="button" onClick={searchGoogleBooks} className="bg-blue-600 text-white px-5 rounded-2xl hover:bg-blue-700 shadow-lg transition-colors"><Sparkles/></button></div>
               <div className="grid grid-cols-2 gap-4"><input className="bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none" placeholder="Autor" value={formData.author} onChange={e => setFormData({...formData, author: e.target.value})}/><input className="bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none" placeholder="País (Ex: Brasil)" value={formData.author_nationality} onChange={e => setFormData({...formData, author_nationality: e.target.value})}/></div>
-              
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-400 ml-1 flex items-center gap-1"><ImageIcon size={12}/> URL da Capa (Manual)</label>
-                <div className="relative"><LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"/><input className="w-full bg-slate-50 rounded-2xl pl-12 pr-4 py-4 text-xs font-bold outline-none border-2 border-transparent focus:border-blue-100" placeholder="Cole o link da imagem..." value={formData.cover_url} onChange={e => setFormData({...formData, cover_url: e.target.value})}/></div>
-              </div>
-
-              <div className="space-y-1"><label className="text-xs font-bold text-slate-400 ml-1 flex items-center gap-1"><Tag size={12}/> Gênero Literário</label>
-                <select className="w-full bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none appearance-none cursor-pointer" value={formData.genre} onChange={e => setFormData({...formData, genre: e.target.value})}>
-                  <optgroup label="Gestão & Negócios"><option>Gestão</option><option>Estratégia</option><option>Liderança</option><option>Vendas</option><option>Marketing</option><option>Startups</option><option>Processos</option></optgroup>
-                  <optgroup label="Técnico & Acadêmico"><option>Tecnologia</option><option>Data Science</option><option>Finanças</option><option>Direito</option><option>História</option><option>Sociologia</option></optgroup>
-                  <optgroup label="Literatura"><option>Ficção</option><option>Romance</option><option>Fantasia</option><option>Sci-Fi</option><option>Clássicos</option><option>Biografia</option></optgroup>
-                  <optgroup label="Outros"><option>Autoajuda</option><option>Outros</option></optgroup>
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1"><label className="text-xs font-bold text-slate-400 ml-1 flex items-center gap-1"><PlayCircle size={12}/> Data Início</label><input type="date" className="w-full bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none" value={formData.started_at} onChange={e => setFormData({...formData, started_at: e.target.value})}/></div>
-                <div className="space-y-1"><label className="text-xs font-bold text-slate-400 ml-1 flex items-center gap-1"><StopCircle size={12}/> Data Conclusão</label><input type="date" className="w-full bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none" value={formData.finished_at} onChange={e => setFormData({...formData, finished_at: e.target.value})}/></div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1"><label className="text-xs font-bold text-slate-400 ml-1">Formato</label><select className="w-full bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none appearance-none" value={formData.format} onChange={e => setFormData({...formData, format: e.target.value})}><option>Físico</option><option>E-book</option><option>Audiobook</option></select></div>
-                <div className="space-y-1"><label className="text-xs font-bold text-slate-400 ml-1">Status</label><select className="w-full bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none appearance-none" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value as BookStatus})}><option value="Na Fila">Na Fila</option><option value="Lendo">Lendo</option><option value="Concluído">Concluído</option><option value="Abandonado">Abandonado</option></select></div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1"><label className="text-xs font-bold text-slate-400 ml-1">Total de Páginas</label><input type="number" className="w-full bg-slate-50 rounded-2xl px-5 py-4 font-bold outline-none" value={formData.total_pages} onChange={e => setFormData({...formData, total_pages: Number(e.target.value)})}/></div>
-                <div className="space-y-1"><label className="text-xs font-bold text-slate-400 ml-1">Páginas Lidas</label><input type="number" className="w-full bg-slate-50 rounded-2xl px-5 py-4 font-bold outline-none" value={formData.read_pages} onChange={e => setFormData({...formData, read_pages: Number(e.target.value)})}/></div>
-              </div>
-              {formData.status === 'Abandonado' && <input className="w-full bg-red-50 text-red-600 rounded-2xl px-5 py-4 text-sm font-bold outline-none border-2 border-red-100" placeholder="Motivo da interrupção?" value={formData.interruption_reason} onChange={e => setFormData({...formData, interruption_reason: e.target.value})}/>}
-              <button type="submit" className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black uppercase shadow-xl hover:bg-blue-600 transition-all">SALVAR DADOS</button>
+              <div className="space-y-1"><label className="text-xs font-bold text-slate-400 ml-1 flex items-center gap-1"><ImageIcon size={12}/> URL da Capa</label><div className="relative"><LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" /><input className="w-full bg-slate-50 rounded-2xl pl-12 pr-4 py-4 text-xs font-bold outline-none border-2 border-transparent focus:border-blue-100" placeholder="Cole o link da imagem..." value={formData.cover_url} onChange={e => setFormData({...formData, cover_url: e.target.value})}/></div></div>
+              <div className="space-y-1"><label className="text-xs font-bold text-slate-400 ml-1 flex items-center gap-1"><Tag size={12}/> Gênero Literário</label><select className="w-full bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none appearance-none cursor-pointer" value={formData.genre} onChange={e => setFormData({...formData, genre: e.target.value})}><optgroup label="Gestão & Negócios"><option>Gestão</option><option>Estratégia</option><option>Liderança</option><option>Vendas</option><option>Marketing</option></optgroup><optgroup label="Literatura"><option>Ficção</option><option>Romance</option><option>Fantasia</option><option>Sci-Fi</option><option>Clássicos</option><option>Biografia</option><option>Outros</option></optgroup></select></div>
+              <div className="grid grid-cols-2 gap-4"><div className="space-y-1"><label className="text-xs font-bold text-slate-400 ml-1 flex items-center gap-1"><PlayCircle size={12}/> Início</label><input type="date" className="w-full bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none" value={formData.started_at} onChange={e => setFormData({...formData, started_at: e.target.value})}/></div><div className="space-y-1"><label className="text-xs font-bold text-slate-400 ml-1 flex items-center gap-1"><StopCircle size={12}/> Fim</label><input type="date" className="w-full bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none" value={formData.finished_at} onChange={e => setFormData({...formData, finished_at: e.target.value})}/></div></div>
+              <div className="grid grid-cols-2 gap-4"><select className="bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none" value={formData.format} onChange={e => setFormData({...formData, format: e.target.value})}><option>Físico</option><option>E-book</option><option>Audiobook</option></select><select className="bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value as BookStatus})}><option value="Na Fila">Na Fila</option><option value="Lendo">Lendo</option><option value="Concluído">Concluído</option><option value="Abandonado">Abandonado</option></select></div>
+              <div className="grid grid-cols-2 gap-4"><input type="number" className="bg-slate-50 rounded-2xl px-5 py-4 font-bold outline-none" placeholder="Páginas" value={formData.total_pages} onChange={e => setFormData({...formData, total_pages: Number(e.target.value)})}/><input type="number" className="bg-slate-50 rounded-2xl px-5 py-4 font-bold outline-none" placeholder="Lidas" value={formData.read_pages} onChange={e => setFormData({...formData, read_pages: Number(e.target.value)})}/></div>
+              <button type="submit" className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black uppercase shadow-xl hover:bg-blue-600 transition-all transform active:scale-95">SALVAR DADOS</button>
             </form>
           </div>
         </div>
