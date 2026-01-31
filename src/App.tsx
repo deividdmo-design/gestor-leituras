@@ -7,7 +7,7 @@ import {
   Layers, Book, PlayCircle, StopCircle, Timer, Award, PieChart, LayoutGrid, Calendar, MapPin, User, Hash, AlertTriangle, Monitor, TrendingUp
 } from 'lucide-react'
 
-// 🌍 MAPA-MÚNDI PARA PAÍSES MAIS LIDOS
+// 🌍 MAPA-MÚNDI
 const countryFlags: Record<string, string> = {
   'brasil': '🇧🇷', 'argentina': '🇦🇷', 'estados unidos': '🇺🇸', 'eua': '🇺🇸', 'portugal': '🇵🇹', 'espanha': '🇪🇸', 'franca': '🇫🇷', 'alemanha': '🇩🇪', 'reino unido': '🇬🇧', 'japao': '🇯🇵', 'china': '🇨🇳', 'israel': '🇮🇱'
 };
@@ -26,11 +26,9 @@ export default function App() {
     genre: 'Outros', is_bestseller: false, platform: 'Físico', interruption_reason: ''
   })
 
-  // 📊 DASHBOARD DE INTELIGÊNCIA (ANALYTICS)
+  // 📊 ENGINE DE ANALYTICS
   const analytics = useMemo(() => {
     const currentYear = new Date().getFullYear();
-    
-    // Filtros de tempo
     const finishedThisYear = books.filter(b => b.status === 'Concluído' && b.finished_at && new Date(b.finished_at).getFullYear() === currentYear);
     
     const counters = {
@@ -38,7 +36,6 @@ export default function App() {
       countries: {} as Record<string, number>,
       genres: {} as Record<string, number>,
       formats: {} as Record<string, number>,
-      platforms: {} as Record<string, number>,
       status: { 'Na Fila': 0, 'Lendo': 0, 'Concluído': 0, 'Abandonado': 0 } as Record<string, number>,
       monthly: Array(12).fill(0)
     };
@@ -47,19 +44,18 @@ export default function App() {
     let booksWithDuration = 0;
 
     books.forEach(b => {
-      // Contagens Gerais
       if (b.author) counters.authors[b.author] = (counters.authors[b.author] || 0) + 1;
-      if (b.author_nationality) counters.countries[b.author_nationality.toLowerCase()] = (counters.countries[b.author_nationality.toLowerCase()] || 0) + 1;
+      if (b.author_nationality) {
+          const nat = b.author_nationality.toLowerCase();
+          counters.countries[nat] = (counters.countries[nat] || 0) + 1;
+      }
       if (b.genre) counters.genres[b.genre] = (counters.genres[b.genre] || 0) + 1;
       if (b.format) counters.formats[b.format] = (counters.formats[b.format] || 0) + 1;
-      if (b.platform) counters.platforms[b.platform] = (counters.platforms[b.platform] || 0) + 1;
       if (b.status) counters.status[b.status] = (counters.status[b.status] || 0) + 1;
 
-      // Evolução Mensal e Tempo Médio
       if (b.status === 'Concluído' && b.finished_at) {
         const date = new Date(b.finished_at);
         if (date.getFullYear() === currentYear) counters.monthly[date.getMonth()]++;
-        
         if (b.started_at) {
           const start = new Date(b.started_at);
           const diff = Math.ceil(Math.abs(date.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
@@ -78,8 +74,7 @@ export default function App() {
       topCountries: Object.entries(counters.countries).sort((a,b) => b[1] - a[1]).slice(0, 3),
       genres: Object.entries(counters.genres).sort((a,b) => b[1] - a[1]),
       statusDist: counters.status,
-      mensal: counters.monthly,
-      formatos: counters.formats
+      mensal: counters.monthly
     };
   }, [books]);
 
@@ -94,7 +89,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800">
+    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans">
       <header className="bg-white border-b border-slate-200 sticky top-0 z-30 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -107,14 +102,13 @@ export default function App() {
              <button onClick={() => setCurrentView('analytics')} className={`px-4 py-2 rounded-lg text-xs font-bold uppercase flex items-center gap-2 transition-all ${currentView === 'analytics' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}><PieChart className="w-4 h-4"/> Relatórios</button>
           </div>
 
-          <button onClick={() => { setEditingBookId(null); setIsModalOpen(true); }} className="bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-600 transition-colors"><Plus className="w-5 h-5" /> <span className="hidden lg:inline">Novo Livro</span></button>
+          <button onClick={() => { setEditingBookId(null); setFormData({ title: '', author: '', author_nationality: '', publisher: '', total_pages: 0, read_pages: 0, cover_url: '', format: 'Físico', status: 'Na Fila', rating: 0, finished_at: '', started_at: '', genre: 'Outros', is_bestseller: false, platform: 'Físico', interruption_reason: '' }); setIsModalOpen(true); }} className="bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-600 transition-colors"><Plus className="w-5 h-5" /> <span className="hidden lg:inline">Novo Livro</span></button>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto p-6">
         {currentView === 'library' ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-500">
-            {/* BIBLIOTECA ORIGINAL MANTIDA */}
             {books.filter(b => b.title.toLowerCase().includes(searchTerm.toLowerCase())).map(book => (
               <div key={book.id} className="bg-white p-5 rounded-[2rem] border border-slate-100 flex gap-6 relative overflow-hidden group shadow-sm hover:shadow-md transition-all">
                 {book.is_bestseller && <div className="absolute top-0 right-0 bg-amber-400 text-amber-900 text-[9px] font-black px-3 py-1 rounded-bl-xl flex items-center gap-1"><Award className="w-3 h-3"/> Best Seller</div>}
@@ -131,14 +125,14 @@ export default function App() {
                   </div>
                 </div>
                 <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => { setEditingBookId(book.id); setFormData(book); setIsModalOpen(true); }} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"><Pencil className="w-4 h-4" /></button>
+                    <button onClick={() => { setEditingBookId(book.id); setFormData(book as any); setIsModalOpen(true); }} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"><Pencil className="w-4 h-4" /></button>
+                    <button onClick={() => { if(confirm('Excluir?')) supabase.from('books').delete().eq('id', book.id).then(refreshBooks) }} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"><Trash2 className="w-4 h-4" /></button>
                 </div>
               </div>
             ))}
           </div>
         ) : (
           <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
-            {/* BLOCO 1: KPIs DE PERFORMANCE NO ANO */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
                   <div className="text-blue-600 mb-2"><Calendar className="w-5 h-5"/></div>
@@ -162,7 +156,6 @@ export default function App() {
                </div>
             </div>
 
-            {/* BLOCO 2: DEMOGRAFIA E RANKINGS */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
                   <h2 className="text-sm font-black uppercase text-slate-900 mb-6 flex items-center gap-2"><User className="w-4 h-4 text-blue-600"/> Autores Favoritos</h2>
@@ -192,24 +185,23 @@ export default function App() {
                </div>
             </div>
 
-            {/* BLOCO 3: EVOLUÇÃO MENSAL E FORMATOS */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
-                    <h2 className="text-sm font-black uppercase text-slate-900 mb-8 flex items-center gap-2"><TrendingUp className="w-4 h-4 text-blue-600"/> Evolução Mensal (Livros Lidos)</h2>
+                    <h2 className="text-sm font-black uppercase text-slate-900 mb-8 flex items-center gap-2"><TrendingUp className="w-4 h-4 text-blue-600"/> Evolução Mensal</h2>
                     <div className="flex items-end justify-between h-32 gap-2">
                         {analytics.mensal.map((count, i) => (
                             <div key={i} className="flex-1 flex flex-col items-center gap-2">
                                 <div className="w-full bg-blue-100 rounded-t-lg transition-all hover:bg-blue-600 relative group" style={{ height: `${(count / (Math.max(...analytics.mensal) || 1)) * 100}%`, minHeight: '4px' }}>
                                    {count > 0 && <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-black opacity-0 group-hover:opacity-100 transition-opacity">{count}</span>}
                                 </div>
-                                <span className="text-[9px] font-bold text-slate-400 uppercase">{['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][i]}</span>
+                                <span className="text-[9px] font-bold text-slate-400 uppercase">{['J','F','M','A','M','J','J','A','S','O','N','D'][i]}</span>
                             </div>
                         ))}
                     </div>
                 </div>
 
                 <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
-                    <h2 className="text-sm font-black uppercase text-slate-900 mb-6 flex items-center gap-2"><Monitor className="w-4 h-4 text-orange-600"/> Formatos e Mix</h2>
+                    <h2 className="text-sm font-black uppercase text-slate-900 mb-6 flex items-center gap-2"><Monitor className="w-4 h-4 text-orange-600"/> Formatos</h2>
                     <div className="space-y-6">
                         {analytics.genres.slice(0, 4).map(([name, count]) => (
                             <div key={name}>
@@ -224,7 +216,6 @@ export default function App() {
         )}
       </main>
 
-      {/* MODAL COM NOVOS CAMPOS (PLATAFORMA E MOTIVO) */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
            <div className="bg-white w-full max-w-xl rounded-[2.5rem] shadow-2xl p-8 max-h-[90vh] overflow-y-auto">
@@ -246,6 +237,7 @@ export default function App() {
                        <option>Na Fila</option><option>Lendo</option><option>Concluído</option><option>Abandonado</option>
                     </select>
                  </div>
+                 <input type="number" className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 font-bold" placeholder="Páginas" value={formData.total_pages} onChange={e => setFormData({...formData, total_pages: Number(e.target.value)})} />
                  {formData.status === 'Abandonado' && (
                     <input className="w-full bg-red-50 border-none rounded-2xl px-5 py-4 text-sm font-bold text-red-600" placeholder="Motivo da interrupção?" value={formData.interruption_reason} onChange={e => setFormData({...formData, interruption_reason: e.target.value})} />
                  )}
