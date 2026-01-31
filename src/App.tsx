@@ -4,7 +4,7 @@ import { supabase } from './lib/supabase'
 import { 
   Library, Plus, Trash2, CheckCircle2, 
   BookMarked, X, Pencil, Search, ArrowUpDown, Sparkles, Star, Trophy, Globe, Link as LinkIcon, Image as ImageIcon,
-  Layers, Book, PlayCircle, StopCircle, Timer, Award, PieChart, LayoutGrid, Calendar, User, Hash, Monitor, Tag
+  Layers, Book, PlayCircle, StopCircle, Timer, Award, PieChart, LayoutGrid, Calendar, User, Hash, Monitor, Tag, Shuffle
 } from 'lucide-react'
 
 // 🌍 MAPA-MÚNDI COMPLETO
@@ -65,6 +65,14 @@ export default function App() {
     status: 'Na Fila' as BookStatus, rating: 0, finished_at: '', started_at: '',
     genre: 'Outros', is_bestseller: false, platform: 'Físico', interruption_reason: ''
   })
+
+  // 🎲 FUNÇÃO DE SORTEIO
+  function handleShuffle() {
+    const queue = books.filter(b => b.status === 'Na Fila');
+    if (queue.length === 0) return alert('Sua fila está vazia! Adicione livros "Na Fila" para sortear.');
+    const randomBook = queue[Math.floor(Math.random() * queue.length)];
+    alert(`📖 Sugestão de leitura:\n\n"${randomBook.title}"\nde ${randomBook.author}`);
+  }
 
   const stats = useMemo(() => ({
     totalBooks: books.length,
@@ -154,11 +162,9 @@ export default function App() {
         started_at: formData.started_at === '' ? null : formData.started_at,
         finished_at: formData.finished_at === '' ? null : formData.finished_at,
       };
-
       const { error } = editingBookId 
         ? await supabase.from('books').update(payload).eq('id', editingBookId)
         : await supabase.from('books').insert([payload]);
-
       if (error) throw error;
       setIsModalOpen(false); refreshBooks(); alert('✅ Livro salvo com sucesso!');
     } catch (e: any) { alert('❌ Erro ao salvar: ' + e.message); }
@@ -193,7 +199,11 @@ export default function App() {
               <div className="relative flex-1"><Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5"/><input className="w-full pl-12 pr-4 font-semibold outline-none text-slate-700" placeholder="Pesquisar..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)}/></div>
               <div className="flex gap-2 p-1">
                 {['Todos', 'Na Fila', 'Lendo', 'Concluído', 'Abandonado'].map((s) => (<button key={s} onClick={() => setFilterStatus(s as any)} className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase transition-all ${filterStatus === s ? 'bg-slate-900 text-white' : 'text-slate-500'}`}>{s}</button>))}
-                <div className="relative ml-2"><select className="appearance-none bg-slate-50 pl-4 pr-10 py-3 rounded-xl text-xs font-bold uppercase text-slate-600 outline-none" value={sortBy} onChange={e => setSortBy(e.target.value as any)}><option value="recent">Recentes</option><option value="rating">Melhores Notas</option></select><ArrowUpDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" /></div>
+                
+                {/* 🎲 BOTÃO SORTEAR REINTRODUZIDO AQUI */}
+                <button onClick={handleShuffle} title="Sortear Próxima Leitura" className="p-3 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all"><Shuffle size={18}/></button>
+                
+                <div className="relative ml-1"><select className="appearance-none bg-slate-50 pl-4 pr-10 py-3 rounded-xl text-xs font-bold uppercase text-slate-600 outline-none" value={sortBy} onChange={e => setSortBy(e.target.value as any)}><option value="recent">Recentes</option><option value="rating">Melhores Notas</option></select><ArrowUpDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" /></div>
               </div>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-500">
@@ -209,7 +219,7 @@ export default function App() {
                     <div className="mt-4"><div className="flex justify-between text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider"><span>Progresso</span><span>{Math.round(((book.read_pages || 0) / (book.total_pages || 1)) * 100)}%</span></div><div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden"><div className="h-full bg-blue-600 rounded-full transition-all duration-500" style={{ width: `${((book.read_pages || 0) / (book.total_pages || 1)) * 100}%` }}></div></div></div>
                     <div className="flex gap-2 mt-4"><span className={`text-[10px] font-black px-2 py-1 rounded uppercase ${book.status === 'Concluído' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-600'}`}>{book.status}</span>{(book.rating || 0) > 0 && <div className="flex items-center gap-1 bg-amber-50 px-2 rounded text-amber-600 text-[10px] font-bold"><Star size={10} className="fill-amber-400 text-amber-400"/> {book.rating}</div>}</div>
                   </div>
-                  <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-all"><button onClick={() => { setEditingBookId(book.id); setFormData(book as any); setIsModalOpen(true); }} className="p-2 text-slate-400 hover:text-blue-600 bg-slate-50 rounded-lg"><Pencil size={16}/></button><button onClick={() => { if(confirm('Excluir livro?')) supabase.from('books').delete().eq('id', book.id).then(refreshBooks); }} className="p-2 text-slate-400 hover:text-red-600 bg-slate-50 rounded-lg"><Trash2 size={16}/></button></div>
+                  <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-all"><button onClick={() => { setEditingBookId(book.id); setFormData(book as any); setIsModalOpen(true); }} className="p-2 text-slate-400 hover:text-blue-600 bg-slate-50 rounded-lg transition-all"><Pencil size={16}/></button><button onClick={() => { if(confirm('Excluir livro?')) supabase.from('books').delete().eq('id', book.id).then(refreshBooks); }} className="p-2 text-slate-400 hover:text-red-600 bg-slate-50 rounded-lg transition-all"><Trash2 size={16}/></button></div>
                 </div>
               ))}
             </div>
@@ -234,18 +244,14 @@ export default function App() {
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <div className="bg-white w-full max-w-xl rounded-[2.5rem] p-8 max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div className="flex justify-between items-center mb-6"><h2 className="text-xl font-black text-slate-900">{editingBookId ? 'Editar BI' : 'Novo Registro'}</h2><button onClick={() => setIsModalOpen(false)} className="p-2 bg-slate-50 rounded-full hover:bg-slate-100"><X/></button></div>
+            <div className="flex justify-between items-center mb-6"><h2 className="text-xl font-black text-slate-900">{editingBookId ? 'Editar Registro' : 'Novo Registro'}</h2><button onClick={() => setIsModalOpen(false)} className="p-2 bg-slate-50 rounded-full hover:bg-slate-100 transition-colors"><X/></button></div>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="flex gap-2"><input className="flex-1 bg-slate-50 rounded-2xl px-5 py-4 font-bold outline-none" placeholder="Título do Livro" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required/><button type="button" onClick={searchGoogleBooks} className="bg-blue-600 text-white px-5 rounded-2xl hover:bg-blue-700 shadow-lg transition-colors"><Sparkles/></button></div>
+              <div className="flex gap-2"><input className="flex-1 bg-slate-50 rounded-2xl px-5 py-4 font-bold outline-none border-2 border-transparent focus:border-blue-100" placeholder="Título do Livro" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required/><button type="button" onClick={searchGoogleBooks} className="bg-blue-600 text-white px-5 rounded-2xl hover:bg-blue-700 shadow-lg transition-colors"><Sparkles/></button></div>
               <div className="grid grid-cols-2 gap-4"><input className="bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none" placeholder="Autor" value={formData.author} onChange={e => setFormData({...formData, author: e.target.value})}/><input className="bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none" placeholder="País (Ex: Brasil)" value={formData.author_nationality} onChange={e => setFormData({...formData, author_nationality: e.target.value})}/></div>
               
-              {/* CAMPO URL DA CAPA REINTRODUZIDO AQUI */}
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-400 ml-1 flex items-center gap-1"><ImageIcon size={12}/> URL da Capa</label>
-                <div className="relative">
-                  <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-                  <input className="w-full bg-slate-50 rounded-2xl pl-12 pr-4 py-4 text-xs font-bold outline-none border-2 border-transparent focus:border-blue-100" placeholder="Cole o link da imagem aqui..." value={formData.cover_url} onChange={e => setFormData({...formData, cover_url: e.target.value})}/>
-                </div>
+                <label className="text-xs font-bold text-slate-400 ml-1 flex items-center gap-1"><ImageIcon size={12}/> URL da Capa (Manual)</label>
+                <div className="relative"><LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"/><input className="w-full bg-slate-50 rounded-2xl pl-12 pr-4 py-4 text-xs font-bold outline-none border-2 border-transparent focus:border-blue-100" placeholder="Cole o link da imagem..." value={formData.cover_url} onChange={e => setFormData({...formData, cover_url: e.target.value})}/></div>
               </div>
 
               <div className="space-y-1"><label className="text-xs font-bold text-slate-400 ml-1 flex items-center gap-1"><Tag size={12}/> Gênero Literário</label>
@@ -263,7 +269,7 @@ export default function App() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1"><label className="text-xs font-bold text-slate-400 ml-1">Formato</label><select className="w-full bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none appearance-none" value={formData.format} onChange={e => setFormData({...formData, format: e.target.value})}><option>Físico</option><option>E-book</option><option>Audiobook</option></select></div>
-                <div className="space-y-1"><label className="text-xs font-bold text-slate-400 ml-1">Status</label><select className="w-full bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none appearance-none" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value as BookStatus})}><option>Na Fila</option><option>Lendo</option><option>Concluído</option><option>Abandonado</option></select></div>
+                <div className="space-y-1"><label className="text-xs font-bold text-slate-400 ml-1">Status</label><select className="w-full bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none appearance-none" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value as BookStatus})}><option value="Na Fila">Na Fila</option><option value="Lendo">Lendo</option><option value="Concluído">Concluído</option><option value="Abandonado">Abandonado</option></select></div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1"><label className="text-xs font-bold text-slate-400 ml-1">Total de Páginas</label><input type="number" className="w-full bg-slate-50 rounded-2xl px-5 py-4 font-bold outline-none" value={formData.total_pages} onChange={e => setFormData({...formData, total_pages: Number(e.target.value)})}/></div>
