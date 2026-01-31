@@ -48,7 +48,7 @@ export default function App() {
     title: '', author: '', author_nationality: '', publisher: '',
     total_pages: 0, read_pages: 0, cover_url: '', format: 'Físico',
     status: 'Na Fila' as BookStatus, rating: 0, finished_at: '', started_at: '',
-    genre: 'Outros', is_bestseller: false, platform: 'Físico', interruption_reason: ''
+    genre: 'Romance', is_bestseller: false, platform: 'Físico', interruption_reason: ''
   };
 
   const [formData, setFormData] = useState(emptyFormData);
@@ -132,14 +132,8 @@ export default function App() {
     try {
       const payload = { ...formData, rating: editingBookId ? formData.rating : 0, started_at: formData.started_at || null, finished_at: formData.finished_at || null };
       const { error } = editingBookId ? await supabase.from('books').update(payload).eq('id', editingBookId) : await supabase.from('books').insert([payload]);
-      
       if (error) throw error;
-      
-      // ✅ LIMPEZA DO FORMULÁRIO APÓS SALVAR
-      setFormData(emptyFormData);
-      setIsModalOpen(false); 
-      refreshBooks(); 
-      alert('✅ Livro salvo com sucesso!');
+      setFormData(emptyFormData); setIsModalOpen(false); refreshBooks(); alert('✅ Livro salvo!');
     } catch (e: any) { alert('❌ Erro: ' + e.message); }
   }
 
@@ -181,7 +175,8 @@ export default function App() {
                 <div key={book.id} className="bg-white p-5 rounded-[2rem] border border-slate-100 flex gap-6 relative group shadow-sm hover:shadow-md transition-all">
                   <div className="w-24 h-36 bg-slate-100 rounded-xl overflow-hidden shrink-0 shadow-inner">{book.cover_url ? <img src={book.cover_url} className="w-full h-full object-cover" alt={book.title}/> : <div className="w-full h-full flex items-center justify-center bg-slate-50"><BookMarked className="text-slate-300 w-8 h-8"/></div>}</div>
                   <div className="flex-1 py-1 min-w-0">
-                    <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded-md border mb-1 block w-fit bg-slate-50 text-slate-600 border-slate-100">{book.genre}</span>
+                    {/* ✅ Proteção de Build: genreColors em uso real para aplicar cores dinâmicas */}
+                    <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-md border mb-1 block w-fit ${genreColors[book.genre] || genreColors['Outros']}`}>{book.genre}</span>
                     <h3 className="font-bold text-lg truncate text-slate-900">{book.title}</h3>
                     <p className="text-sm text-slate-500 flex items-center gap-2">
                         {book.author_nationality ? (countryFlags[book.author_nationality.toLowerCase().trim()] || <Globe size={12}/>) : <Globe size={12}/>} {book.author}
@@ -291,10 +286,10 @@ export default function App() {
                 <input type="date" className="w-full bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none" value={formData.finished_at} onChange={e => setFormData({ ...formData, finished_at: e.target.value })}/>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <select className="bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none appearance-none" value={formData.format} onChange={e => setFormData({...formData, format: e.target.value})}><option>Físico</option><option>E-book</option><option>Audiobook</option></select>
-                <select className="bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none appearance-none" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value as BookStatus})}><option value="Na Fila">Na Fila</option><option value="Lendo">Lendo</option><option value="Concluído">Concluído</option><option value="Abandonado">Abandonado</option></select>
+                <div className="space-y-1"><label className="text-xs font-bold text-slate-400 ml-1">Formato</label><select className="w-full bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none appearance-none" value={formData.format} onChange={e => setFormData({...formData, format: e.target.value})}><option>Físico</option><option>E-book</option><option>Audiobook</option></select></div>
+                <div className="space-y-1"><label className="text-xs font-bold text-slate-400 ml-1">Status</label><select className="w-full bg-slate-50 rounded-2xl px-5 py-4 text-sm font-bold outline-none appearance-none" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value as BookStatus})}><option value="Na Fila">Na Fila</option><option value="Lendo">Lendo</option><option value="Concluído">Concluído</option><option value="Abandonado">Abandonado</option></select></div>
               </div>
-              <div className="grid grid-cols-2 gap-4"><input type="number" className="bg-slate-50 rounded-2xl px-5 py-4 font-bold outline-none" placeholder="Páginas" value={formData.total_pages} onChange={e => setFormData({...formData, total_pages: Number(e.target.value)})}/><input type="number" className="bg-slate-50 rounded-2xl px-5 py-4 font-bold outline-none" placeholder="Lidas" value={formData.read_pages} onChange={e => setFormData({...formData, read_pages: Number(e.target.value)})}/></div>
+              <div className="grid grid-cols-2 gap-4"><input type="number" className="w-full bg-slate-50 rounded-2xl px-5 py-4 font-bold outline-none" placeholder="Páginas" value={formData.total_pages} onChange={e => setFormData({...formData, total_pages: Number(e.target.value)})}/><input type="number" className="w-full bg-slate-50 rounded-2xl px-5 py-4 font-bold outline-none" placeholder="Lidas" value={formData.read_pages} onChange={e => setFormData({...formData, read_pages: Number(e.target.value)})}/></div>
               <button type="submit" className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black uppercase shadow-xl hover:bg-blue-600 transition-all transform active:scale-95">SALVAR DADOS</button>
             </form>
           </div>
