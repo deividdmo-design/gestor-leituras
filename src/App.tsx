@@ -4,7 +4,7 @@ import { supabase } from './lib/supabase'
 import { 
   Library, Plus, Trash2, CheckCircle2, 
   BookMarked, X, Pencil, Search, ArrowUpDown, Sparkles, Star, Trophy, Globe, Link as LinkIcon, Image as ImageIcon,
-  Layers, Book, PlayCircle, StopCircle, Timer, Award
+  Layers, Book, PlayCircle, StopCircle, Timer, Award, PieChart, LayoutGrid
 } from 'lucide-react'
 
 // 🌍 MAPA-MÚNDI
@@ -54,6 +54,9 @@ export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingBookId, setEditingBookId] = useState<string | null>(null)
   
+  // 🧭 NAVEGAÇÃO ENTRE ABAS
+  const [currentView, setCurrentView] = useState<'library' | 'analytics'>('library')
+
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState('Todos')
   const [sortBy, setSortBy] = useState<'recent' | 'rating'>('recent')
@@ -65,16 +68,31 @@ export default function App() {
     genre: 'Outros', is_bestseller: false
   })
 
-  // 📊 DASHBOARD CORRIGIDO
+  // 📊 DASHBOARD GERAL
   const stats = useMemo(() => ({
     totalBooks: books.length,
     totalReadPages: books.reduce((acc, b) => acc + (b.read_pages || 0), 0),
     completedBooks: books.filter(b => b.status === 'Concluído').length,
     readingBooks: books.filter(b => b.status === 'Lendo').length,
-    // 👇 AQUI ESTAVA O ERRO! Adicionei o cálculo que faltava:
     queueBooks: books.filter(b => b.status === 'Na Fila').length,
     bestSellers: books.filter(b => b.is_bestseller).length
   }), [books]);
+
+  // 📈 ESTATÍSTICAS POR GÊNERO (NOVO)
+  const genreStats = useMemo(() => {
+    const counts: Record<string, number> = {};
+    books.forEach(book => {
+        const g = book.genre || 'Outros';
+        counts[g] = (counts[g] || 0) + 1;
+    });
+    return Object.entries(counts)
+        .sort((a, b) => b[1] - a[1]) // Ordenar do maior para o menor
+        .map(([name, count]) => ({
+            name, 
+            count, 
+            percent: Math.round((count / books.length) * 100)
+        }));
+  }, [books]);
 
   function calculateDays(start?: string | null, end?: string | null) {
     if (!start) return null;
@@ -175,15 +193,27 @@ export default function App() {
               </div>
             </div>
           </div>
+          
+          {/* MENU DE ABAS NO HEADER */}
+          <div className="hidden md:flex bg-slate-100 p-1 rounded-xl">
+             <button onClick={() => setCurrentView('library')} className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-all ${currentView === 'library' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}>
+                <LayoutGrid className="w-4 h-4"/> Biblioteca
+             </button>
+             <button onClick={() => setCurrentView('analytics')} className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-all ${currentView === 'analytics' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}>
+                <PieChart className="w-4 h-4"/> Relatórios
+             </button>
+          </div>
+
           <button onClick={() => { setEditingBookId(null); setIsModalOpen(true); }} className="group bg-slate-900 hover:bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all shadow-xl shadow-slate-900/10 hover:shadow-blue-600/20 active:scale-95">
             <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform" /> <span className="hidden sm:inline">Novo Livro</span>
           </button>
         </div>
       </header>
 
+      {/* CONTEÚDO PRINCIPAL - ALTERNA ENTRE VISÕES */}
       <main className="max-w-7xl mx-auto p-6 space-y-8">
         
-        {/* DASHBOARD */}
+        {/* DASHBOARD DE MÉTRICAS (SEMPRE VISÍVEL) */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between hover:border-violet-100 transition-colors group">
             <div className="flex justify-between items-start mb-2"><div className="bg-violet-50 p-2.5 rounded-xl text-violet-600 group-hover:bg-violet-600 group-hover:text-white transition-colors"><Book className="w-5 h-5" /></div></div>
@@ -207,97 +237,141 @@ export default function App() {
           </div>
         </div>
 
-        {/* FERRAMENTAS */}
-        <div className="bg-white p-2 rounded-[1.5rem] border border-slate-200 shadow-sm flex flex-col lg:flex-row gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-            <input className="w-full h-full bg-transparent pl-12 pr-4 font-semibold text-slate-700 outline-none placeholder:text-slate-400 rounded-xl hover:bg-slate-50 transition-colors" placeholder="Pesquisar..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
-          </div>
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0 no-scrollbar px-2 lg:px-0">
-             <div className="h-8 w-px bg-slate-200 hidden lg:block mx-2"></div>
-             {['Todos', 'Na Fila', 'Lendo', 'Concluído'].map((s) => (
-                <button key={s} onClick={() => setFilterStatus(s)} className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${filterStatus === s ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'}`}>{s}</button>
-              ))}
-              <div className="h-8 w-px bg-slate-200 hidden lg:block mx-2"></div>
-              <div className="relative group">
-                <select className="appearance-none bg-slate-50 hover:bg-slate-100 pl-4 pr-10 py-3 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-600 outline-none cursor-pointer transition-colors" value={sortBy} onChange={e => setSortBy(e.target.value as any)}>
-                    <option value="recent">Recentes</option><option value="rating">Melhores Notas</option>
-                </select>
-                <ArrowUpDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-              </div>
-          </div>
-        </div>
-
-        {/* LISTAGEM DE LIVROS */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {processedBooks.map(book => {
-              const progress = Math.min(Math.round((book.read_pages / book.total_pages) * 100) || 0, 100);
-              const daysCount = calculateDays(book.started_at, book.finished_at);
-              const genre = book.genre || 'Outros';
-              
-              return (
-                <div key={book.id} className="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-100 transition-all duration-300 flex gap-6 group relative overflow-hidden">
-                  
-                  {book.is_bestseller && (
-                     <div className="absolute top-0 right-0 bg-gradient-to-l from-amber-400 to-amber-200 text-amber-900 text-[9px] font-black uppercase px-3 py-1 rounded-bl-2xl shadow-sm z-10 flex items-center gap-1">
-                        <Award className="w-3 h-3" /> Best Seller
-                     </div>
-                  )}
-
-                  <div className="w-28 h-40 rounded-xl shadow-lg shadow-slate-200 overflow-hidden shrink-0 transform group-hover:-translate-y-1 transition-transform duration-300 relative bg-slate-100">
-                    {book.cover_url ? <img src={book.cover_url} className="w-full h-full object-cover" alt={book.title} /> : <div className="w-full h-full flex items-center justify-center bg-slate-50"><BookMarked className="text-slate-200 w-8 h-8" /></div>}
-                  </div>
-
-                  <div className="flex-1 flex flex-col justify-between min-w-0 py-1">
-                    <div>
-                      <div className="flex justify-between items-start gap-2">
-                         <div className="flex flex-col gap-1 min-w-0">
-                            <span className={`w-fit px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider border mb-1 ${genreColors[genre] || genreColors['Outros']}`}>{genre}</span>
-                            <h3 className="text-lg font-bold text-slate-900 leading-tight truncate pr-2" title={book.title}>{book.title}</h3>
-                            <div className="flex items-center gap-2 text-sm text-slate-500">
-                                {(() => {
-                                    const nation = book.author_nationality?.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "") || '';
-                                    return countryFlags[nation] ? <span title={book.author_nationality}>{countryFlags[nation]}</span> : <Globe className="w-3 h-3" />;
-                                })()}
-                                <span className="truncate">{book.author}</span>
-                            </div>
-                         </div>
-                         <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onClick={() => handleEdit(book)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"><Pencil className="w-4 h-4" /></button>
-                            <button onClick={() => { if(confirm('Excluir?')) supabase.from('books').delete().eq('id', book.id).then(refreshBooks) }} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"><Trash2 className="w-4 h-4" /></button>
-                         </div>
-                      </div>
-                      
-                      <div className="flex flex-wrap items-center gap-2 mt-3">
-                         <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${book.status === 'Concluído' ? 'bg-emerald-100 text-emerald-700' : book.status === 'Lendo' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'}`}>{book.status}</span>
-                         {(book.rating ?? 0) > 0 && <div className="flex gap-0.5">{[...Array(5)].map((_, i) => <Star key={i} className={`w-3 h-3 ${i < (book.rating ?? 0) ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}`} />)}</div>}
-                         
-                         {book.status === 'Lendo' && daysCount !== null && (
-                            <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-amber-50 text-amber-700 text-[10px] font-bold uppercase tracking-wider border border-amber-100"><Timer className="w-3 h-3" /> Há {daysCount} dias</span>
-                         )}
-                         {book.status === 'Concluído' && daysCount !== null && (
-                            <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase tracking-wider border border-emerald-100"><CheckCircle2 className="w-3 h-3" /> em {daysCount} dias</span>
-                         )}
-                      </div>
-                    </div>
-
-                    <div className="mt-4">
-                        <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-                           <span>{book.format}</span>
-                           <span>{progress}% Lido</span>
-                        </div>
-                      <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                        <div className={`h-full rounded-full transition-all duration-1000 ${book.status === 'Concluído' ? 'bg-emerald-500' : 'bg-blue-600'}`} style={{ width: `${progress}%` }}></div>
-                      </div>
-                    </div>
-                  </div>
+        {/* VISÃO 1: BIBLIOTECA (Padrão) */}
+        {currentView === 'library' && (
+            <>
+                {/* FERRAMENTAS */}
+                <div className="bg-white p-2 rounded-[1.5rem] border border-slate-200 shadow-sm flex flex-col lg:flex-row gap-2">
+                <div className="relative flex-1">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                    <input className="w-full h-full bg-transparent pl-12 pr-4 font-semibold text-slate-700 outline-none placeholder:text-slate-400 rounded-xl hover:bg-slate-50 transition-colors" placeholder="Pesquisar..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
                 </div>
-              )
-          })}
-        </div>
+                <div className="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0 no-scrollbar px-2 lg:px-0">
+                    <div className="h-8 w-px bg-slate-200 hidden lg:block mx-2"></div>
+                    {['Todos', 'Na Fila', 'Lendo', 'Concluído'].map((s) => (
+                        <button key={s} onClick={() => setFilterStatus(s)} className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${filterStatus === s ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'}`}>{s}</button>
+                    ))}
+                    <div className="h-8 w-px bg-slate-200 hidden lg:block mx-2"></div>
+                    <div className="relative group">
+                        <select className="appearance-none bg-slate-50 hover:bg-slate-100 pl-4 pr-10 py-3 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-600 outline-none cursor-pointer transition-colors" value={sortBy} onChange={e => setSortBy(e.target.value as any)}>
+                            <option value="recent">Recentes</option><option value="rating">Melhores Notas</option>
+                        </select>
+                        <ArrowUpDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                    </div>
+                </div>
+                </div>
+
+                {/* LISTAGEM DE LIVROS */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {processedBooks.map(book => {
+                    const progress = Math.min(Math.round((book.read_pages / book.total_pages) * 100) || 0, 100);
+                    const daysCount = calculateDays(book.started_at, book.finished_at);
+                    const genre = book.genre || 'Outros';
+                    
+                    return (
+                        <div key={book.id} className="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-100 transition-all duration-300 flex gap-6 group relative overflow-hidden">
+                        
+                        {book.is_bestseller && (
+                            <div className="absolute top-0 right-0 bg-gradient-to-l from-amber-400 to-amber-200 text-amber-900 text-[9px] font-black uppercase px-3 py-1 rounded-bl-2xl shadow-sm z-10 flex items-center gap-1">
+                                <Award className="w-3 h-3" /> Best Seller
+                            </div>
+                        )}
+
+                        <div className="w-28 h-40 rounded-xl shadow-lg shadow-slate-200 overflow-hidden shrink-0 transform group-hover:-translate-y-1 transition-transform duration-300 relative bg-slate-100">
+                            {book.cover_url ? <img src={book.cover_url} className="w-full h-full object-cover" alt={book.title} /> : <div className="w-full h-full flex items-center justify-center bg-slate-50"><BookMarked className="text-slate-200 w-8 h-8" /></div>}
+                        </div>
+
+                        <div className="flex-1 flex flex-col justify-between min-w-0 py-1">
+                            <div>
+                            <div className="flex justify-between items-start gap-2">
+                                <div className="flex flex-col gap-1 min-w-0">
+                                    <span className={`w-fit px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider border mb-1 ${genreColors[genre] || genreColors['Outros']}`}>{genre}</span>
+                                    <h3 className="text-lg font-bold text-slate-900 leading-tight truncate pr-2" title={book.title}>{book.title}</h3>
+                                    <div className="flex items-center gap-2 text-sm text-slate-500">
+                                        {(() => {
+                                            const nation = book.author_nationality?.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "") || '';
+                                            return countryFlags[nation] ? <span title={book.author_nationality}>{countryFlags[nation]}</span> : <Globe className="w-3 h-3" />;
+                                        })()}
+                                        <span className="truncate">{book.author}</span>
+                                    </div>
+                                </div>
+                                <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button onClick={() => handleEdit(book)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"><Pencil className="w-4 h-4" /></button>
+                                    <button onClick={() => { if(confirm('Excluir?')) supabase.from('books').delete().eq('id', book.id).then(refreshBooks) }} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"><Trash2 className="w-4 h-4" /></button>
+                                </div>
+                            </div>
+                            
+                            <div className="flex flex-wrap items-center gap-2 mt-3">
+                                <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${book.status === 'Concluído' ? 'bg-emerald-100 text-emerald-700' : book.status === 'Lendo' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'}`}>{book.status}</span>
+                                {(book.rating ?? 0) > 0 && <div className="flex gap-0.5">{[...Array(5)].map((_, i) => <Star key={i} className={`w-3 h-3 ${i < (book.rating ?? 0) ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}`} />)}</div>}
+                                
+                                {book.status === 'Lendo' && daysCount !== null && (
+                                    <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-amber-50 text-amber-700 text-[10px] font-bold uppercase tracking-wider border border-amber-100"><Timer className="w-3 h-3" /> Há {daysCount} dias</span>
+                                )}
+                                {book.status === 'Concluído' && daysCount !== null && (
+                                    <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase tracking-wider border border-emerald-100"><CheckCircle2 className="w-3 h-3" /> em {daysCount} dias</span>
+                                )}
+                            </div>
+                            </div>
+
+                            <div className="mt-4">
+                                <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                                <span>{book.format}</span>
+                                <span>{progress}% Lido</span>
+                                </div>
+                            <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                                <div className={`h-full rounded-full transition-all duration-1000 ${book.status === 'Concluído' ? 'bg-emerald-500' : 'bg-blue-600'}`} style={{ width: `${progress}%` }}></div>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+                    )
+                })}
+                </div>
+            </>
+        )}
+
+        {/* VISÃO 2: RELATÓRIOS (NOVO PAINEL SEGURO) */}
+        {currentView === 'analytics' && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                    <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2"><PieChart className="w-5 h-5 text-blue-600"/> Distribuição por Gênero</h2>
+                    
+                    <div className="space-y-6">
+                        {genreStats.map((stat, index) => (
+                            <div key={stat.name} className="group">
+                                <div className="flex justify-between items-end mb-2">
+                                    <div className="flex items-center gap-2">
+                                        <span className={`w-3 h-3 rounded-full ${genreColors[stat.name]?.split(' ')[0] || 'bg-slate-200'}`}></span>
+                                        <span className="font-bold text-slate-700 text-sm">{stat.name}</span>
+                                    </div>
+                                    <div className="text-right">
+                                        <span className="text-xl font-black text-slate-900">{stat.count}</span>
+                                        <span className="text-xs text-slate-400 font-bold uppercase ml-1">Livros</span>
+                                    </div>
+                                </div>
+                                <div className="w-full bg-slate-50 h-3 rounded-full overflow-hidden border border-slate-100">
+                                    <div 
+                                        className={`h-full rounded-full transition-all duration-1000 ${genreColors[stat.name]?.split(' ')[0].replace('bg-', 'bg-') || 'bg-slate-400'}`} 
+                                        style={{ width: `${stat.percent}%`, opacity: 0.8 }}
+                                    ></div>
+                                </div>
+                            </div>
+                        ))}
+                        
+                        {genreStats.length === 0 && (
+                            <div className="text-center py-10 text-slate-400">
+                                <p>Nenhum dado para exibir ainda. Adicione livros!</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        )}
+
       </main>
 
-      {/* MODAL */}
+      {/* MODAL (Só aparece se clicar em Novo/Editar) */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
           <div className="bg-white w-full max-w-xl rounded-[2rem] shadow-2xl overflow-hidden border border-white/20 max-h-[90vh] overflow-y-auto scrollbar-hide">
