@@ -12,15 +12,16 @@ export interface Book {
   read_pages: number
   cover_url: string
   format: string
-  status: 'Lendo' | 'Na Fila' | 'Concluído' | 'Abandonado' // Adicionado Abandonado
+  // AQUI ESTÁ A CORREÇÃO: Adicionamos 'Abandonado' na lista de tipos permitidos
+  status: 'Lendo' | 'Na Fila' | 'Concluído' | 'Abandonado' 
   rating?: number
   finished_at?: string | null
   started_at?: string | null
   genre?: string
   is_bestseller?: boolean
-  platform?: string          // NOVO
-  interruption_reason?: string // NOVO
-  abandoned_at?: string | null // NOVO
+  platform?: string
+  interruption_reason?: string
+  abandoned_at?: string | null
 }
 
 interface BookContextData {
