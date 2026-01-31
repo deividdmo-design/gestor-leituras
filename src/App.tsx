@@ -54,7 +54,7 @@ export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingBookId, setEditingBookId] = useState<string | null>(null)
   
-  // 🧭 NAVEGAÇÃO ENTRE ABAS
+  // 🧭 NOVO: CONTROLE DE ABAS
   const [currentView, setCurrentView] = useState<'library' | 'analytics'>('library')
 
   const [searchTerm, setSearchTerm] = useState('')
@@ -78,15 +78,16 @@ export default function App() {
     bestSellers: books.filter(b => b.is_bestseller).length
   }), [books]);
 
-  // 📈 ESTATÍSTICAS POR GÊNERO (NOVO)
+  // 📈 NOVO: ESTATÍSTICAS POR GÊNERO
   const genreStats = useMemo(() => {
     const counts: Record<string, number> = {};
     books.forEach(book => {
         const g = book.genre || 'Outros';
         counts[g] = (counts[g] || 0) + 1;
     });
+    // Transforma em array e ordena do maior para o menor
     return Object.entries(counts)
-        .sort((a, b) => b[1] - a[1]) // Ordenar do maior para o menor
+        .sort((a, b) => b[1] - a[1]) 
         .map(([name, count]) => ({
             name, 
             count, 
@@ -193,8 +194,8 @@ export default function App() {
               </div>
             </div>
           </div>
-          
-          {/* MENU DE ABAS NO HEADER */}
+
+          {/* MENU DE ABAS (NOVO) */}
           <div className="hidden md:flex bg-slate-100 p-1 rounded-xl">
              <button onClick={() => setCurrentView('library')} className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-all ${currentView === 'library' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}>
                 <LayoutGrid className="w-4 h-4"/> Biblioteca
@@ -210,10 +211,10 @@ export default function App() {
         </div>
       </header>
 
-      {/* CONTEÚDO PRINCIPAL - ALTERNA ENTRE VISÕES */}
+      {/* CONTEÚDO PRINCIPAL - AGORA COM ABAS */}
       <main className="max-w-7xl mx-auto p-6 space-y-8">
         
-        {/* DASHBOARD DE MÉTRICAS (SEMPRE VISÍVEL) */}
+        {/* DASHBOARD GERAL (Sempre visível) */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between hover:border-violet-100 transition-colors group">
             <div className="flex justify-between items-start mb-2"><div className="bg-violet-50 p-2.5 rounded-xl text-violet-600 group-hover:bg-violet-600 group-hover:text-white transition-colors"><Book className="w-5 h-5" /></div></div>
@@ -237,10 +238,9 @@ export default function App() {
           </div>
         </div>
 
-        {/* VISÃO 1: BIBLIOTECA (Padrão) */}
+        {/* ABA 1: BIBLIOTECA */}
         {currentView === 'library' && (
             <>
-                {/* FERRAMENTAS */}
                 <div className="bg-white p-2 rounded-[1.5rem] border border-slate-200 shadow-sm flex flex-col lg:flex-row gap-2">
                 <div className="relative flex-1">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -261,7 +261,6 @@ export default function App() {
                 </div>
                 </div>
 
-                {/* LISTAGEM DE LIVROS */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {processedBooks.map(book => {
                     const progress = Math.min(Math.round((book.read_pages / book.total_pages) * 100) || 0, 100);
@@ -331,14 +330,14 @@ export default function App() {
             </>
         )}
 
-        {/* VISÃO 2: RELATÓRIOS (NOVO PAINEL SEGURO) */}
+        {/* ABA 2: RELATÓRIOS (PAINEL SEGURO) */}
         {currentView === 'analytics' && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
                     <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2"><PieChart className="w-5 h-5 text-blue-600"/> Distribuição por Gênero</h2>
                     
                     <div className="space-y-6">
-                        {genreStats.map((stat, index) => (
+                        {genreStats.map((stat) => (
                             <div key={stat.name} className="group">
                                 <div className="flex justify-between items-end mb-2">
                                     <div className="flex items-center gap-2">
@@ -371,7 +370,7 @@ export default function App() {
 
       </main>
 
-      {/* MODAL (Só aparece se clicar em Novo/Editar) */}
+      {/* MODAL */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
           <div className="bg-white w-full max-w-xl rounded-[2rem] shadow-2xl overflow-hidden border border-white/20 max-h-[90vh] overflow-y-auto scrollbar-hide">
