@@ -170,25 +170,60 @@ export default function App() {
     });
 
   async function searchGoogleBooks() {
-    const query = formData.title.trim();
-    if (!query) return alert('Digite o título!');
-    const API_KEY = import.meta.env.VITE_GOOGLE_BOOKS_KEY;
-    try {
-      const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&key=${API_KEY}&maxResults=1`);
-      const data = await response.json();
-      if (data.items?.[0]) {
-        const info = data.items[0].volumeInfo;
-        setFormData(prev => ({
-          ...prev, 
-          title: info.title || prev.title, 
-          author: info.authors?.join(', ') || '',
-          publisher: info.publisher || '', 
-          total_pages: info.pageCount || 0,
-          cover_url: info.imageLinks?.thumbnail?.replace('http:', 'https:') || '',
-        }));
-      }
-    } catch (e) { alert('Erro na busca.'); }
+  const query = formData.title.trim();
+  console.log('🔍 Buscando livro com título:', query);
+  console.log('🔑 Chave da API:', import.meta.env.VITE_GOOGLE_BOOKS_KEY ? 'PRESENTE' : 'AUSENTE');
+  
+  if (!query) {
+    alert('Digite o título!');
+    return;
   }
+
+  const API_KEY = import.meta.env.VITE_GOOGLE_BOOKS_KEY;
+  if (!API_KEY) {
+    alert('Erro: Chave da API do Google Books não configurada!');
+    console.error('❌ VITE_GOOGLE_BOOKS_KEY está vazia ou não carregada.');
+    return;
+  }
+
+  const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&key=${API_KEY}&maxResults=1`;
+  console.log('🌐 URL da requisição:', url);
+
+  try {
+    console.log('🔄 Fazendo fetch...');
+    const response = await fetch(url);
+    console.log('📊 Status da resposta:', response.status, response.statusText);
+    
+    if (!response.ok) {
+      throw new Error(`Erro HTTP: ${response.status} ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    console.log('📦 Dados brutos da API:', data);
+    
+    if (data.items && data.items.length > 0) {
+      const info = data.items[0].volumeInfo;
+      console.log('✅ Livro encontrado:', info.title);
+      
+      setFormData(prev => ({
+        ...prev, 
+        title: info.title || prev.title, 
+        author: info.authors?.join(', ') || '',
+        publisher: info.publisher || '', 
+        total_pages: info.pageCount || 0,
+        cover_url: info.imageLinks?.thumbnail?.replace('http:', 'https:') || '',
+      }));
+      
+      console.log('🎉 Formulário atualizado com sucesso!');
+    } else {
+      console.log('⚠️ Nenhum livro encontrado para:', query);
+      alert('Nenhum livro encontrado para: ' + query);
+    }
+  } catch (error: any) {
+    console.error('❌ Erro na busca Google Books:', error);
+    alert('Erro na busca: ' + error.message);
+  }
+}
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
