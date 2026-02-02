@@ -3,8 +3,8 @@ import { useBooks } from './contexts/BookContext'
 import { supabase } from './lib/supabase'
 import { 
   Library, Plus, Trash2, CheckCircle2, 
-  BookMarked, X, Pencil, Search, ArrowUpDown, Sparkles, Star, Trophy, Globe, Link as LinkIcon, Image as ImageIcon,
-  Book, Award, PieChart, LayoutGrid, Tag, Shuffle, Sparkle, Loader2
+  BookMarked, X, Pencil, Search, ArrowUpDown, Sparkles, Star, Trophy, Globe, Link as LinkIcon,
+  Book, Award, PieChart, LayoutGrid, Shuffle, Sparkle, Loader2
 } from 'lucide-react'
 
 // 🌍 MAPA-MÚNDI COMPLETO (120 BANDEIRAS)
@@ -122,7 +122,7 @@ export default function App() {
     <div className="min-h-screen bg-[#F9F7F2] text-slate-900 font-sans tracking-tight">
       <header className="bg-white border-b border-stone-200 h-20 flex items-center justify-between px-6 sticky top-0 z-30 shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="bg-stone-900 p-2.5 rounded-xl text-amber-500 shadow-lg shadow-stone-200"><Library /></div>
+          <div className="bg-stone-900 p-2.5 rounded-xl text-amber-500 shadow-lg"><Library /></div>
           <h1 className="text-xl font-black text-stone-900 tracking-widest uppercase hidden md:block">Estante Premium</h1>
         </div>
         <div className="flex bg-stone-100 p-1 rounded-xl">
@@ -135,7 +135,7 @@ export default function App() {
       <main className="max-w-7xl mx-auto p-6 space-y-8">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div className="bg-white p-5 rounded-3xl border border-stone-100 shadow-sm"><Book className="text-stone-400 mb-2"/><p className="text-2xl font-black">{stats.totalBooks}</p><p className="text-[10px] text-stone-400 font-black uppercase tracking-widest">Total</p></div>
-          <div className="bg-white p-5 rounded-3xl border border-stone-100 shadow-sm"><Trophy className="text-amber-600 mb-2"/><p className="text-2xl font-black">{stats.totalReadPages.toLocaleString()}</p><p className="text-[10px] text-stone-400 font-black uppercase tracking-widest">Páginas</p></div>
+          <div className="bg-white p-5 rounded-3xl border border-stone-100 shadow-sm"><Trophy className="text-blue-600 mb-2"/><p className="text-2xl font-black">{stats.totalReadPages.toLocaleString()}</p><p className="text-[10px] text-stone-400 font-black uppercase tracking-widest">Páginas</p></div>
           <div className="bg-white p-5 rounded-3xl border border-stone-100 shadow-sm"><CheckCircle2 className="text-stone-900 mb-2"/><p className="text-2xl font-black">{stats.completedBooks}</p><p className="text-[10px] text-stone-400 font-black uppercase tracking-widest">Lidos</p></div>
           <div className="bg-white p-5 rounded-3xl border border-stone-100 shadow-sm flex flex-col justify-center items-center"><div className="w-8 h-8 flex items-center justify-center bg-amber-50 rounded-lg mb-1"><Star className="text-amber-600 w-5 h-5 fill-amber-600"/></div><p className="text-[10px] text-stone-400 font-black uppercase tracking-widest">Notas</p></div>
           <div className="bg-white p-5 rounded-3xl border border-stone-100 shadow-sm flex items-center justify-center"><Sparkle className="text-stone-300 w-8 h-8"/></div>
@@ -146,7 +146,7 @@ export default function App() {
             <div className="bg-white p-2 rounded-[1.5rem] border border-stone-200 flex flex-col lg:flex-row gap-2 shadow-sm">
               <div className="relative flex-1"><Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300 w-5 h-5"/><input className="w-full pl-12 pr-4 font-bold outline-none text-stone-800" placeholder="Pesquisar..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)}/></div>
               <div className="flex gap-2 p-1">
-                {['Todos', 'Na Fila', 'Lendo', 'Concluído'].map((s) => (<button key={s} onClick={() => setFilterStatus(s as any)} className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all ${filterStatus === s ? 'bg-stone-900 text-white' : 'text-stone-400 hover:text-stone-600'}`}>{s}</button>))}
+                {['Todos', 'Na Fila', 'Lendo', 'Concluído'].map((s) => (<button key={s} onClick={() => setFilterStatus(s as any)} className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filterStatus === s ? 'bg-stone-900 text-white' : 'text-stone-400 hover:text-stone-600'}`}>{s}</button>))}
                 <button onClick={handleShuffle} className="p-3 bg-stone-50 text-stone-900 rounded-xl hover:bg-stone-900 hover:text-white transition-all shadow-sm border border-stone-100"><Shuffle size={18}/></button>
                 <div className="relative ml-1"><select className="appearance-none bg-stone-50 pl-4 pr-10 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-stone-600 outline-none border border-stone-100" value={sortBy} onChange={e => setSortBy(e.target.value as any)}><option value="recent">Recentes</option><option value="rating">Melhores</option></select><ArrowUpDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-stone-400 pointer-events-none" /></div>
               </div>
@@ -159,7 +159,7 @@ export default function App() {
                   <div key={book.id} className="bg-white p-5 rounded-[2rem] border border-stone-100 flex gap-6 relative group shadow-sm hover:shadow-xl transition-all duration-300">
                     <div className="w-24 h-36 bg-stone-50 rounded-xl overflow-hidden shrink-0 shadow-inner border border-stone-100">{book.cover_url ? <img src={book.cover_url} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center bg-stone-50"><BookMarked className="text-stone-200 w-8 h-8"/></div>}</div>
                     <div className="flex-1 py-1 min-w-0">
-                      <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-md border mb-2 block w-fit ${book.genre && genreColors[book.genre] ? genreColors[book.genre] : genreColors['Outros']}`}>{book.genre}</span>
+                      <span className={`text-[8px] font-black uppercase tracking-tighter px-2 py-0.5 rounded-md border mb-2 block w-fit ${book.genre && genreColors[book.genre] ? genreColors[book.genre] : genreColors['Outros']}`}>{book.genre}</span>
                       <h3 className="font-black text-lg truncate text-stone-900 leading-tight">{book.title}</h3>
                       <p className="text-xs text-stone-400 font-bold flex items-center gap-2 mt-1 uppercase tracking-wider">
                           {book.author_nationality ? (countryFlags[book.author_nationality.toLowerCase().trim()] || <Globe size={10}/>) : <Globe size={10}/>} {book.author}
@@ -214,7 +214,7 @@ export default function App() {
         </div>
       )}
 
-      {/* MODAL DE CADASTRO (RESTAURADO COM TODOS OS GÊNEROS) */}
+      {/* MODAL DE CADASTRO */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-stone-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white w-full max-w-xl rounded-[2.5rem] p-8 max-h-[90vh] overflow-y-auto shadow-2xl">
@@ -230,11 +230,11 @@ export default function App() {
                   <optgroup label="Terror & Horror"><option>Terror</option><option>Horror Cósmico</option></optgroup>
                   <optgroup label="Literatura Clássica"><option>Clássico Universal</option><option>Clássico Nacional</option></optgroup>
                   <optgroup label="Não Ficção"><option>Biografia</option><option>Autobiografia</option><option>Ensaio</option><option>Reportagem Literária</option></optgroup>
-                  <optgroup label="Humanas & Sociais"><option>Filosofia</option><option>História</option><option>Direito</option><option>Sociologia</option><option>Antropologia</option><option>Ciência Política</option><option>Economia</option><option>Geografia Humana</option></optgroup>
+                  <optgroup label="Humanas & Sociais"><option>Filosofia</option><option>História</option><option>Direito</option><option>Sociologia</option><option>Economia</option><option>Geografia Humana</option><option>Psicologia</option></optgroup>
                   <optgroup label="Sociais Aplicadas"><option>Administração</option><option>Contabilidade</option><option>Relações Internacionais</option><option>Comunicação Social</option></optgroup>
                   <optgroup label="Ciências Exatas"><option>Matemática</option><option>Estatística</option><option>Física</option><option>Química</option><option>Ciência de Dados</option></optgroup>
                   <optgroup label="Ciências da Natureza"><option>Biologia</option><option>Ecologia</option><option>Geologia</option><option>Astronomia</option></optgroup>
-                  <optgroup label="Ciências da Saúde"><option>Medicina</option><option>Psicologia</option><option>Psiquiatria</option><option>Neurociência</option><option>Nutrição</option></optgroup>
+                  <optgroup label="Ciências da Saúde"><option>Medicina</option><option>Psiquiatria</option><option>Neurociência</option><option>Nutrição</option></optgroup>
                   <optgroup label="Tecnologia"><option>Tecnologia da Informação</option><option>Programação</option><option>Inteligência Artificial</option><option>Segurança da Informação</option></optgroup>
                   <optgroup label="Espiritualidade"><option>Teologia</option><option>Espiritualidade</option><option>Mitologia</option></optgroup>
                   <optgroup label="Pessoal"><option>Autoajuda</option><option>Liderança</option><option>Produtividade</option></optgroup>
