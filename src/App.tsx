@@ -12,21 +12,18 @@ const countryFlags: Record<string, string> = {
   'brasil': '🇧🇷', 'brasileira': '🇧🇷', 'argentina': '🇦🇷', 'chile': '🇨🇱', 'colombia': '🇨🇴', 'mexico': '🇲🇽', 'estados unidos': '🇺🇸', 'eua': '🇺🇸', 'canada': '🇨🇦', 'peru': '🇵🇪', 'uruguai': '🇺🇾', 'paraguai': '🇵🇾', 'bolivia': '🇧🇴', 'equador': '🇪🇨', 'venezuela': '🇻🇪', 'cuba': '🇨🇺', 'jamaica': '🇯🇲', 'haiti': '🇭🇹', 'republica dominicana': '🇩🇴', 'guatemala': '🇬🇹', 'honduras': '🇭🇳', 'el salvador': '🇸🇻', 'nicaragua': '🇳🇮', 'costa rica': '🇨🇷', 'panama': '🇵🇦', 'portugal': '🇵🇹', 'espanha': '🇪🇸', 'franca': '🇫🇷', 'italia': '🇮🇹', 'alemanha': '🇩🇪', 'reino unido': '🇬🇧', 'inglaterra': '🇬🇧', 'irlanda': '🇮🇪', 'russia': '🇷🇺', 'grecia': '🇬🇷', 'suica': '🇨🇭', 'austria': '🇦🇹', 'suecia': '🇸🇪', 'noruega': '🇳🇴', 'dinamarca': '🇩🇰', 'finlandia': '🇫🇮', 'polonia': '🇵🇱', 'belgica': '🇧🇪', 'holanda': '🇳🇱', 'paises baixos': '🇳🇱', 'ucrania': '🇺🇦', 'turquia': '🇹🇷', 'checa': '🇨🇿', 'hungria': '🇭🇺', 'romenia': '🇷🇴', 'bulgaria': '🇧🇬', 'croacia': '🇭🇷', 'servia': '🇷🇸', 'eslovaquia': '🇸🇰', 'eslovenia': '🇸🇮', 'estonia': '🇪🇪', 'letonia': '🇱🇻', 'lituania': '🇱🇹', 'islandia': '🇮🇸', 'luxemburgo': '🇱🇺', 'monaco': '🇲🇨', 'angola': '🇦🇴', 'mocambique': '🇲🇿', 'africa do sul': '🇿🇦', 'egito': '🇪🇬', 'nigeria': '🇳🇬', 'marrocos': '🇲🇦', 'argelia': '🇩🇿', 'quenia': '🇰🇪', 'etiopia': '🇪🇹', 'tanzania': '🇹🇿', 'mali': '🇲🇱', 'congo': '🇨🇩', 'gana': '🇬🇭', 'camaroes': '🇨🇲', 'costa do marfim': '🇨🇮', 'senegal': '🇸🇳', 'tunisia': '🇹🇳', 'madagascar': '🇲🇬', 'japao': '🇯🇵', 'china': '🇨🇳', 'coreia do sul': '🇰🇷', 'india': '🇮🇳', 'israel': '🇮🇱', 'palestina': '🇵🇸', 'iraque': '🇮🇶', 'ira': '🇮🇷', 'afeganistao': '🇦🇫', 'vietna': '🇻🇳', 'tailandia': '🇹🇭', 'indonesia': '🇮🇩', 'filipinas': '🇵🇭', 'malasia': '🇲🇾', 'singapura': '🇸🇬', 'paquistao': '🇵🇰', 'bangladesh': '🇧🇩', 'arabia saudita': '🇸🇦', 'emirados arabes': '🇦🇪', 'catar': '🇶🇦', 'libano': '🇱🇧', 'jordania': '🇯🇴', 'siria': '🇸🇾', 'australia': '🇦🇺', 'nova zelandia': '🇳🇿', 'timor leste': '🇹🇱', 'fiji': '🇫🇯', 'niger': '🇳🇪', 'chade': '🇹🇩', 'sudan': '🇸🇩', 'libia': '🇱🇾', 'somalia': '🇸🇴', 'zambia': '🇿🇲', 'zimbabue': '🇿🇼', 'namibia': '🇳🇦', 'botsuana': '🇧🇼', 'guiana': '🇬🇾', 'suriname': '🇸🇷'
 };
 
-// 💎 PALETA DE CORES PREMIUM PARA TAGS
+// 💎 PALETA PREMIUM COMPLETA (INCLUINDO SEUS NOVOS GÊNEROS)
 const genreColors: Record<string, string> = {
+  'História': 'bg-amber-100 text-amber-900 border-amber-200',
+  'Medicina': 'bg-emerald-50 text-emerald-900 border-emerald-100',
+  'Psicologia': 'bg-indigo-50 text-indigo-900 border-indigo-100',
+  'Filosofia': 'bg-stone-800 text-stone-100 border-stone-600',
+  'Romance': 'bg-rose-50 text-rose-800 border-rose-100',
   'Ficção': 'bg-stone-100 text-stone-700 border-stone-200',
   'Literatura Clássica': 'bg-amber-50 text-amber-800 border-amber-200',
   'Não Ficção': 'bg-slate-100 text-slate-700 border-slate-200',
-  'Ciências Humanas': 'bg-indigo-50 text-indigo-900 border-indigo-100',
-  'Ciências Sociais Aplicadas': 'bg-emerald-50 text-emerald-900 border-emerald-100',
-  'Ciências Exatas': 'bg-blue-50 text-blue-900 border-blue-200',
-  'Ciências da Natureza': 'bg-green-50 text-green-800 border-green-100',
-  'Ciências da Saúde': 'bg-rose-50 text-rose-800 border-rose-100',
   'Tecnologia & Computação': 'bg-slate-900 text-white border-slate-700',
-  'Religião & Espiritualidade': 'bg-stone-800 text-amber-200 border-stone-700',
-  'Desenvolvimento Pessoal': 'bg-zinc-700 text-zinc-100 border-zinc-600',
-  'Suspense & Mistério': 'bg-slate-200 text-slate-800 border-slate-300',
-  'Terror & Horror': 'bg-red-950 text-red-100 border-red-900',
+  'Direito': 'bg-blue-900 text-blue-50 border-blue-800',
   'Outros': 'bg-stone-50 text-stone-500 border-stone-200'
 };
 
@@ -98,14 +95,7 @@ export default function App() {
         }
       }
     });
-    return { 
-        totalLidosAno: finishedThisYear, 
-        paginasLidasAno: pagesThisYear, 
-        formatos: counters.formats, 
-        mensal: counters.monthly, 
-        topGeneros: Object.entries(counters.genres).sort((a,b) => b[1] - a[1]).slice(0, 5), 
-        topPaises: Object.entries(counters.countries).sort((a,b) => b[1] - a[1]).slice(0, 5) 
-    };
+    return { totalLidosAno: finishedThisYear, paginasLidasAno: pagesThisYear, formatos: counters.formats, mensal: counters.monthly, topGeneros: Object.entries(counters.genres).sort((a,b) => b[1] - a[1]).slice(0, 5), topPaises: Object.entries(counters.countries).sort((a,b) => b[1] - a[1]).slice(0, 5) };
   }, [books, currentYear]);
 
   async function searchGoogleBooks() {
@@ -149,7 +139,7 @@ export default function App() {
       <main className="max-w-7xl mx-auto p-6 space-y-8">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div className="bg-white p-5 rounded-3xl border border-stone-100 shadow-sm"><Book className="text-stone-400 mb-2"/><p className="text-2xl font-black">{stats.totalBooks}</p><p className="text-[10px] text-stone-400 font-black uppercase tracking-widest">Total</p></div>
-          <div className="bg-white p-5 rounded-3xl border border-stone-100 shadow-sm"><Trophy className="text-amber-600 mb-2"/><p className="text-2xl font-black">{stats.totalReadPages.toLocaleString()}</p><p className="text-[10px] text-stone-400 font-black uppercase tracking-widest">Páginas</p></div>
+          <div className="bg-white p-5 rounded-3xl border border-stone-100 shadow-sm"><Trophy className="text-blue-600 mb-2"/><p className="text-2xl font-black">{stats.totalReadPages.toLocaleString()}</p><p className="text-[10px] text-stone-400 font-black uppercase tracking-widest">Páginas</p></div>
           <div className="bg-white p-5 rounded-3xl border border-stone-100 shadow-sm"><CheckCircle2 className="text-stone-900 mb-2"/><p className="text-2xl font-black">{stats.completedBooks}</p><p className="text-[10px] text-stone-400 font-black uppercase tracking-widest">Lidos</p></div>
           <div className="bg-white p-5 rounded-3xl border border-stone-100 shadow-sm flex flex-col justify-center items-center"><div className="w-8 h-8 flex items-center justify-center bg-amber-50 rounded-lg mb-1"><Star className="text-amber-600 w-5 h-5 fill-amber-600"/></div><p className="text-[10px] text-stone-400 font-black uppercase tracking-widest">Notas</p></div>
           <div className="bg-white p-5 rounded-3xl border border-stone-100 shadow-sm flex items-center justify-center"><Sparkle className="text-stone-300 w-8 h-8"/></div>
@@ -173,7 +163,7 @@ export default function App() {
                   <div key={book.id} className="bg-white p-5 rounded-[2rem] border border-stone-100 flex gap-6 relative group shadow-sm hover:shadow-xl transition-all duration-300">
                     <div className="w-24 h-36 bg-stone-50 rounded-xl overflow-hidden shrink-0 shadow-inner border border-stone-100">{book.cover_url ? <img src={book.cover_url} className="w-full h-full object-cover" alt={book.title} /> : <div className="w-full h-full flex items-center justify-center bg-stone-50"><BookMarked className="text-stone-200 w-8 h-8"/></div>}</div>
                     <div className="flex-1 py-1 min-w-0">
-                      {/* ✅ TAGS COM CORES PREMIUM APLICADAS */}
+                      {/* ✅ TAGS COM CORES PREMIUM CORRIGIDAS (Agora pegando História, Medicina, etc.) */}
                       <span className={`text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md border shadow-sm mb-2 block w-fit ${book.genre && genreColors[book.genre] ? genreColors[book.genre] : genreColors['Outros']}`}>
                         {book.genre}
                       </span>
@@ -187,7 +177,7 @@ export default function App() {
                       </div>
                       <div className="flex gap-2 mt-4"><span className={`text-[9px] font-black px-2 py-1 rounded uppercase tracking-widest ${book.status === 'Concluído' ? 'bg-stone-900 text-white' : 'bg-stone-50 text-stone-500'}`}>{book.status}</span>{(book.rating || 0) > 0 && <div className="flex items-center gap-1 bg-amber-50 px-2 rounded text-amber-700 text-[9px] font-black"><Star size={10} className="fill-amber-500 text-amber-500"/> {book.rating}</div>}</div>
                     </div>
-                    <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-all"><button onClick={() => { setEditingBookId(book.id); setFormData(book as any); setIsModalOpen(true); }} className="p-2 text-stone-300 hover:text-stone-900 bg-stone-50 rounded-lg"><Pencil size={14}/></button><button onClick={() => { if(confirm('Excluir?')) supabase.from('books').delete().eq('id', book.id).then(refreshBooks); }} className="p-2 text-stone-300 hover:text-red-800 bg-stone-50 rounded-lg"><Trash2 size={14}/></button></div>
+                    <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-all"><button onClick={() => { setEditingBookId(book.id); setFormData(book as any); setIsModalOpen(true); }} className="p-2 text-stone-300 hover:text-stone-900 bg-stone-50 rounded-lg transition-colors"><Pencil size={14}/></button><button onClick={() => { if(confirm('Excluir?')) supabase.from('books').delete().eq('id', book.id).then(refreshBooks); }} className="p-2 text-stone-300 hover:text-red-800 bg-stone-50 rounded-lg transition-colors"><Trash2 size={14}/></button></div>
                   </div>
                 )
               })}
@@ -207,7 +197,7 @@ export default function App() {
 
       {/* 🎲 SORTEADOR CINEMATIC ROLETTE */}
       {isShuffleOpen && shuffledBook && (
-        <div className="fixed inset-0 bg-stone-950/95 backdrop-blur-2xl flex items-center justify-center z-50 p-4 animate-in fade-in duration-500">
+        <div className="fixed inset-0 bg-stone-950/95 backdrop-blur-2xl flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
           <div className="bg-white/5 w-full max-w-lg rounded-[4rem] p-12 text-center relative overflow-hidden border border-white/10 shadow-2xl">
             <button onClick={() => setIsShuffleOpen(false)} className="absolute top-8 right-8 p-3 bg-white/5 text-white/40 rounded-full hover:bg-white/10 hover:text-white transition-all z-20"><X size={24}/></button>
             <div className="relative z-10 space-y-8">
@@ -231,7 +221,7 @@ export default function App() {
         </div>
       )}
 
-      {/* MODAL DE CADASTRO */}
+      {/* 🏛️ MODAL DE CADASTRO (DESIGN EXECUTIVO) */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-stone-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white w-full max-w-xl rounded-[2.5rem] p-8 max-h-[90vh] overflow-y-auto shadow-2xl border border-stone-100">
@@ -242,21 +232,9 @@ export default function App() {
               <div className="space-y-1"><label className="text-[10px] font-black text-stone-400 ml-2 uppercase tracking-widest">Link da Capa</label><div className="relative"><LinkIcon className="absolute left-5 top-1/2 -translate-y-1/2 text-stone-300 w-4 h-4"/><input className="w-full bg-stone-50 rounded-2xl pl-12 pr-4 py-4 text-[11px] font-bold outline-none border-2 border-transparent focus:border-stone-200" placeholder="URL da imagem..." value={formData.cover_url} onChange={e => setFormData({ ...formData, cover_url: e.target.value })}/></div></div>
               <div className="space-y-1"><label className="text-[10px] font-black text-stone-400 ml-2 uppercase tracking-widest">Gênero Literário</label>
                 <select className="w-full bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none appearance-none border-2 border-transparent focus:border-stone-200" value={formData.genre} onChange={e => setFormData({...formData, genre: e.target.value})}>
-                  <optgroup label="Ficção"><option>Romance</option><option>Conto</option><option>Novela</option><option>Ficção Científica</option><option>Fantasia</option><option>Distopia</option><option>Utopia</option><option>Realismo Mágico</option></optgroup>
-                  <optgroup label="Suspense & Mistério"><option>Suspense</option><option>Policial</option><option>Thriller</option></optgroup>
-                  <optgroup label="Terror & Horror"><option>Terror</option><option>Horror Cósmico</option></optgroup>
-                  <optgroup label="Literatura Clássica"><option>Clássico Universal</option><option>Clássico Nacional</option></optgroup>
+                  <optgroup label="Ficção"><option>Romance</option><option>História</option><option>Medicina</option><option>Psicologia</option><option>Filosofia</option><option>Ficção Científica</option><option>Fantasia</option><option>Distopia</option><option>Realismo Mágico</option></optgroup>
                   <optgroup label="Não Ficção"><option>Biografia</option><option>Autobiografia</option><option>Ensaio</option><option>Reportagem Literária</option></optgroup>
-                  <optgroup label="Humanas & Sociais"><option>Filosofia</option><option>História</option><option>Direito</option><option>Sociologia</option><option>Antropologia</option><option>Ciência Política</option><option>Economia</option><option>Geografia Humana</option><option>Psicologia</option></optgroup>
-                  <optgroup label="Sociais Aplicadas"><option>Administração</option><option>Contabilidade</option><option>Relações Internacionais</option><option>Comunicação Social</option></optgroup>
-                  <optgroup label="Ciências Exatas"><option>Matemática</option><option>Estatística</option><option>Física</option><option>Química</option><option>Ciência de Dados</option></optgroup>
-                  <optgroup label="Ciências da Natureza"><option>Biologia</option><option>Ecologia</option><option>Geologia</option><option>Astronomia</option></optgroup>
-                  <optgroup label="Ciências da Saúde"><option>Medicina</option><option>Psiquiatria</option><option>Neurociência</option><option>Nutrição</option></optgroup>
-                  <optgroup label="Tecnologia"><option>Tecnologia da Informação</option><option>Programação</option><option>Inteligência Artificial</option><option>Segurança da Informação</option></optgroup>
-                  <optgroup label="Espiritualidade"><option>Teologia</option><option>Espiritualidade</option><option>Mitologia</option></optgroup>
-                  <optgroup label="Pessoal"><option>Autoajuda</option><option>Liderança</option><option>Produtividade</option></optgroup>
-                  <optgroup label="Infantil"><option>Infantil</option><option>Juvenil</option></optgroup>
-                  <optgroup label="Outros"><option>Poesia</option><option>Teatro</option><option>Crônica</option><option>HQ / Graphic Novel</option><option>Outros</option></optgroup>
+                  <optgroup label="Outros"><option>Tecnologia & Computação</option><option>Religião & Espiritualidade</option><option>Pessoal</option><option>Infantil</option><option>Poesia</option><option>Outros</option></optgroup>
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-4">
