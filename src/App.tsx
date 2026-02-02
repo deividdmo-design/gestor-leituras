@@ -7,7 +7,23 @@ import {
   Book as BookIcon, PieChart, LayoutGrid, Shuffle, Sparkle, Loader2, Tag, Calendar, StickyNote
 } from 'lucide-react'
 
-// 🌍 MAPA-MÚNDI COMPLETO
+// 🛠️ DEFINIÇÃO DE TIPO EXCLUSIVA PARA ESTA TELA (Evita conflito com Context)
+interface AppBook {
+  id: string;
+  title: string;
+  author: string;
+  author_nationality?: string;
+  total_pages: number;
+  read_pages: number;
+  cover_url?: string;
+  genre?: string;
+  status: 'Lendo' | 'Na Fila' | 'Concluído' | 'Abandonado';
+  rating?: number;
+  notes?: string;
+  finished_at?: string;
+  started_at?: string;
+}
+
 const countryFlags: Record<string, string> = {
   'brasil': '🇧🇷', 'brasileira': '🇧🇷', 'argentina': '🇦🇷', 'chile': '🇨🇱', 'colombia': '🇨🇴', 'mexico': '🇲🇽', 'estados unidos': '🇺🇸', 'eua': '🇺🇸', 'canada': '🇨🇦', 'peru': '🇵🇪', 'uruguai': '🇺🇾', 'paraguai': '🇵🇾', 'bolivia': '🇧🇴', 'equador': '🇪🇨', 'venezuela': '🇻🇪', 'cuba': '🇨🇺', 'jamaica': '🇯🇲', 'haiti': '🇭🇹', 'republica dominicana': '🇩🇴', 'guatemala': '🇬🇹', 'honduras': '🇭🇳', 'el salvador': '🇸🇻', 'nicaragua': '🇳🇮', 'costa rica': '🇨🇷', 'panama': '🇵🇦', 'portugal': '🇵🇹', 'espanha': '🇪🇸', 'franca': '🇫🇷', 'italia': '🇮🇹', 'alemanha': '🇩🇪', 'reino unido': '🇬🇧', 'inglaterra': '🇬🇧', 'irlanda': '🇮🇪', 'russia': '🇷🇺', 'grecia': '🇬🇷', 'suica': '🇨🇭', 'austria': '🇦🇹', 'suecia': '🇸🇪', 'noruega': '🇳🇴', 'dinamarca': '🇩🇰', 'finlandia': '🇫🇮', 'polonia': '🇵🇱', 'belgica': '🇧🇪', 'holanda': '🇳🇱', 'paises baixos': '🇳🇱', 'ucrania': '🇺🇦', 'turquia': '🇹🇷', 'checa': '🇨🇿', 'hungria': '🇭🇺', 'romenia': '🇷🇴', 'bulgaria': '🇧🇬', 'croacia': '🇭🇷', 'servia': '🇷🇸', 'eslovaquia': '🇸🇰', 'eslovenia': '🇸🇮', 'estonia': '🇪🇪', 'letonia': '🇱🇻', 'lituania': '🇱🇹', 'islandia': '🇮🇸', 'luxemburgo': '🇱🇺', 'monaco': '🇲🇨', 'angola': '🇦🇴', 'mocambique': '🇲🇿', 'africa do sul': '🇿🇦', 'egito': '🇪🇬', 'nigeria': '🇳🇬', 'marrocos': '🇲🇦', 'argelia': '🇩🇿', 'quenia': '🇰🇪', 'etiopia': '🇪🇹', 'tanzania': '🇹🇿', 'mali': '🇲🇱', 'congo': '🇨🇩', 'gana': '🇬🇭', 'camaroes': '🇨🇲', 'costa do marfim': '🇨🇮', 'senegal': '🇸🇳', 'tunisia': '🇹🇳', 'madagascar': '🇲🇬', 'japao': '🇯🇵', 'china': '🇨🇳', 'coreia do sul': '🇰🇷', 'india': '🇮🇳', 'israel': '🇮🇱', 'palestina': '🇵🇸', 'iraque': '🇮🇶', 'ira': '🇮🇷', 'afeganistao': '🇦🇫', 'vietna': '🇻🇳', 'tailandia': '🇹🇭', 'indonesia': '🇮🇩', 'filipinas': '🇵🇭', 'malasia': '🇲🇾', 'singapura': '🇸🇬', 'paquistao': '🇵🇰', 'bangladesh': '🇧🇩', 'arabia saudita': '🇸🇦', 'emirados arabes': '🇦🇪', 'catar': '🇶🇦', 'libano': '🇱🇧', 'jordania': '🇯🇴', 'siria': '🇸🇾', 'australia': '🇦🇺', 'nova zelandia': '🇳🇿', 'timor leste': '🇹🇱', 'fiji': '🇫🇯', 'niger': '🇳🇪', 'chade': '🇹🇩', 'sudan': '🇸🇩', 'libia': '🇱🇾', 'somalia': '🇸🇴', 'zambia': '🇿🇲', 'zimbabue': '🇿🇼', 'namibia': '🇳🇦', 'botsuana': '🇧🇼', 'guiana': '🇬🇾', 'suriname': '🇸🇷'
 };
@@ -33,40 +49,21 @@ const genreBarColors: Record<string, string> = {
     'Tecnologia & Computação': 'bg-slate-900', 'Autoajuda': 'bg-zinc-600'
 };
 
-type BookStatus = 'Lendo' | 'Na Fila' | 'Concluído' | 'Abandonado';
-
-// 🛠️ INTERFACE REFORÇADA PARA O TYPESCRIPT
-interface Book {
-  id: string;
-  title: string;
-  author: string;
-  author_nationality?: string;
-  total_pages: number;
-  read_pages: number;
-  cover_url?: string;
-  genre?: string;
-  status: BookStatus;
-  rating: number;
-  notes?: string; // ✅ Campo notes adicionado
-  finished_at?: string;
-  started_at?: string;
-}
-
 export default function App() {
   const { books, refreshBooks } = useBooks()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isShuffleOpen, setIsShuffleOpen] = useState(false)
   const [isShuffling, setIsShuffling] = useState(false)
   const [editingBookId, setEditingBookId] = useState<string | null>(null)
-  const [shuffledBook, setShuffledBook] = useState<Book | null>(null)
+  const [shuffledBook, setShuffledBook] = useState<AppBook | null>(null)
   const [currentView, setCurrentView] = useState<'library' | 'analytics'>('library')
   const [searchTerm, setSearchTerm] = useState('')
-  const [filterStatus, setFilterStatus] = useState<BookStatus | 'Todos'>('Todos')
+  const [filterStatus, setFilterStatus] = useState<string | 'Todos'>('Todos')
   const [sortBy, setSortBy] = useState<'recent' | 'rating'>('recent')
   const [readingGoal, setReadingGoal] = useState(24)
 
   const currentYear = new Date().getFullYear();
-  const emptyForm = { title: '', author: '', author_nationality: '', total_pages: 0, read_pages: 0, cover_url: '', status: 'Na Fila' as BookStatus, rating: 0, genre: 'Romance', notes: '' };
+  const emptyForm = { title: '', author: '', author_nationality: '', total_pages: 0, read_pages: 0, cover_url: '', status: 'Na Fila', rating: 0, genre: 'Romance', notes: '' };
   const [formData, setFormData] = useState<any>(emptyForm);
 
   useEffect(() => {
@@ -88,9 +85,13 @@ export default function App() {
     setIsShuffleOpen(true); setIsShuffling(true);
     let counter = 0;
     const interval = setInterval(() => {
-      setShuffledBook(queue[Math.floor(Math.random() * queue.length)]);
+      setShuffledBook(queue[Math.floor(Math.random() * queue.length)] as any);
       counter++;
-      if (counter > 12) { clearInterval(interval); setShuffledBook(queue[Math.floor(Math.random() * queue.length)]); setIsShuffling(false); }
+      if (counter > 12) { 
+        clearInterval(interval); 
+        setShuffledBook(queue[Math.floor(Math.random() * queue.length)] as any); 
+        setIsShuffling(false); 
+      }
     }, 120);
   }
 
@@ -118,13 +119,12 @@ export default function App() {
 
   const stats = useMemo(() => {
     const ratedBooks = books.filter(b => b.rating && b.rating > 0);
-    const sumRatings = ratedBooks.reduce((acc, b) => acc + (b.rating || 0), 0);
     return {
       totalBooks: books.length,
       totalReadPages: books.reduce((acc, b) => acc + (b.read_pages || 0), 0),
       completedBooks: books.filter(b => b.status === 'Concluído').length,
       queueBooks: books.filter(b => b.status === 'Na Fila').length,
-      averageRating: ratedBooks.length > 0 ? (sumRatings / ratedBooks.length).toFixed(1) : '0.0'
+      averageRating: ratedBooks.length > 0 ? (ratedBooks.reduce((acc, b) => acc + (b.rating || 0), 0) / ratedBooks.length).toFixed(1) : '0.0'
     };
   }, [books]);
 
@@ -171,7 +171,7 @@ export default function App() {
           <button onClick={() => setCurrentView('library')} className={`px-4 py-2 rounded-lg text-xs font-black uppercase transition-all ${currentView === 'library' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-400'}`}><LayoutGrid className="w-4 h-4 inline mr-2"/> Biblioteca</button>
           <button onClick={() => setCurrentView('analytics')} className={`px-4 py-2 rounded-lg text-xs font-black uppercase transition-all ${currentView === 'analytics' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-400'}`}><PieChart className="w-4 h-4 inline mr-2"/> Relatórios</button>
         </div>
-        <button onClick={() => { setEditingBookId(null); setFormData(emptyForm); setIsModalOpen(true); }} className="bg-stone-900 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-amber-700 transition-all shadow-xl"><Plus size={20}/> Novo</button>
+        <button onClick={() => { setEditingBookId(null); setFormData(emptyForm); setIsModalOpen(true); }} className="bg-stone-900 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-amber-700 transition-all shadow-xl shadow-stone-200"><Plus size={20}/> Novo</button>
       </header>
 
       <main className="max-w-7xl mx-auto p-6 space-y-8">
@@ -196,6 +196,7 @@ export default function App() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-500">
               {books.filter(b => (b.title.toLowerCase().includes(searchTerm.toLowerCase()) || b.author.toLowerCase().includes(searchTerm.toLowerCase())) && (filterStatus === 'Todos' || b.status === filterStatus)).map(book => {
                 const progress = Math.round(((book.read_pages || 0) / (book.total_pages || 1)) * 100);
+                const typedBook = book as any as AppBook; // ✅ Conversão de segurança
                 return (
                   <div key={book.id} className="bg-white p-5 rounded-[2rem] border border-stone-100 flex gap-6 relative group shadow-sm hover:shadow-xl transition-all duration-300">
                     <div className="w-32 h-44 bg-stone-50 rounded-xl overflow-hidden shrink-0 shadow-inner border border-stone-100">{book.cover_url ? <img src={book.cover_url} className="w-full h-full object-cover" alt={book.title} /> : <div className="w-full h-full flex items-center justify-center bg-stone-50"><BookMarked className="text-stone-200 w-8 h-8"/></div>}</div>
@@ -207,7 +208,7 @@ export default function App() {
                       <div className="flex gap-2 mt-4">
                         <span className={`text-[9px] font-black px-2 py-1 rounded uppercase tracking-widest ${book.status === 'Concluído' ? 'bg-stone-900 text-white' : 'bg-stone-50 text-stone-500'}`}>{book.status}</span>
                         {(book.rating || 0) > 0 && <div className="flex items-center gap-1 bg-amber-50 px-2 rounded text-amber-700 text-[9px] font-black"><Star size={10} className="fill-amber-500 text-amber-500"/> {book.rating}</div>}
-                        {book.notes && <div className="flex items-center gap-1 bg-stone-100 px-2 rounded text-stone-500 text-[9px] font-black"><StickyNote size={10}/> NOTA</div>}
+                        {typedBook.notes && <div title={typedBook.notes} className="flex items-center gap-1 bg-stone-100 px-2 rounded text-stone-500 text-[9px] font-black"><StickyNote size={10}/> NOTA</div>}
                       </div>
                     </div>
                     <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-all"><button onClick={() => { setEditingBookId(book.id); setFormData(book as any); setIsModalOpen(true); }} className="p-2 text-stone-300 hover:text-stone-900 bg-stone-50 rounded-lg"><Pencil size={14}/></button><button onClick={() => { if(confirm('Excluir?')) supabase.from('books').delete().eq('id', book.id).then(refreshBooks); }} className="p-2 text-stone-300 hover:text-red-800 bg-stone-50 rounded-lg"><Trash2 size={14}/></button></div>
@@ -252,6 +253,7 @@ export default function App() {
         )}
       </main>
 
+      {/* 🎲 SORTEADOR */}
       {isShuffleOpen && shuffledBook && (
         <div className="fixed inset-0 bg-stone-950/95 backdrop-blur-2xl flex items-center justify-center z-50 p-4 animate-in fade-in duration-500">
           <div className="bg-white/5 w-full max-w-lg rounded-[4rem] p-12 text-center relative overflow-hidden border border-white/10 shadow-2xl">
@@ -265,13 +267,14 @@ export default function App() {
         </div>
       )}
 
+      {/* 🏛️ MODAL DE CADASTRO */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-stone-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white w-full max-w-xl rounded-[2.5rem] p-8 max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div className="flex justify-between items-center mb-8 pb-6 border-b border-stone-50"><h2 className="text-lg font-black text-stone-900 uppercase tracking-[0.2em]">{editingBookId ? 'Editar Acervo' : 'Novo Registro'}</h2><button onClick={() => setIsModalOpen(false)} className="p-2 bg-stone-50 rounded-full hover:bg-stone-100"><X/></button></div>
+          <div className="bg-white w-full max-w-xl rounded-[2.5rem] p-8 max-h-[90vh] overflow-y-auto shadow-2xl border border-stone-100">
+            <div className="flex justify-between items-center mb-8 pb-6 border-b border-stone-50"><h2 className="text-lg font-black text-stone-900 uppercase tracking-[0.2em]">{editingBookId ? 'Editar Acervo' : 'Novo Registro'}</h2><button onClick={() => setIsModalOpen(false)} className="p-2 bg-stone-50 rounded-full hover:bg-stone-100 transition-colors"><X/></button></div>
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="flex gap-2"><input className="flex-1 bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none border-2 border-transparent focus:border-stone-200 transition-all" placeholder="Título" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required/><button type="button" onClick={searchGoogleBooks} className="bg-stone-900 text-amber-500 px-5 rounded-2xl hover:bg-stone-800 transition-colors"><Sparkles size={20}/></button></div>
-              <div className="grid grid-cols-2 gap-4"><input className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none border-2 border-transparent focus:border-stone-200 transition-all" placeholder="Autor" value={formData.author} onChange={e => setFormData({...formData, author: e.target.value})}/><input className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none border-2 border-transparent focus:border-stone-200 transition-all" placeholder="País" value={formData.author_nationality} onChange={e => setFormData({...formData, author_nationality: e.target.value})}/></div>
+              <div className="grid grid-cols-2 gap-4"><input className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none focus:border-stone-200 border-2 border-transparent" placeholder="Autor" value={formData.author} onChange={e => setFormData({...formData, author: e.target.value})}/><input className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none focus:border-stone-200 border-2 border-transparent" placeholder="País" value={formData.author_nationality} onChange={e => setFormData({...formData, author_nationality: e.target.value})}/></div>
               <div className="space-y-1"><label className="text-[10px] font-black text-stone-400 ml-2 uppercase tracking-widest">Link da Capa</label><input className="w-full bg-stone-50 rounded-2xl px-6 py-4 text-[11px] font-bold outline-none border-2 border-transparent focus:border-stone-200" placeholder="URL da imagem..." value={formData.cover_url} onChange={e => setFormData({ ...formData, cover_url: e.target.value })}/></div>
               <div className="space-y-1"><label className="text-[10px] font-black text-stone-400 ml-2 uppercase tracking-widest">Gênero Literário</label>
                 <select className="w-full bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none appearance-none border-2 border-transparent focus:border-stone-200" value={formData.genre} onChange={e => setFormData({...formData, genre: e.target.value})}>
@@ -280,7 +283,7 @@ export default function App() {
               </div>
               <div className="space-y-1"><label className="text-[10px] font-black text-stone-400 ml-2 uppercase tracking-widest flex items-center gap-1"><StickyNote size={12}/> Anotações / Citações</label><textarea rows={3} className="w-full bg-stone-50 rounded-2xl px-6 py-4 text-xs font-bold outline-none border-2 border-transparent focus:border-stone-200 resize-none" placeholder=" Insights marcantes do livro..." value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})}></textarea></div>
               <div className="grid grid-cols-2 gap-4"><input type="date" className="w-full bg-stone-50 rounded-2xl px-6 py-4 text-xs font-bold outline-none border-2 border-transparent focus:border-stone-200" value={formData.started_at} onChange={e => setFormData({...formData, started_at: e.target.value})}/><input type="date" className="w-full bg-stone-50 rounded-2xl px-6 py-4 text-xs font-bold outline-none border-2 border-transparent focus:border-stone-200" value={formData.finished_at} onChange={e => setFormData({...formData, finished_at: e.target.value})}/></div>
-              <div className="grid grid-cols-2 gap-4"><select className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none appearance-none border-2 border-transparent focus:border-stone-200" value={formData.format} onChange={e => setFormData({...formData, format: e.target.value})}><option>Físico</option><option>E-book</option><option>Audiobook</option></select><select className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none appearance-none border-2 border-transparent focus:border-stone-200" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value as BookStatus})}><option value="Na Fila">Na Fila</option><option value="Lendo">Lendo</option><option value="Concluído">Concluído</option><option value="Abandonado">Abandonado</option></select></div>
+              <div className="grid grid-cols-2 gap-4"><select className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none appearance-none border-2 border-transparent focus:border-stone-200" value={formData.format} onChange={e => setFormData({...formData, format: e.target.value})}><option>Físico</option><option>E-book</option><option>Audiobook</option></select><select className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none appearance-none border-2 border-transparent focus:border-stone-200" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}><option value="Na Fila">Na Fila</option><option value="Lendo">Lendo</option><option value="Concluído">Concluído</option><option value="Abandonado">Abandonado</option></select></div>
               <div className="grid grid-cols-2 gap-4"><input type="number" className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none border-2 border-transparent focus:border-stone-200" placeholder="Páginas" value={formData.total_pages} onChange={e => setFormData({...formData, total_pages: Number(e.target.value)})}/><input type="number" className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none border-2 border-transparent focus:border-stone-200" placeholder="Lidas" value={formData.read_pages} onChange={e => setFormData({...formData, read_pages: Number(e.target.value)})}/></div>
               <button type="submit" className="w-full bg-stone-950 text-white py-5 rounded-2xl font-black uppercase tracking-[0.3em] hover:bg-amber-700 transition-all shadow-2xl">Finalizar Cadastro</button>
             </form>
