@@ -12,6 +12,7 @@ const countryFlags: Record<string, string> = {
   'brasil': '🇧🇷', 'brasileira': '🇧🇷', 'argentina': '🇦🇷', 'chile': '🇨🇱', 'colombia': '🇨🇴', 'mexico': '🇲🇽', 'estados unidos': '🇺🇸', 'eua': '🇺🇸', 'canada': '🇨🇦', 'peru': '🇵🇪', 'uruguai': '🇺🇾', 'paraguai': '🇵🇾', 'bolivia': '🇧🇴', 'equador': '🇪🇨', 'venezuela': '🇻🇪', 'cuba': '🇨🇺', 'jamaica': '🇯🇲', 'haiti': '🇭🇹', 'republica dominicana': '🇩🇴', 'guatemala': '🇬🇹', 'honduras': '🇭🇳', 'el salvador': '🇸🇻', 'nicaragua': '🇳🇮', 'costa rica': '🇨🇷', 'panama': '🇵🇦', 'portugal': '🇵🇹', 'espanha': '🇪🇸', 'franca': '🇫🇷', 'italia': '🇮🇹', 'alemanha': '🇩🇪', 'reino unido': '🇬🇧', 'inglaterra': '🇬🇧', 'irlanda': '🇮🇪', 'russia': '🇷🇺', 'grecia': '🇬🇷', 'suica': '🇨🇭', 'austria': '🇦🇹', 'suecia': '🇸🇪', 'noruega': '🇳🇴', 'dinamarca': '🇩🇰', 'finlandia': '🇫🇮', 'polonia': '🇵🇱', 'belgica': '🇧🇪', 'holanda': '🇳🇱', 'paises baixos': '🇳🇱', 'ucrania': '🇺🇦', 'turquia': '🇹🇷', 'checa': '🇨🇿', 'hungria': '🇭🇺', 'romenia': '🇷🇴', 'bulgaria': '🇧🇬', 'croacia': '🇭🇷', 'servia': '🇷🇸', 'eslovaquia': '🇸🇰', 'eslovenia': '🇸🇮', 'estonia': '🇪🇪', 'letonia': '🇱🇻', 'lituania': '🇱🇹', 'islandia': '🇮🇸', 'luxemburgo': '🇱🇺', 'monaco': '🇲🇨', 'angola': '🇦🇴', 'mocambique': '🇲🇿', 'africa do sul': '🇿🇦', 'egito': '🇪🇬', 'nigeria': '🇳🇬', 'marrocos': '🇲🇦', 'argelia': '🇩🇿', 'quenia': '🇰🇪', 'etiopia': '🇪🇹', 'tanzania': '🇹🇿', 'mali': '🇲🇱', 'congo': '🇨🇩', 'gana': '🇬🇭', 'camaroes': '🇨🇲', 'costa do marfim': '🇨🇮', 'senegal': '🇸🇳', 'tunisia': '🇹🇳', 'madagascar': '🇲🇬', 'japao': '🇯🇵', 'china': '🇨🇳', 'coreia do sul': '🇰🇷', 'india': '🇮🇳', 'israel': '🇮🇱', 'palestina': '🇵🇸', 'iraque': '🇮🇶', 'ira': '🇮🇷', 'afeganistao': '🇦🇫', 'vietna': '🇻🇳', 'tailandia': '🇹🇭', 'indonesia': '🇮🇩', 'filipinas': '🇵🇭', 'malasia': '🇲🇾', 'singapura': '🇸🇬', 'paquistao': '🇵🇰', 'bangladesh': '🇧🇩', 'arabia saudita': '🇸🇦', 'emirados arabes': '🇦🇪', 'catar': '🇶🇦', 'libano': '🇱🇧', 'jordania': '🇯🇴', 'siria': '🇸🇾', 'australia': '🇦🇺', 'nova zelandia': '🇳🇿', 'timor leste': '🇹🇱', 'fiji': '🇫🇯', 'niger': '🇳🇪', 'chade': '🇹🇩', 'sudan': '🇸🇩', 'libia': '🇱🇾', 'somalia': '🇸🇴', 'zambia': '🇿🇲', 'zimbabue': '🇿🇼', 'namibia': '🇳🇦', 'botsuana': '🇧🇼', 'guiana': '🇬🇾', 'suriname': '🇸🇷'
 };
 
+// 💎 PALETA PREMIUM (SINCRONIZADA COM BARRA DE PROGRESSO)
 const genreColors: Record<string, string> = {
   'História': 'bg-amber-100 text-amber-900 border-amber-200',
   'Medicina': 'bg-emerald-50 text-emerald-900 border-emerald-100',
@@ -22,7 +23,16 @@ const genreColors: Record<string, string> = {
   'Literatura Clássica': 'bg-amber-50 text-amber-800 border-amber-200',
   'Não Ficção': 'bg-slate-100 text-slate-700 border-slate-200',
   'Tecnologia & Computação': 'bg-slate-900 text-white border-slate-700',
+  'Autoajuda': 'bg-zinc-700 text-zinc-100 border-zinc-600',
   'Outros': 'bg-stone-50 text-stone-500 border-stone-200'
+};
+
+// Map para cores sólidas de barra (Tailwind puras)
+const genreBarColors: Record<string, string> = {
+    'História': 'bg-amber-600', 'Medicina': 'bg-emerald-600', 'Psicologia': 'bg-indigo-600',
+    'Filosofia': 'bg-stone-800', 'Romance': 'bg-rose-600', 'Ficção': 'bg-stone-400',
+    'Literatura Clássica': 'bg-amber-700', 'Não Ficção': 'bg-slate-600', 
+    'Tecnologia & Computação': 'bg-slate-900', 'Autoajuda': 'bg-zinc-600'
 };
 
 type BookStatus = 'Lendo' | 'Na Fila' | 'Concluído' | 'Abandonado';
@@ -43,7 +53,6 @@ export default function App() {
   const emptyForm = { title: '', author: '', author_nationality: '', publisher: '', total_pages: 0, read_pages: 0, cover_url: '', format: 'Físico', status: 'Na Fila' as BookStatus, rating: 0, finished_at: '', started_at: '', genre: 'Romance', is_bestseller: false, platform: 'Físico', interruption_reason: '' };
   const [formData, setFormData] = useState(emptyForm);
 
-  // 🎲 FUNÇÕES DO SORTEADOR
   async function handleShuffle() {
     const queue = books.filter(b => b.status === 'Na Fila');
     if (queue.length === 0) return alert('Sua fila está vazia!');
@@ -64,7 +73,6 @@ export default function App() {
     } catch (e: any) { alert(e.message); }
   }
 
-  // 🔍 BUSCA GOOGLE
   async function searchGoogleBooks() {
     const query = formData.title.trim();
     if (!query) return;
@@ -116,7 +124,7 @@ export default function App() {
       const payload = { ...formData, rating: editingBookId ? formData.rating : 0, started_at: formData.started_at || null, finished_at: formData.finished_at || null };
       if (editingBookId) await supabase.from('books').update(payload).eq('id', editingBookId);
       else await supabase.from('books').insert([payload]);
-      setFormData(emptyForm); setIsModalOpen(false); refreshBooks(); alert('✅ Salvo.');
+      setFormData(emptyForm); setIsModalOpen(false); refreshBooks(); alert('✅ Registro salvo.');
     } catch (e: any) { alert('❌ Erro: ' + e.message); }
   }
 
@@ -183,7 +191,17 @@ export default function App() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="bg-white p-8 rounded-[2.5rem] border border-stone-200 shadow-sm">
                 <h2 className="text-[11px] font-black uppercase text-stone-900 mb-8 flex items-center gap-2 tracking-[0.2em] border-b border-stone-50 pb-4">Ranking de Gêneros</h2>
-                <div className="space-y-6">{analytics.topGeneros.map(([n, c]) => (<div key={n}><div className="flex justify-between items-center mb-2 font-black text-[10px] uppercase tracking-widest"><span>{n}</span><span className="text-stone-400">{c} Livros</span></div><div className="w-full bg-stone-50 h-2 rounded-full overflow-hidden shadow-inner"><div className="bg-stone-900 h-full rounded-full transition-all duration-1000" style={{ width: `${(c / stats.totalBooks) * 100}%` }}></div></div></div>))}</div>
+                <div className="space-y-6">
+                  {analytics.topGeneros.map(([n, c]) => (
+                    <div key={n}>
+                      <div className="flex justify-between items-center mb-2 font-black text-[10px] uppercase tracking-widest"><span>{n}</span><span className="text-stone-400">{c} Livros</span></div>
+                      <div className="w-full bg-stone-50 h-2 rounded-full overflow-hidden shadow-inner">
+                        {/* ✅ BARRA COM CORES PREMIUM SINCRONIZADAS */}
+                        <div className={`h-full rounded-full transition-all duration-1000 ${genreBarColors[n] || 'bg-stone-900'}`} style={{ width: `${(c / stats.totalBooks) * 100}%` }}></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
               <div className="bg-white p-8 rounded-[2.5rem] border border-stone-200 shadow-sm">
                 <h2 className="text-[11px] font-black uppercase text-stone-900 mb-8 flex items-center gap-2 tracking-[0.2em] border-b border-stone-50 pb-4">Nacionalidades do Acervo</h2>
@@ -214,12 +232,12 @@ export default function App() {
           <div className="bg-white w-full max-w-xl rounded-[2.5rem] p-8 max-h-[90vh] overflow-y-auto shadow-2xl border border-stone-100">
             <div className="flex justify-between items-center mb-8 pb-6 border-b border-stone-50"><h2 className="text-lg font-black text-stone-900 uppercase tracking-[0.2em]">{editingBookId ? 'Editar Acervo' : 'Novo Registro'}</h2><button onClick={() => setIsModalOpen(false)} className="p-2 bg-stone-50 rounded-full hover:bg-stone-100"><X/></button></div>
             <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="flex gap-2"><input className="flex-1 bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none border-2 border-transparent focus:border-stone-200 transition-all" placeholder="Título" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required/><button type="button" onClick={searchGoogleBooks} className="bg-stone-900 text-amber-500 px-5 rounded-2xl hover:bg-stone-800 shadow-lg"><Sparkles size={20}/></button></div>
-              <div className="grid grid-cols-2 gap-4"><input className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none focus:border-stone-200 border-2 border-transparent" placeholder="Autor" value={formData.author} onChange={e => setFormData({...formData, author: e.target.value})}/><input className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none focus:border-stone-200 border-2 border-transparent" placeholder="País" value={formData.author_nationality} onChange={e => setFormData({...formData, author_nationality: e.target.value})}/></div>
+              <div className="flex gap-2"><input className="flex-1 bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none border-2 border-transparent focus:border-stone-200 transition-all" placeholder="Título" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required/><button type="button" onClick={searchGoogleBooks} className="bg-stone-900 text-amber-500 px-5 rounded-2xl hover:bg-stone-800"><Sparkles size={20}/></button></div>
+              <div className="grid grid-cols-2 gap-4"><input className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none border-2 border-transparent focus:border-stone-200" placeholder="Autor" value={formData.author} onChange={e => setFormData({...formData, author: e.target.value})}/><input className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none border-2 border-transparent focus:border-stone-200" placeholder="País" value={formData.author_nationality} onChange={e => setFormData({...formData, author_nationality: e.target.value})}/></div>
               <div className="space-y-1"><label className="text-[10px] font-black text-stone-400 ml-2 uppercase tracking-widest"><LinkIcon size={12} className="inline mr-1"/> Link da Capa</label><input className="w-full bg-stone-50 rounded-2xl px-6 py-4 text-[11px] font-bold outline-none border-2 border-transparent focus:border-stone-200" placeholder="URL da imagem..." value={formData.cover_url} onChange={e => setFormData({ ...formData, cover_url: e.target.value })}/></div>
-              <div className="space-y-1"><label className="text-[10px] font-black text-stone-400 ml-2 uppercase tracking-widest">Gênero Literário</label>
+              <div className="space-y-1"><label className="text-[10px] font-black text-stone-400 ml-2 uppercase tracking-widest"><Tag size={12} className="inline mr-1"/> Gênero Literário</label>
                 <select className="w-full bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none appearance-none border-2 border-transparent focus:border-stone-200" value={formData.genre} onChange={e => setFormData({...formData, genre: e.target.value})}>
-                  <optgroup label="Selecione"><option>Romance</option><option>História</option><option>Medicina</option><option>Psicologia</option><option>Filosofia</option><option>Não Ficção</option><option>Tecnologia & Computação</option><option>Outros</option></optgroup>
+                  <optgroup label="Selecione"><option>Romance</option><option>História</option><option>Medicina</option><option>Psicologia</option><option>Filosofia</option><option>Não Ficção</option><option>Tecnologia & Computação</option><option>Autoajuda</option><option>Outros</option></optgroup>
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-4"><input type="date" className="w-full bg-stone-50 rounded-2xl px-6 py-4 text-xs font-bold outline-none border-2 border-transparent focus:border-stone-200" value={formData.started_at} onChange={e => setFormData({...formData, started_at: e.target.value})}/><input type="date" className="w-full bg-stone-50 rounded-2xl px-6 py-4 text-xs font-bold outline-none border-2 border-transparent focus:border-stone-200" value={formData.finished_at} onChange={e => setFormData({...formData, finished_at: e.target.value})}/></div>
