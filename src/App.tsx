@@ -7,6 +7,9 @@ import {
   Book as BookIcon, PieChart, LayoutGrid, Shuffle, Sparkle, Loader2, Tag, Calendar, StickyNote
 } from 'lucide-react'
 
+// ✅ CORREÇÃO: TIPO RESTAURADO
+type BookStatus = 'Lendo' | 'Na Fila' | 'Concluído' | 'Abandonado';
+
 // 🛠️ DEFINIÇÃO DE TIPO
 interface AppBook {
   id: string;
@@ -17,14 +20,14 @@ interface AppBook {
   read_pages: number;
   cover_url?: string;
   genre?: string;
-  status: 'Lendo' | 'Na Fila' | 'Concluído' | 'Abandonado';
+  status: BookStatus; // Usa o tipo definido acima
   rating?: number;
   notes?: string;
   finished_at?: string;
   started_at?: string;
 }
 
-// 🌍 LISTA COMPLETA DE PAÍSES (120+)
+// 🌍 LISTA COMPLETA DE PAÍSES
 const countryFlags: Record<string, string> = {
   'brasil': '🇧🇷', 'brasileira': '🇧🇷', 'argentina': '🇦🇷', 'chile': '🇨🇱', 'colombia': '🇨🇴', 'mexico': '🇲🇽', 'estados unidos': '🇺🇸', 'eua': '🇺🇸', 'canada': '🇨🇦', 'peru': '🇵🇪', 'uruguai': '🇺🇾', 'paraguai': '🇵🇾', 'bolivia': '🇧🇴', 'equador': '🇪🇨', 'venezuela': '🇻🇪', 'cuba': '🇨🇺', 'jamaica': '🇯🇲', 'haiti': '🇭🇹', 'republica dominicana': '🇩🇴', 'guatemala': '🇬🇹', 'honduras': '🇭🇳', 'el salvador': '🇸🇻', 'nicaragua': '🇳🇮', 'costa rica': '🇨🇷', 'panama': '🇵🇦', 'portugal': '🇵🇹', 'espanha': '🇪🇸', 'franca': '🇫🇷', 'italia': '🇮🇹', 'alemanha': '🇩🇪', 'reino unido': '🇬🇧', 'inglaterra': '🇬🇧', 'irlanda': '🇮🇪', 'russia': '🇷🇺', 'grecia': '🇬🇷', 'suica': '🇨🇭', 'austria': '🇦🇹', 'suecia': '🇸🇪', 'noruega': '🇳🇴', 'dinamarca': '🇩🇰', 'finlandia': '🇫🇮', 'polonia': '🇵🇱', 'belgica': '🇧🇪', 'holanda': '🇳🇱', 'paises baixos': '🇳🇱', 'ucrania': '🇺🇦', 'turquia': '🇹🇷', 'checa': '🇨🇿', 'hungria': '🇭🇺', 'romenia': '🇷🇴', 'bulgaria': '🇧🇬', 'croacia': '🇭🇷', 'servia': '🇷🇸', 'eslovaquia': '🇸🇰', 'eslovenia': '🇸🇮', 'estonia': '🇪🇪', 'letonia': '🇱🇻', 'lituania': '🇱🇹', 'islandia': '🇮🇸', 'luxemburgo': '🇱🇺', 'monaco': '🇲🇨', 'angola': '🇦🇴', 'mocambique': '🇲🇿', 'africa do sul': '🇿🇦', 'egito': '🇪🇬', 'nigeria': '🇳🇬', 'marrocos': '🇲🇦', 'argelia': '🇩🇿', 'quenia': '🇰🇪', 'etiopia': '🇪🇹', 'tanzania': '🇹🇿', 'mali': '🇲🇱', 'congo': '🇨🇩', 'gana': '🇬🇭', 'camaroes': '🇨🇲', 'costa do marfim': '🇨🇮', 'senegal': '🇸🇳', 'tunisia': '🇹🇳', 'madagascar': '🇲🇬', 'japao': '🇯🇵', 'china': '🇨🇳', 'coreia do sul': '🇰🇷', 'india': '🇮🇳', 'israel': '🇮🇱', 'palestina': '🇵🇸', 'iraque': '🇮🇶', 'ira': '🇮🇷', 'afeganistao': '🇦🇫', 'vietna': '🇻🇳', 'tailandia': '🇹🇭', 'indonesia': '🇮🇩', 'filipinas': '🇵🇭', 'malasia': '🇲🇾', 'singapura': '🇸🇬', 'paquistao': '🇵🇰', 'bangladesh': '🇧🇩', 'arabia saudita': '🇸🇦', 'emirados arabes': '🇦🇪', 'catar': '🇶🇦', 'libano': '🇱🇧', 'jordania': '🇯🇴', 'siria': '🇸🇾', 'australia': '🇦🇺', 'nova zelandia': '🇳🇿', 'timor leste': '🇹🇱', 'fiji': '🇫🇯', 'niger': '🇳🇪', 'chade': '🇹🇩', 'sudan': '🇸🇩', 'libia': '🇱🇾', 'somalia': '🇸🇴', 'zambia': '🇿🇲', 'zimbabue': '🇿🇼', 'namibia': '🇳🇦', 'botsuana': '🇧🇼', 'guiana': '🇬🇾', 'suriname': '🇸🇷'
 };
@@ -64,7 +67,7 @@ export default function App() {
   const [readingGoal, setReadingGoal] = useState(24)
 
   const currentYear = new Date().getFullYear();
-  const emptyForm = { title: '', author: '', author_nationality: '', total_pages: 0, read_pages: 0, cover_url: '', status: 'Na Fila', rating: 0, genre: 'Romance', notes: '' };
+  const emptyForm = { title: '', author: '', author_nationality: '', total_pages: 0, read_pages: 0, cover_url: '', status: 'Na Fila' as BookStatus, rating: 0, genre: 'Romance', notes: '' };
   const [formData, setFormData] = useState<any>(emptyForm);
 
   useEffect(() => {
@@ -75,11 +78,9 @@ export default function App() {
     loadSettings();
   }, []);
 
-  // 🛠️ CORREÇÃO: USAR UPSERT PARA CRIAR SE NÃO EXISTIR
   async function updateGoal(newGoal: number) {
     setReadingGoal(newGoal);
-    const { error } = await supabase.from('settings').upsert({ id: 'user_settings', reading_goal: newGoal });
-    if (error) console.error('Erro ao salvar meta:', error);
+    await supabase.from('settings').upsert({ id: 'user_settings', reading_goal: newGoal });
   }
 
   async function handleShuffle() {
@@ -245,7 +246,7 @@ export default function App() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="bg-white/40 backdrop-blur-md p-8 rounded-[2.5rem] border border-white/60 shadow-sm">
                 <h2 className="text-[11px] font-black uppercase text-stone-900 mb-8 flex items-center gap-2 border-b border-stone-100 pb-4"><Tag size={16}/> Ranking de Gêneros</h2>
-                <div className="space-y-6">{analytics.topGeneros.map(([n, c]) => (<div key={n}><div className="flex justify-between items-center mb-2 font-black text-[10px] uppercase"><span>{n}</span><span className="text-stone-400">{c} Livros</span></div><div className="w-full bg-stone-950/5 h-2 rounded-full overflow-hidden"><div className={`h-full rounded-full ${genreBarColors[n] || 'bg-stone-900'}`} style={{ width: `${(c / (stats.totalBooks || 1)) * 100}%` }}></div></div></div>))}</div>
+                <div className="space-y-6">{analytics.topGeneros.map(([n, c]) => (<div key={n}><div className="flex justify-between items-center mb-2 font-black text-[10px] uppercase"><span>{n}</span><span className="text-stone-400">{c} Livros</span></div><div className="w-full bg-stone-950/5 h-2 rounded-full overflow-hidden shadow-inner"><div className={`h-full rounded-full ${genreBarColors[n] || 'bg-stone-900'}`} style={{ width: `${(c / (stats.totalBooks || 1)) * 100}%` }}></div></div></div>))}</div>
               </div>
               <div className="bg-white/40 backdrop-blur-md p-8 rounded-[2.5rem] border border-white/60 shadow-sm">
                 <h2 className="text-[11px] font-black uppercase text-stone-900 mb-8 flex items-center gap-2 border-b border-stone-100 pb-4"><Globe size={16}/> Nacionalidades</h2>
