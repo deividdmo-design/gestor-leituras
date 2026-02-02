@@ -12,14 +12,22 @@ const countryFlags: Record<string, string> = {
   'brasil': '🇧🇷', 'brasileira': '🇧🇷', 'argentina': '🇦🇷', 'chile': '🇨🇱', 'colombia': '🇨🇴', 'mexico': '🇲🇽', 'estados unidos': '🇺🇸', 'eua': '🇺🇸', 'canada': '🇨🇦', 'peru': '🇵🇪', 'uruguai': '🇺🇾', 'paraguai': '🇵🇾', 'bolivia': '🇧🇴', 'equador': '🇪🇨', 'venezuela': '🇻🇪', 'cuba': '🇨🇺', 'jamaica': '🇯🇲', 'haiti': '🇭🇹', 'republica dominicana': '🇩🇴', 'guatemala': '🇬🇹', 'honduras': '🇭🇳', 'el salvador': '🇸🇻', 'nicaragua': '🇳🇮', 'costa rica': '🇨🇷', 'panama': '🇵🇦', 'portugal': '🇵🇹', 'espanha': '🇪🇸', 'franca': '🇫🇷', 'italia': '🇮🇹', 'alemanha': '🇩🇪', 'reino unido': '🇬🇧', 'inglaterra': '🇬🇧', 'irlanda': '🇮🇪', 'russia': '🇷🇺', 'grecia': '🇬🇷', 'suica': '🇨🇭', 'austria': '🇦🇹', 'suecia': '🇸🇪', 'noruega': '🇳🇴', 'dinamarca': '🇩🇰', 'finlandia': '🇫🇮', 'polonia': '🇵🇱', 'belgica': '🇧🇪', 'holanda': '🇳🇱', 'paises baixos': '🇳🇱', 'ucrania': '🇺🇦', 'turquia': '🇹🇷', 'checa': '🇨🇿', 'hungria': '🇭🇺', 'romenia': '🇷🇴', 'bulgaria': '🇧🇬', 'croacia': '🇭🇷', 'servia': '🇷🇸', 'eslovaquia': '🇸🇰', 'eslovenia': '🇸🇮', 'estonia': '🇪🇪', 'letonia': '🇱🇻', 'lituania': '🇱🇹', 'islandia': '🇮🇸', 'luxemburgo': '🇱🇺', 'monaco': '🇲🇨', 'angola': '🇦🇴', 'mocambique': '🇲🇿', 'africa do sul': '🇿🇦', 'egito': '🇪🇬', 'nigeria': '🇳🇬', 'marrocos': '🇲🇦', 'argelia': '🇩🇿', 'quenia': '🇰🇪', 'etiopia': '🇪🇹', 'tanzania': '🇹🇿', 'mali': '🇲🇱', 'congo': '🇨🇩', 'gana': '🇬🇭', 'camaroes': '🇨🇲', 'costa do marfim': '🇨🇮', 'senegal': '🇸🇳', 'tunisia': '🇹🇳', 'madagascar': '🇲🇬', 'japao': '🇯🇵', 'china': '🇨🇳', 'coreia do sul': '🇰🇷', 'india': '🇮🇳', 'israel': '🇮🇱', 'palestina': '🇵🇸', 'iraque': '🇮🇶', 'ira': '🇮🇷', 'afeganistao': '🇦🇫', 'vietna': '🇻🇳', 'tailandia': '🇹🇭', 'indonesia': '🇮🇩', 'filipinas': '🇵🇭', 'malasia': '🇲🇾', 'singapura': '🇸🇬', 'paquistao': '🇵🇰', 'bangladesh': '🇧🇩', 'arabia saudita': '🇸🇦', 'emirados arabes': '🇦🇪', 'catar': '🇶🇦', 'libano': '🇱🇧', 'jordania': '🇯🇴', 'siria': '🇸🇾', 'australia': '🇦🇺', 'nova zelandia': '🇳🇿', 'timor leste': '🇹🇱', 'fiji': '🇫🇯', 'niger': '🇳🇪', 'chade': '🇹🇩', 'sudan': '🇸🇩', 'libia': '🇱🇾', 'somalia': '🇸🇴', 'zambia': '🇿🇲', 'zimbabue': '🇿🇼', 'namibia': '🇳🇦', 'botsuana': '🇧🇼', 'guiana': '🇬🇾', 'suriname': '🇸🇷'
 };
 
+// 💎 PALETA DE CORES PREMIUM PARA TAGS
 const genreColors: Record<string, string> = {
   'Ficção': 'bg-stone-100 text-stone-700 border-stone-200',
   'Literatura Clássica': 'bg-amber-50 text-amber-800 border-amber-200',
   'Não Ficção': 'bg-slate-100 text-slate-700 border-slate-200',
-  'Ciências Humanas': 'bg-stone-200 text-stone-900 border-stone-300',
-  'Ciências Sociais Aplicadas': 'bg-slate-800 text-slate-50 border-slate-700',
+  'Ciências Humanas': 'bg-indigo-50 text-indigo-900 border-indigo-100',
+  'Ciências Sociais Aplicadas': 'bg-emerald-50 text-emerald-900 border-emerald-100',
+  'Ciências Exatas': 'bg-blue-50 text-blue-900 border-blue-200',
+  'Ciências da Natureza': 'bg-green-50 text-green-800 border-green-100',
+  'Ciências da Saúde': 'bg-rose-50 text-rose-800 border-rose-100',
   'Tecnologia & Computação': 'bg-slate-900 text-white border-slate-700',
-  'Outros': 'bg-gray-100 text-gray-500 border-gray-200'
+  'Religião & Espiritualidade': 'bg-stone-800 text-amber-200 border-stone-700',
+  'Desenvolvimento Pessoal': 'bg-zinc-700 text-zinc-100 border-zinc-600',
+  'Suspense & Mistério': 'bg-slate-200 text-slate-800 border-slate-300',
+  'Terror & Horror': 'bg-red-950 text-red-100 border-red-900',
+  'Outros': 'bg-stone-50 text-stone-500 border-stone-200'
 };
 
 type BookStatus = 'Lendo' | 'Na Fila' | 'Concluído' | 'Abandonado';
@@ -40,7 +48,6 @@ export default function App() {
   const emptyForm = { title: '', author: '', author_nationality: '', publisher: '', total_pages: 0, read_pages: 0, cover_url: '', format: 'Físico', status: 'Na Fila' as BookStatus, rating: 0, finished_at: '', started_at: '', genre: 'Romance', is_bestseller: false, platform: 'Físico', interruption_reason: '' };
   const [formData, setFormData] = useState(emptyForm);
 
-  // 🎲 SORTEADOR CINEMATIC ROLETTE
   async function handleShuffle() {
     const queue = books.filter(b => b.status === 'Na Fila');
     if (queue.length === 0) return alert('Sua fila está vazia!');
@@ -91,7 +98,14 @@ export default function App() {
         }
       }
     });
-    return { totalLidosAno: finishedThisYear, paginasLidasAno: pagesThisYear, formatos: counters.formats, mensal: counters.monthly, topGeneros: Object.entries(counters.genres).sort((a,b) => b[1] - a[1]).slice(0, 5), topPaises: Object.entries(counters.countries).sort((a,b) => b[1] - a[1]).slice(0, 5) };
+    return { 
+        totalLidosAno: finishedThisYear, 
+        paginasLidasAno: pagesThisYear, 
+        formatos: counters.formats, 
+        mensal: counters.monthly, 
+        topGeneros: Object.entries(counters.genres).sort((a,b) => b[1] - a[1]).slice(0, 5), 
+        topPaises: Object.entries(counters.countries).sort((a,b) => b[1] - a[1]).slice(0, 5) 
+    };
   }, [books, currentYear]);
 
   async function searchGoogleBooks() {
@@ -135,7 +149,7 @@ export default function App() {
       <main className="max-w-7xl mx-auto p-6 space-y-8">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div className="bg-white p-5 rounded-3xl border border-stone-100 shadow-sm"><Book className="text-stone-400 mb-2"/><p className="text-2xl font-black">{stats.totalBooks}</p><p className="text-[10px] text-stone-400 font-black uppercase tracking-widest">Total</p></div>
-          <div className="bg-white p-5 rounded-3xl border border-stone-100 shadow-sm"><Trophy className="text-blue-600 mb-2"/><p className="text-2xl font-black">{stats.totalReadPages.toLocaleString()}</p><p className="text-[10px] text-stone-400 font-black uppercase tracking-widest">Páginas</p></div>
+          <div className="bg-white p-5 rounded-3xl border border-stone-100 shadow-sm"><Trophy className="text-amber-600 mb-2"/><p className="text-2xl font-black">{stats.totalReadPages.toLocaleString()}</p><p className="text-[10px] text-stone-400 font-black uppercase tracking-widest">Páginas</p></div>
           <div className="bg-white p-5 rounded-3xl border border-stone-100 shadow-sm"><CheckCircle2 className="text-stone-900 mb-2"/><p className="text-2xl font-black">{stats.completedBooks}</p><p className="text-[10px] text-stone-400 font-black uppercase tracking-widest">Lidos</p></div>
           <div className="bg-white p-5 rounded-3xl border border-stone-100 shadow-sm flex flex-col justify-center items-center"><div className="w-8 h-8 flex items-center justify-center bg-amber-50 rounded-lg mb-1"><Star className="text-amber-600 w-5 h-5 fill-amber-600"/></div><p className="text-[10px] text-stone-400 font-black uppercase tracking-widest">Notas</p></div>
           <div className="bg-white p-5 rounded-3xl border border-stone-100 shadow-sm flex items-center justify-center"><Sparkle className="text-stone-300 w-8 h-8"/></div>
@@ -144,7 +158,7 @@ export default function App() {
         {currentView === 'library' ? (
           <>
             <div className="bg-white p-2 rounded-[1.5rem] border border-stone-200 flex flex-col lg:flex-row gap-2 shadow-sm">
-              <div className="relative flex-1"><Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300 w-5 h-5"/><input className="w-full pl-12 pr-4 font-bold outline-none text-stone-800" placeholder="Pesquisar..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)}/></div>
+              <div className="relative flex-1"><Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300 w-5 h-5"/><input className="w-full pl-12 pr-4 font-bold outline-none text-stone-800 placeholder:text-stone-300" placeholder="Pesquisar..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)}/></div>
               <div className="flex gap-2 p-1">
                 {['Todos', 'Na Fila', 'Lendo', 'Concluído'].map((s) => (<button key={s} onClick={() => setFilterStatus(s as any)} className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filterStatus === s ? 'bg-stone-900 text-white' : 'text-stone-400 hover:text-stone-600'}`}>{s}</button>))}
                 <button onClick={handleShuffle} className="p-3 bg-stone-50 text-stone-900 rounded-xl hover:bg-stone-900 hover:text-white transition-all shadow-sm border border-stone-100"><Shuffle size={18}/></button>
@@ -152,15 +166,18 @@ export default function App() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-500">
               {books.filter(b => (b.title.toLowerCase().includes(searchTerm.toLowerCase()) || b.author.toLowerCase().includes(searchTerm.toLowerCase())) && (filterStatus === 'Todos' || b.status === filterStatus)).map(book => {
                 const progress = Math.round(((book.read_pages || 0) / (book.total_pages || 1)) * 100);
                 return (
                   <div key={book.id} className="bg-white p-5 rounded-[2rem] border border-stone-100 flex gap-6 relative group shadow-sm hover:shadow-xl transition-all duration-300">
-                    <div className="w-24 h-36 bg-stone-50 rounded-xl overflow-hidden shrink-0 shadow-inner border border-stone-100">{book.cover_url ? <img src={book.cover_url} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center bg-stone-50"><BookMarked className="text-stone-200 w-8 h-8"/></div>}</div>
+                    <div className="w-24 h-36 bg-stone-50 rounded-xl overflow-hidden shrink-0 shadow-inner border border-stone-100">{book.cover_url ? <img src={book.cover_url} className="w-full h-full object-cover" alt={book.title} /> : <div className="w-full h-full flex items-center justify-center bg-stone-50"><BookMarked className="text-stone-200 w-8 h-8"/></div>}</div>
                     <div className="flex-1 py-1 min-w-0">
-                      <span className={`text-[8px] font-black uppercase tracking-tighter px-2 py-0.5 rounded-md border mb-2 block w-fit ${book.genre && genreColors[book.genre] ? genreColors[book.genre] : genreColors['Outros']}`}>{book.genre}</span>
-                      <h3 className="font-black text-lg truncate text-stone-900 leading-tight">{book.title}</h3>
+                      {/* ✅ TAGS COM CORES PREMIUM APLICADAS */}
+                      <span className={`text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md border shadow-sm mb-2 block w-fit ${book.genre && genreColors[book.genre] ? genreColors[book.genre] : genreColors['Outros']}`}>
+                        {book.genre}
+                      </span>
+                      <h3 className="font-black text-lg truncate text-stone-900 tracking-tight leading-tight">{book.title}</h3>
                       <p className="text-xs text-stone-400 font-bold flex items-center gap-2 mt-1 uppercase tracking-wider">
                           {book.author_nationality ? (countryFlags[book.author_nationality.toLowerCase().trim()] || <Globe size={10}/>) : <Globe size={10}/>} {book.author}
                       </p>
@@ -217,8 +234,8 @@ export default function App() {
       {/* MODAL DE CADASTRO */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-stone-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white w-full max-w-xl rounded-[2.5rem] p-8 max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div className="flex justify-between items-center mb-8 pb-6 border-b border-stone-50"><h2 className="text-lg font-black text-stone-900 uppercase tracking-[0.2em]">Novo Acervo</h2><button onClick={() => setIsModalOpen(false)} className="p-2 bg-stone-50 rounded-full hover:bg-stone-100"><X/></button></div>
+          <div className="bg-white w-full max-w-xl rounded-[2.5rem] p-8 max-h-[90vh] overflow-y-auto shadow-2xl border border-stone-100">
+            <div className="flex justify-between items-center mb-8 pb-6 border-b border-stone-50"><h2 className="text-lg font-black text-stone-900 uppercase tracking-[0.2em]">{editingBookId ? 'Editar' : 'Novo Acervo'}</h2><button onClick={() => setIsModalOpen(false)} className="p-2 bg-stone-50 rounded-full hover:bg-stone-100"><X/></button></div>
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="flex gap-2"><input className="flex-1 bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none border-2 border-transparent focus:border-stone-200 transition-all" placeholder="Título" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required/><button type="button" onClick={searchGoogleBooks} className="bg-stone-900 text-amber-500 px-5 rounded-2xl hover:bg-stone-800"><Sparkles size={20}/></button></div>
               <div className="grid grid-cols-2 gap-4"><input className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none border-2 border-transparent focus:border-stone-200" placeholder="Autor" value={formData.author} onChange={e => setFormData({...formData, author: e.target.value})}/><input className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none border-2 border-transparent focus:border-stone-200" placeholder="País" value={formData.author_nationality} onChange={e => setFormData({...formData, author_nationality: e.target.value})}/></div>
@@ -230,7 +247,7 @@ export default function App() {
                   <optgroup label="Terror & Horror"><option>Terror</option><option>Horror Cósmico</option></optgroup>
                   <optgroup label="Literatura Clássica"><option>Clássico Universal</option><option>Clássico Nacional</option></optgroup>
                   <optgroup label="Não Ficção"><option>Biografia</option><option>Autobiografia</option><option>Ensaio</option><option>Reportagem Literária</option></optgroup>
-                  <optgroup label="Humanas & Sociais"><option>Filosofia</option><option>História</option><option>Direito</option><option>Sociologia</option><option>Economia</option><option>Geografia Humana</option><option>Psicologia</option></optgroup>
+                  <optgroup label="Humanas & Sociais"><option>Filosofia</option><option>História</option><option>Direito</option><option>Sociologia</option><option>Antropologia</option><option>Ciência Política</option><option>Economia</option><option>Geografia Humana</option><option>Psicologia</option></optgroup>
                   <optgroup label="Sociais Aplicadas"><option>Administração</option><option>Contabilidade</option><option>Relações Internacionais</option><option>Comunicação Social</option></optgroup>
                   <optgroup label="Ciências Exatas"><option>Matemática</option><option>Estatística</option><option>Física</option><option>Química</option><option>Ciência de Dados</option></optgroup>
                   <optgroup label="Ciências da Natureza"><option>Biologia</option><option>Ecologia</option><option>Geologia</option><option>Astronomia</option></optgroup>
@@ -251,7 +268,7 @@ export default function App() {
                 <select className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none appearance-none border-2 border-transparent focus:border-stone-200" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value as BookStatus})}><option value="Na Fila">Na Fila</option><option value="Lendo">Lendo</option><option value="Concluído">Concluído</option><option value="Abandonado">Abandonado</option></select>
               </div>
               <div className="grid grid-cols-2 gap-4"><input type="number" className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none border-2 border-transparent focus:border-stone-200" placeholder="Páginas" value={formData.total_pages} onChange={e => setFormData({...formData, total_pages: Number(e.target.value)})}/><input type="number" className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none border-2 border-transparent focus:border-stone-200" placeholder="Lidas" value={formData.read_pages} onChange={e => setFormData({...formData, read_pages: Number(e.target.value)})}/></div>
-              <button type="submit" className="w-full bg-stone-950 text-white py-5 rounded-2xl font-black uppercase tracking-[0.3em] hover:bg-amber-700 transition-all transform active:scale-95 shadow-2xl">Catalogar Livro</button>
+              <button type="submit" className="w-full bg-stone-950 text-white py-5 rounded-2xl font-black uppercase tracking-[0.3em] hover:bg-amber-700 transition-all shadow-2xl">Catalogar Registro</button>
             </form>
           </div>
         </div>
