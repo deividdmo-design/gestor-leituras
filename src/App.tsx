@@ -20,7 +20,7 @@ interface AppBook {
 }
 
 const countryFlags: Record<string, string> = {
-  'brasil': '🇧🇷', 'portugal': '🇵🇹', 'estados unidos': '🇺🇸', 'eua': '🇺🇸', 'argentina': '🇦🇷', 'franca': '🇫🇷', 'reino unido': '🇬🇧', 'italia': '🇮🇹', 'alemanha': '🇩🇪', 'mexico': '🇲🇽', 'colombia': '🇨🇴'
+  'brasil': '🇧🇷', 'brasileira': '🇧🇷', 'argentina': '🇦🇷', 'chile': '🇨🇱', 'colombia': '🇨🇴', 'mexico': '🇲🇽', 'estados unidos': '🇺🇸', 'eua': '🇺🇸', 'canada': '🇨🇦', 'peru': '🇵🇪', 'uruguai': '🇺🇾', 'paraguai': '🇵🇾', 'bolivia': '🇧🇴', 'equador': '🇪🇨', 'venezuela': '🇻🇪', 'cuba': '🇨🇺', 'portugal': '🇵🇹', 'espanha': '🇪🇸', 'franca': '🇫🇷', 'italia': '🇮🇹', 'alemanha': '🇩🇪', 'reino unido': '🇬🇧', 'irlanda': '🇮🇪', 'russia': '🇷🇺', 'japao': '🇯🇵', 'china': '🇨🇳'
 };
 
 const genreColors: Record<string, string> = {
@@ -85,7 +85,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#F9F7F2] text-slate-900 print:bg-white">
-      <header className="bg-white/80 backdrop-blur-md border-b border-stone-200 h-20 flex items-center justify-between px-6 sticky top-0 z-40 print:hidden">
+      <header className="bg-white/80 backdrop-blur-md border-b border-stone-200 h-20 flex items-center justify-between px-6 sticky top-0 z-40 print:hidden text-stone-900">
         <div className="flex items-center gap-3">
           <div className="bg-stone-900 p-2.5 rounded-xl text-amber-500 shadow-lg"><Library /></div>
           <h1 className="text-xl font-black uppercase tracking-widest hidden md:block">Estante Premium</h1>
@@ -99,16 +99,15 @@ export default function App() {
       </header>
 
       <main className="max-w-[1600px] mx-auto p-6 space-y-8 print:p-0">
-        {/* KPIs - Ocultos na Impressão */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 print:hidden">
           <div className="bg-white p-6 rounded-[2rem] border border-stone-100 shadow-sm flex flex-col items-center justify-center">
-              <p className="text-2xl font-black">{stats.total}</p><p className="text-[9px] font-black uppercase text-stone-400 tracking-widest">Acervo</p>
+              <p className="text-2xl font-black text-stone-900">{stats.total}</p><p className="text-[9px] font-black uppercase text-stone-400 tracking-widest">Acervo</p>
           </div>
           <div className="bg-white p-6 rounded-[2rem] border border-stone-100 shadow-sm flex flex-col items-center justify-center">
-              <p className="text-2xl font-black">{stats.pages.toLocaleString()}</p><p className="text-[9px] font-black uppercase text-stone-400 tracking-widest">Páginas</p>
+              <p className="text-2xl font-black text-stone-900">{stats.pages.toLocaleString()}</p><p className="text-[9px] font-black uppercase text-stone-400 tracking-widest">Páginas</p>
           </div>
           <div className="bg-white p-6 rounded-[2rem] border border-stone-100 shadow-sm flex flex-col items-center justify-center">
-              <p className="text-2xl font-black">{stats.completed}</p><p className="text-[9px] font-black uppercase text-stone-400 tracking-widest">Lidos</p>
+              <p className="text-2xl font-black text-stone-900">{stats.completed}</p><p className="text-[9px] font-black uppercase text-stone-400 tracking-widest">Lidos</p>
           </div>
         </div>
 
@@ -116,6 +115,7 @@ export default function App() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in fade-in duration-500">
             {books.map(book => {
               const progress = Math.round(((book.read_pages || 0) / (book.total_pages || 1)) * 100);
+              const typedBook = book as any as AppBook;
               return (
                 <div key={book.id} className="bg-white p-6 rounded-[2.5rem] border border-stone-100 flex gap-6 group hover:shadow-xl transition-all relative overflow-hidden">
                   <div className="w-32 h-44 bg-stone-50 rounded-2xl overflow-hidden shrink-0 shadow-inner border border-stone-100">
@@ -129,7 +129,7 @@ export default function App() {
                     </p>
                     <div className="mt-6"><div className="flex justify-between text-[9px] font-black text-stone-400 mb-1.5 uppercase tracking-widest"><span>Progresso</span><span className="text-amber-600">{progress}%</span></div>
                     <div className="w-full bg-stone-100 h-1.5 rounded-full overflow-hidden shadow-inner"><div className="bg-amber-500 h-full transition-all duration-1000" style={{ width: `${progress}%` }}></div></div></div>
-                    <div className="mt-5 flex gap-2"><span className="text-[9px] font-black px-3 py-1 rounded-lg bg-stone-50 text-stone-500 uppercase">{book.status}</span>{book.notes && <div className="bg-amber-100 text-amber-700 px-3 py-1 rounded-lg text-[9px] font-black flex items-center gap-1 shadow-sm"><StickyNote size={10}/> NOTA</div>}</div>
+                    <div className="mt-5 flex gap-2"><span className="text-[9px] font-black px-3 py-1 rounded-lg bg-stone-50 text-stone-500 uppercase">{book.status}</span>{typedBook.notes && <div className="bg-amber-100 text-amber-700 px-3 py-1 rounded-lg text-[9px] font-black flex items-center gap-1 shadow-sm uppercase"><StickyNote size={10}/> Nota</div>}</div>
                   </div>
                 </div>
               )
@@ -139,13 +139,6 @@ export default function App() {
 
         {currentView === 'insights' && (
           <div className="space-y-6 animate-in slide-in-from-right duration-500">
-            {/* CABEÇALHO DE ESTUDO - Exclusivo para PDF */}
-            <div className="hidden print:block text-center border-b-2 border-stone-200 pb-8 mb-10">
-                <h1 className="text-3xl font-black uppercase tracking-tighter text-stone-900 mb-2">{activeInsightBook?.title}</h1>
-                <p className="text-lg font-bold text-stone-400 uppercase tracking-widest">{activeInsightBook?.author}</p>
-                <div className="mt-4 text-[10px] font-black uppercase text-stone-300">Grimório de Insights • Estante Premium • 2026</div>
-            </div>
-
             <div className="bg-white p-6 rounded-[2rem] border border-stone-200 flex items-center gap-4 print:hidden shadow-sm">
               <select className="flex-1 bg-stone-50 border-none rounded-2xl p-4 font-black text-stone-800 outline-none cursor-pointer appearance-none" value={selectedBookId} onChange={(e) => { setSelectedBookId(e.target.value); setEditingEntryId(null); setCurrentEntry({quote:'', reflection:''}); }}>
                 <option value="">Selecione o livro do caderno...</option>
@@ -158,7 +151,7 @@ export default function App() {
             {activeInsightBook && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                 <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 bg-white rounded-[3rem] border border-stone-200 overflow-hidden shadow-2xl min-h-[600px] relative print:shadow-none print:border-none print:block">
-                  <div className="p-10 border-r border-stone-100 space-y-6 bg-[#FDFCFB] print:bg-white print:border-none print:p-0 print:mb-10">
+                  <div className="p-10 border-r border-stone-100 space-y-6 bg-[#FDFCFB] print:bg-white print:p-0 print:mb-10 print:border-none">
                     <div className="flex items-center gap-3 text-amber-600 print:text-black">
                         <Quote size={24} /><span className="text-[11px] font-black uppercase tracking-[0.4em]">Passagem da Obra</span>
                     </div>
@@ -176,10 +169,10 @@ export default function App() {
                   <div className="flex items-center gap-2 font-black uppercase text-[10px] text-stone-400 px-4"><History size={16}/> Histórico</div>
                   <div className="space-y-3 max-h-[650px] overflow-y-auto pr-2">
                     {history.map((entry) => (
-                      <button key={entry.id} onClick={() => { setCurrentEntry({quote: entry.quote, reflection: entry.reflection}); setEditingEntryId(entry.id); }} className={`w-full text-left p-6 rounded-[2rem] border transition-all ${editingEntryId === entry.id ? 'bg-amber-50 border-amber-200' : 'bg-white border-stone-100'}`}>
+                      <button key={entry.id} onClick={() => { setCurrentEntry({quote: entry.quote, reflection: entry.reflection}); setEditingEntryId(entry.id); }} className={`w-full text-left p-6 rounded-[2rem] border transition-all ${editingEntryId === entry.id ? 'bg-amber-50 border-amber-200 shadow-md' : 'bg-white border-stone-100 hover:border-stone-300'}`}>
                         <div className="flex items-center gap-2 text-[9px] font-black text-stone-400 mb-3"><Clock size={12}/> {entry.date}</div>
                         <p className="text-sm font-serif italic text-stone-600 line-clamp-2 mb-2">"{entry.quote}"</p>
-                        <p className="text-xs font-bold text-stone-900">{entry.reflection}</p>
+                        <p className="text-xs font-bold text-stone-900 line-clamp-1">{entry.reflection}</p>
                       </button>
                     ))}
                   </div>
@@ -193,7 +186,7 @@ export default function App() {
           <div className="bg-white p-12 rounded-[3rem] border border-stone-100 shadow-xl print:hidden animate-in slide-in-from-bottom-4">
             <h2 className="text-[11px] font-black uppercase text-amber-600 tracking-[0.3em] mb-6">Reading Challenge 2026</h2>
             <div className="w-full bg-stone-50 h-5 rounded-full overflow-hidden shadow-inner border border-stone-100"><div className="bg-amber-500 h-full transition-all duration-1000 shadow-[0_0_20px_rgba(245,158,11,0.5)]" style={{ width: `${Math.min((stats.completed/readingGoal)*100, 100)}%` }}></div></div>
-            <p className="text-4xl font-black mt-8 tracking-tighter">{stats.completed} de {readingGoal} lidos</p>
+            <p className="text-4xl font-black mt-8 text-stone-900 tracking-tighter">{stats.completed} de {readingGoal} lidos</p>
           </div>
         )}
       </main>
@@ -202,7 +195,7 @@ export default function App() {
         @media print { 
           @page { size: A4 portrait; margin: 2cm; } 
           body { background: white !important; -webkit-print-color-adjust: exact; }
-          textarea { border: none !important; resize: none !important; }
+          textarea { border: none !important; resize: none !important; overflow: visible !important; }
           .print\\:hidden { display: none !important; }
         }
       `}</style>
