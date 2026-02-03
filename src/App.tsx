@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { useBooks } from './contexts/BookContext'
 import { supabase } from './lib/supabase'
 import { 
-  Library, Plus, X, Pencil, Search, Star, Trophy, Globe,
+  Library, Plus, X, Pencil, Star, Trophy, Globe, CheckCircle,
   Book as BookIcon, PieChart, LayoutGrid, Quote, MessageSquare, PenTool, FileDown
 } from 'lucide-react'
 
@@ -24,7 +24,6 @@ interface AppBook {
   started_at?: string;
 }
 
-// 🌍 MAPA-MÚNDI COMPLETO PRESERVADO
 const countryFlags: Record<string, string> = {
   'brasil': '🇧🇷', 'brasileira': '🇧🇷', 'argentina': '🇦🇷', 'chile': '🇨🇱', 'colombia': '🇨🇴', 'mexico': '🇲🇽', 'estados unidos': '🇺🇸', 'eua': '🇺🇸', 'canada': '🇨🇦', 'peru': '🇵🇪', 'uruguai': '🇺🇾', 'paraguai': '🇵🇾', 'bolivia': '🇧🇴', 'equador': '🇪🇨', 'venezuela': '🇻🇪', 'cuba': '🇨🇺', 'jamaica': '🇯🇲', 'haiti': '🇭🇹', 'republica dominicana': '🇩🇴', 'guatemala': '🇬🇹', 'honduras': '🇭🇳', 'el salvador': '🇸🇻', 'nicaragua': '🇳🇮', 'costa rica': '🇨🇷', 'panama': '🇵🇦', 'portugal': '🇵🇹', 'espanha': '🇪🇸', 'franca': '🇫🇷', 'italia': '🇮🇹', 'alemanha': '🇩🇪', 'reino unido': '🇬🇧', 'inglaterra': '🇬🇧', 'irlanda': '🇮🇪', 'russia': '🇷🇺', 'grecia': '🇬🇷', 'suica': '🇨🇭', 'austria': '🇦🇹', 'suecia': '🇸🇪', 'noruega': '🇳🇴', 'dinamarca': '🇩🇰', 'finlandia': '🇫🇮', 'polonia': '🇵🇱', 'belgica': '🇧🇪', 'holanda': '🇳🇱', 'paises baixos': '🇳🇱', 'ucrania': '🇺🇦', 'turquia': '🇹🇷', 'checa': '🇨🇿', 'hungria': '🇭🇺', 'romenia': '🇷🇴', 'bulgaria': '🇧🇬', 'croacia': '🇭🇷', 'servia': '🇷🇸', 'eslovaquia': '🇸🇰', 'eslovenia': '🇸🇮', 'estonia': '🇪🇪', 'letonia': '🇱🇻', 'lituania': '🇱🇹', 'islandia': '🇮🇸', 'luxemburgo': '🇱🇺', 'monaco': '🇲🇨', 'angola': '🇦🇴', 'mocambique': '🇲🇿', 'africa do sul': '🇿🇦', 'egito': '🇪🇬', 'nigeria': '🇳🇬', 'marrocos': '🇲🇦', 'argelia': '🇩🇿', 'quenia': '🇰🇪', 'etiopia': '🇪🇹', 'tanzania': '🇹🇿', 'mali': '🇲🇱', 'congo': '🇨🇩', 'gana': '🇬🇭', 'camaroes': '🇨🇲', 'costa do marfim': '🇨🇮', 'senegal': '🇸🇳', 'tunisia': '🇹🇳', 'madagascar': '🇲🇬', 'japao': '🇯🇵', 'china': '🇨🇳', 'coreia do sul': '🇰🇷', 'india': '🇮🇳', 'israel': '🇮🇱', 'palestina': '🇵🇸', 'iraque': '🇮🇶', 'ira': '🇮🇷', 'afeganistao': '🇦🇫', 'vietna': '🇻🇳', 'tailandia': '🇹🇭', 'indonesia': '🇮🇩', 'filipinas': '🇵🇭', 'malasia': '🇲🇾', 'singapura': '🇸🇬', 'paquistao': '🇵🇰', 'bangladesh': '🇧🇩', 'arabia saudita': '🇸🇦', 'emirados arabes': '🇦🇪', 'catar': '🇶🇦', 'libano': '🇱🇧', 'jordania': '🇯🇴', 'siria': '🇸🇾', 'australia': '🇦🇺', 'nova zelandia': '🇳🇿', 'timor leste': '🇹🇱', 'fiji': '🇫🇯', 'niger': '🇳🇪', 'chade': '🇹🇩', 'sudan': '🇸🇩', 'libia': '🇱🇾', 'somalia': '🇸🇴', 'zambia': '🇿🇲', 'zimbabue': '🇿🇼', 'namibia': '🇳🇦', 'botsuana': '🇧🇼', 'guiana': '🇬🇾', 'suriname': '🇸🇷'
 };
@@ -44,7 +43,6 @@ export default function App() {
   const [currentView, setCurrentView] = useState<'library' | 'analytics' | 'insights'>('library')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingBookId, setEditingBookId] = useState<string | null>(null)
-  const [searchTerm, setSearchTerm] = useState('')
   const [readingGoal, setReadingGoal] = useState(24)
   const [selectedBookId, setSelectedBookId] = useState<string>('')
   
@@ -107,13 +105,13 @@ export default function App() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 print:hidden">
           <div className="bg-white p-5 rounded-3xl border border-stone-200 flex flex-col items-center"><BookIcon className="text-stone-300 mb-1"/><p className="text-xl font-black">{stats.totalBooks}</p></div>
           <div className="bg-white p-5 rounded-3xl border border-stone-200 flex flex-col items-center"><Trophy className="text-amber-500 mb-1"/><p className="text-xl font-black">{stats.totalReadPages.toLocaleString()}</p></div>
-          <div className="bg-white p-5 rounded-3xl border border-stone-200 flex flex-col items-center"><CheckCircle2 className="text-stone-900 mb-1"/><p className="text-xl font-black">{stats.completedBooks}</p></div>
+          <div className="bg-white p-5 rounded-3xl border border-stone-200 flex flex-col items-center"><CheckCircle className="text-stone-900 mb-1"/><p className="text-xl font-black">{stats.completedBooks}</p></div>
           <div className="bg-white p-5 rounded-3xl border border-stone-200 flex flex-col items-center"><Star className="text-amber-500 mb-1"/><p className="text-xl font-black">{stats.avgRating}</p></div>
         </div>
 
         {currentView === 'library' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-500">
-            {books.filter(b => b.title.toLowerCase().includes(searchTerm.toLowerCase())).map(book => {
+            {books.map(book => {
               const typedBook = book as any as AppBook;
               return (
                 <div key={book.id} className="bg-white p-5 rounded-[2rem] border border-stone-100 flex gap-6 group hover:shadow-xl transition-all">
@@ -176,7 +174,7 @@ export default function App() {
           <div className="bg-white w-full max-w-xl rounded-[2.5rem] p-8 shadow-2xl overflow-y-auto max-h-[90vh]">
             <div className="flex justify-between items-center mb-6 pb-6 border-b border-stone-50"><h2 className="font-black uppercase tracking-widest text-stone-900">Configurar Obra</h2><button onClick={() => setIsModalOpen(false)} className="p-2 bg-stone-50 rounded-full hover:bg-stone-100"><X/></button></div>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <input className="w-full bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none" placeholder="Título" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required/>
+              <input className="w-full bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none border-2 border-transparent focus:border-stone-100" placeholder="Título" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required/>
               <div className="grid grid-cols-2 gap-4">
                 <input className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none" placeholder="Autor" value={formData.author} onChange={e => setFormData({...formData, author: e.target.value})}/>
                 <input className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none" placeholder="País" value={formData.author_nationality} onChange={e => setFormData({...formData, author_nationality: e.target.value})}/>
