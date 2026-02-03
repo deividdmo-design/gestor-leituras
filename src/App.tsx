@@ -2,18 +2,15 @@ import { useState, useMemo, useEffect } from 'react'
 import { useBooks } from './contexts/BookContext'
 import { supabase } from './lib/supabase'
 import { 
-  Library, Star, Trophy, Globe, CheckCircle2, Save, History,
-  Book as BookIcon, PieChart, LayoutGrid, Quote, MessageSquare, PenTool, Clock, FileDown, 
+  Library, Globe, Save, History, 
+  PieChart, LayoutGrid, Quote, MessageSquare, PenTool, Clock, FileDown,
   BookMarked, StickyNote
 } from 'lucide-react'
 
 type BookStatus = 'Lendo' | 'Na Fila' | 'Concluído' | 'Abandonado';
 
 interface Marginalia {
-  id: string;
-  date: string;
-  quote: string;
-  reflection: string;
+  id: string; date: string; quote: string; reflection: string;
 }
 
 interface AppBook {
@@ -41,7 +38,6 @@ export default function App() {
   const [currentView, setCurrentView] = useState<'library' | 'analytics' | 'insights'>('library')
   const [selectedBookId, setSelectedBookId] = useState<string>('')
   const [readingGoal, setReadingGoal] = useState(30)
-  
   const [currentEntry, setCurrentEntry] = useState({ quote: '', reflection: '' })
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null)
 
@@ -69,26 +65,16 @@ export default function App() {
 
   async function handleSaveEntry() {
     if (!selectedBookId || (!currentEntry.quote && !currentEntry.reflection)) return;
-
     let newHistory = [...history];
     if (editingEntryId) {
       newHistory = newHistory.map(en => en.id === editingEntryId ? 
         { ...en, quote: currentEntry.quote, reflection: currentEntry.reflection } : en
       );
     } else {
-      const newEntry: Marginalia = {
-        id: crypto.randomUUID(),
-        date: new Date().toLocaleDateString('pt-BR'),
-        quote: currentEntry.quote,
-        reflection: currentEntry.reflection
-      };
-      newHistory = [newEntry, ...newHistory];
+      newHistory = [{ id: crypto.randomUUID(), date: new Date().toLocaleDateString('pt-BR'), quote: currentEntry.quote, reflection: currentEntry.reflection }, ...newHistory];
     }
-
     await supabase.from('books').update({ notes: JSON.stringify(newHistory) }).eq('id', selectedBookId);
-    setCurrentEntry({ quote: '', reflection: '' });
-    setEditingEntryId(null);
-    refreshBooks();
+    setCurrentEntry({ quote: '', reflection: '' }); setEditingEntryId(null); refreshBooks();
   }
 
   const stats = useMemo(() => ({
@@ -113,18 +99,16 @@ export default function App() {
       </header>
 
       <main className="max-w-[1600px] mx-auto p-6 space-y-8 print:p-0">
+        {/* KPIs - Ocultos na Impressão */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 print:hidden">
           <div className="bg-white p-6 rounded-[2rem] border border-stone-100 shadow-sm flex flex-col items-center justify-center">
-              <p className="text-2xl font-black text-stone-900">{stats.total}</p>
-              <p className="text-[9px] font-black uppercase text-stone-400 tracking-widest">Acervo</p>
+              <p className="text-2xl font-black">{stats.total}</p><p className="text-[9px] font-black uppercase text-stone-400 tracking-widest">Acervo</p>
           </div>
           <div className="bg-white p-6 rounded-[2rem] border border-stone-100 shadow-sm flex flex-col items-center justify-center">
-              <p className="text-2xl font-black text-stone-900">{stats.pages.toLocaleString()}</p>
-              <p className="text-[9px] font-black uppercase text-stone-400 tracking-widest">Páginas</p>
+              <p className="text-2xl font-black">{stats.pages.toLocaleString()}</p><p className="text-[9px] font-black uppercase text-stone-400 tracking-widest">Páginas</p>
           </div>
           <div className="bg-white p-6 rounded-[2rem] border border-stone-100 shadow-sm flex flex-col items-center justify-center">
-              <p className="text-2xl font-black text-stone-900">{stats.completed}</p>
-              <p className="text-[9px] font-black uppercase text-stone-400 tracking-widest">Lidos</p>
+              <p className="text-2xl font-black">{stats.completed}</p><p className="text-[9px] font-black uppercase text-stone-400 tracking-widest">Lidos</p>
           </div>
         </div>
 
@@ -143,21 +127,9 @@ export default function App() {
                     <p className="text-xs text-stone-400 font-bold uppercase flex items-center gap-1">
                       {book.author_nationality ? (countryFlags[book.author_nationality.toLowerCase().trim()] || <Globe size={10}/>) : <Globe size={10}/>} {book.author}
                     </p>
-                    
-                    <div className="mt-6">
-                        <div className="flex justify-between text-[9px] font-black text-stone-400 mb-1.5 uppercase tracking-widest">
-                            <span>Progresso</span>
-                            <span className="text-amber-600">{progress}%</span>
-                        </div>
-                        <div className="w-full bg-stone-100 h-1.5 rounded-full overflow-hidden shadow-inner">
-                            <div className="bg-amber-500 h-full transition-all duration-1000" style={{ width: `${progress}%` }}></div>
-                        </div>
-                    </div>
-
-                    <div className="mt-5 flex gap-2">
-                        <span className="text-[9px] font-black px-3 py-1 rounded-lg bg-stone-50 text-stone-500 uppercase tracking-tighter">{book.status}</span>
-                        {book.notes && <div className="bg-amber-100 text-amber-700 px-3 py-1 rounded-lg text-[9px] font-black flex items-center gap-1 shadow-sm"><StickyNote size={10}/> NOTA</div>}
-                    </div>
+                    <div className="mt-6"><div className="flex justify-between text-[9px] font-black text-stone-400 mb-1.5 uppercase tracking-widest"><span>Progresso</span><span className="text-amber-600">{progress}%</span></div>
+                    <div className="w-full bg-stone-100 h-1.5 rounded-full overflow-hidden shadow-inner"><div className="bg-amber-500 h-full transition-all duration-1000" style={{ width: `${progress}%` }}></div></div></div>
+                    <div className="mt-5 flex gap-2"><span className="text-[9px] font-black px-3 py-1 rounded-lg bg-stone-50 text-stone-500 uppercase">{book.status}</span>{book.notes && <div className="bg-amber-100 text-amber-700 px-3 py-1 rounded-lg text-[9px] font-black flex items-center gap-1 shadow-sm"><StickyNote size={10}/> NOTA</div>}</div>
                   </div>
                 </div>
               )
@@ -167,41 +139,47 @@ export default function App() {
 
         {currentView === 'insights' && (
           <div className="space-y-6 animate-in slide-in-from-right duration-500">
+            {/* CABEÇALHO DE ESTUDO - Exclusivo para PDF */}
+            <div className="hidden print:block text-center border-b-2 border-stone-200 pb-8 mb-10">
+                <h1 className="text-3xl font-black uppercase tracking-tighter text-stone-900 mb-2">{activeInsightBook?.title}</h1>
+                <p className="text-lg font-bold text-stone-400 uppercase tracking-widest">{activeInsightBook?.author}</p>
+                <div className="mt-4 text-[10px] font-black uppercase text-stone-300">Grimório de Insights • Estante Premium • 2026</div>
+            </div>
+
             <div className="bg-white p-6 rounded-[2rem] border border-stone-200 flex items-center gap-4 print:hidden shadow-sm">
-              <select className="flex-1 bg-stone-50 border-none rounded-2xl p-4 font-black text-stone-800 outline-none appearance-none cursor-pointer" value={selectedBookId} onChange={(e) => { setSelectedBookId(e.target.value); setEditingEntryId(null); setCurrentEntry({quote:'', reflection:''}); }}>
-                <option value="">O que você está lendo agora?</option>
+              <select className="flex-1 bg-stone-50 border-none rounded-2xl p-4 font-black text-stone-800 outline-none cursor-pointer appearance-none" value={selectedBookId} onChange={(e) => { setSelectedBookId(e.target.value); setEditingEntryId(null); setCurrentEntry({quote:'', reflection:''}); }}>
+                <option value="">Selecione o livro do caderno...</option>
                 {readingBooks.map(b => <option key={b.id} value={b.id}>{b.title}</option>)}
               </select>
-              {activeInsightBook && (
-                <button onClick={handleSaveEntry} className="bg-stone-900 text-white px-8 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest flex items-center gap-2 hover:bg-amber-600 transition-all shadow-lg">
-                  <Save size={18}/> {editingEntryId ? 'Atualizar' : 'Salvar Insight'}
-                </button>
-              )}
-              {activeInsightBook && <button onClick={() => window.print()} className="bg-amber-500 text-white px-6 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest flex items-center gap-2 hover:bg-stone-900 transition-all shadow-lg"><FileDown size={18}/> PDF</button>}
+              {activeInsightBook && <button onClick={handleSaveEntry} className="bg-stone-900 text-white px-8 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest flex items-center gap-2 hover:bg-amber-600 transition-all shadow-lg active:scale-95"><Save size={18}/> {editingEntryId ? 'Atualizar' : 'Salvar Insight'}</button>}
+              {activeInsightBook && <button onClick={() => window.print()} className="bg-amber-500 text-white px-6 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest flex items-center gap-2 hover:bg-stone-900 transition-all shadow-lg active:scale-95"><FileDown size={18}/> PDF</button>}
             </div>
 
             {activeInsightBook && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 bg-white rounded-[3rem] border border-stone-200 overflow-hidden shadow-2xl min-h-[600px] relative print:shadow-none print:border-none">
-                  <div className="p-10 border-r border-stone-100 space-y-6 bg-[#FDFCFB] print:bg-white">
-                    <div className="flex items-center gap-3 text-amber-600 print:text-black"><Quote size={24} /><span className="text-[11px] font-black uppercase tracking-[0.4em]">O Autor Disse</span></div>
-                    <textarea className="w-full h-[450px] bg-transparent text-xl font-serif italic text-stone-700 outline-none resize-none leading-relaxed print:text-black" placeholder="Passagem do livro..." value={currentEntry.quote} onChange={e => setCurrentEntry({...currentEntry, quote: e.target.value})} />
+                <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 bg-white rounded-[3rem] border border-stone-200 overflow-hidden shadow-2xl min-h-[600px] relative print:shadow-none print:border-none print:block">
+                  <div className="p-10 border-r border-stone-100 space-y-6 bg-[#FDFCFB] print:bg-white print:border-none print:p-0 print:mb-10">
+                    <div className="flex items-center gap-3 text-amber-600 print:text-black">
+                        <Quote size={24} /><span className="text-[11px] font-black uppercase tracking-[0.4em]">Passagem da Obra</span>
+                    </div>
+                    <textarea className="w-full h-[450px] bg-transparent text-xl font-serif italic text-stone-700 outline-none resize-none leading-relaxed print:h-auto print:text-black" placeholder="Citação..." value={currentEntry.quote} onChange={e => setCurrentEntry({...currentEntry, quote: e.target.value})} />
                   </div>
-                  <div className="p-10 space-y-6 bg-white">
-                    <div className="flex items-center gap-3 text-blue-600 print:text-black"><MessageSquare size={24} /><span className="text-[11px] font-black uppercase tracking-[0.4em]">Sua Marginalia</span></div>
-                    <textarea className="w-full h-[450px] bg-transparent text-xl font-bold text-stone-900 outline-none resize-none leading-relaxed print:text-black print:font-normal" placeholder="Sua reflexão..." value={currentEntry.reflection} onChange={e => setCurrentEntry({...currentEntry, reflection: e.target.value})} />
+                  <div className="p-10 space-y-6 bg-white print:p-0">
+                    <div className="flex items-center gap-3 text-blue-600 print:text-black">
+                        <MessageSquare size={24} /><span className="text-[11px] font-black uppercase tracking-[0.4em]">Sua Reflexão</span>
+                    </div>
+                    <textarea className="w-full h-[450px] bg-transparent text-xl font-bold text-stone-900 outline-none resize-none leading-relaxed print:h-auto print:text-black print:font-normal" placeholder="Insights..." value={currentEntry.reflection} onChange={e => setCurrentEntry({...currentEntry, reflection: e.target.value})} />
                   </div>
                 </div>
 
                 <div className="lg:col-span-4 space-y-4 print:hidden">
-                  <div className="flex items-center gap-2 font-black uppercase text-[10px] tracking-[0.2em] text-stone-400 px-4"><History size={16}/> Histórico de Marginalia</div>
-                  <div className="space-y-3 max-h-[650px] overflow-y-auto pr-2 custom-scrollbar">
-                    {history.length === 0 && <div className="p-10 text-center text-stone-300 border-4 border-dashed border-stone-100 rounded-[2.5rem] font-black uppercase text-[10px]">Aguardando registro</div>}
+                  <div className="flex items-center gap-2 font-black uppercase text-[10px] text-stone-400 px-4"><History size={16}/> Histórico</div>
+                  <div className="space-y-3 max-h-[650px] overflow-y-auto pr-2">
                     {history.map((entry) => (
-                      <button key={entry.id} onClick={() => { setCurrentEntry({quote: entry.quote, reflection: entry.reflection}); setEditingEntryId(entry.id); }} className={`w-full text-left p-6 rounded-[2rem] border transition-all ${editingEntryId === entry.id ? 'bg-amber-50 border-amber-200 shadow-lg' : 'bg-white border-stone-100 hover:border-stone-300 shadow-sm'}`}>
+                      <button key={entry.id} onClick={() => { setCurrentEntry({quote: entry.quote, reflection: entry.reflection}); setEditingEntryId(entry.id); }} className={`w-full text-left p-6 rounded-[2rem] border transition-all ${editingEntryId === entry.id ? 'bg-amber-50 border-amber-200' : 'bg-white border-stone-100'}`}>
                         <div className="flex items-center gap-2 text-[9px] font-black text-stone-400 mb-3"><Clock size={12}/> {entry.date}</div>
                         <p className="text-sm font-serif italic text-stone-600 line-clamp-2 mb-2">"{entry.quote}"</p>
-                        <p className="text-xs font-bold text-stone-900 line-clamp-1">{entry.reflection}</p>
+                        <p className="text-xs font-bold text-stone-900">{entry.reflection}</p>
                       </button>
                     ))}
                   </div>
@@ -214,15 +192,20 @@ export default function App() {
         {currentView === 'analytics' && (
           <div className="bg-white p-12 rounded-[3rem] border border-stone-100 shadow-xl print:hidden animate-in slide-in-from-bottom-4">
             <h2 className="text-[11px] font-black uppercase text-amber-600 tracking-[0.3em] mb-6">Reading Challenge 2026</h2>
-            <div className="w-full bg-stone-50 h-5 rounded-full overflow-hidden shadow-inner border border-stone-100">
-                <div className="bg-amber-500 h-full transition-all duration-1000 shadow-[0_0_20px_rgba(245,158,11,0.5)]" style={{ width: `${Math.min((stats.completed/readingGoal)*100, 100)}%` }}></div>
-            </div>
-            <p className="text-4xl font-black mt-8 text-stone-900 tracking-tighter">{stats.completed} de {readingGoal} lidos</p>
+            <div className="w-full bg-stone-50 h-5 rounded-full overflow-hidden shadow-inner border border-stone-100"><div className="bg-amber-500 h-full transition-all duration-1000 shadow-[0_0_20px_rgba(245,158,11,0.5)]" style={{ width: `${Math.min((stats.completed/readingGoal)*100, 100)}%` }}></div></div>
+            <p className="text-4xl font-black mt-8 tracking-tighter">{stats.completed} de {readingGoal} lidos</p>
           </div>
         )}
       </main>
 
-      <style>{`@media print { @page { size: A4 landscape; margin: 1cm; } header, .print\\:hidden { display: none !important; } textarea { border: none !important; overflow: visible !important; height: auto !important; } }`}</style>
+      <style>{`
+        @media print { 
+          @page { size: A4 portrait; margin: 2cm; } 
+          body { background: white !important; -webkit-print-color-adjust: exact; }
+          textarea { border: none !important; resize: none !important; }
+          .print\\:hidden { display: none !important; }
+        }
+      `}</style>
     </div>
   )
 }
