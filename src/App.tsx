@@ -5,7 +5,7 @@ import {
   Library, Globe, Save, History, 
   PieChart, LayoutGrid, Quote, MessageSquare, PenTool, Clock, FileDown,
   BookMarked, StickyNote, X, Pencil, Trash2, Plus, Trophy, CheckCircle2,
-  BarChart3, BookOpen, MapPin, Search, Shuffle, Sparkles, PlayCircle
+  BarChart3, BookOpen, MapPin, Search, Shuffle, Sparkles, PlayCircle, ImagePlus
 } from 'lucide-react'
 
 type BookStatus = 'Lendo' | 'Na Fila' | 'Concluído' | 'Abandonado';
@@ -21,22 +21,58 @@ interface AppBook {
 }
 
 const countryFlags: Record<string, string> = {
-  'brasil': '🇧🇷', 'brasileira': '🇧🇷', 'argentina': '🇦🇷', 'chile': '🇨🇱', 'colombia': '🇨🇴', 'mexico': '🇲🇽', 'estados unidos': '🇺🇸', 'eua': '🇺🇸', 'canada': '🇨🇦', 'peru': '🇵🇪', 'uruguai': '🇺🇾', 'paraguai': '🇵🇾', 'bolivia': '🇧🇴', 'equador': '🇪🇨', 'venezuela': '🇻🇪', 'cuba': '🇨🇺', 'portugal': '🇵🇹', 'espanha': '🇪🇸', 'franca': '🇫🇷', 'italia': '🇮🇹', 'alemanha': '🇩🇪', 'reino unido': '🇬🇧', 'inglaterra': '🇬🇧', 'irlanda': '🇮🇪', 'russia': '🇷🇺', 'japao': '🇯🇵', 'china': '🇨🇳'
+  'brasil': '🇧🇷', 'brasileira': '🇧🇷', 'argentina': '🇦🇷', 'chile': '🇨🇱', 'colombia': '🇨🇴', 'mexico': '🇲🇽', 'estados unidos': '🇺🇸', 'eua': '🇺🇸', 'canada': '🇨🇦', 'peru': '🇵🇪', 'uruguai': '🇺🇾', 'paraguai': '🇵🇾', 'bolivia': '🇧🇴', 'equador': '🇪🇨', 'venezuela': '🇻🇪', 'cuba': '🇨🇺', 'portugal': '🇵🇹', 'espanha': '🇪🇸', 'franca': '🇫🇷', 'italia': '🇮🇹', 'alemanha': '🇩🇪', 'reino unido': '🇬🇧', 'inglaterra': '🇬🇧', 'irlanda': '🇮🇪', 'russia': '🇷🇺', 'japao': '🇯🇵', 'china': '🇨🇳', 'grecia': '🇬🇷'
 };
 
-const genreColors: Record<string, string> = {
-  'História': 'bg-amber-100 text-amber-900 border-amber-200',
-  'Medicina': 'bg-emerald-50 text-emerald-900 border-emerald-100',
-  'Psicologia': 'bg-indigo-50 text-indigo-900 border-indigo-100',
-  'Filosofia': 'bg-stone-800 text-stone-100 border-stone-600',
-  'Romance': 'bg-rose-50 text-rose-800 border-rose-100',
-  'Autoajuda': 'bg-zinc-700 text-zinc-100 border-zinc-600',
-  'Outros': 'bg-stone-50 text-stone-500 border-stone-200'
+// 📚 ESTRUTURA COMPLETA DE GÊNEROS E CORES
+const genreStructure: Record<string, string[]> = {
+  'Narrativos (Ficção)': ['Romance', 'Romance realista', 'Romance psicológico', 'Romance histórico', 'Novela', 'Conto', 'Conto fantástico', 'Microconto'],
+  'Ficção Especulativa': ['Fantasia', 'Fantasia épica', 'Ficção Científica', 'Distopia', 'Cyberpunk', 'Realismo mágico', 'Terror'],
+  'Suspense e Policial': ['Romance policial', 'Thriller psicológico', 'Romance noir', 'Espionagem', 'Investigação'],
+  'Romance e Drama': ['Romance romântico', 'Drama', 'Tragédia', 'Comédia', 'Erótico', 'Jovem-adulto (YA)'],
+  'Poesia e Teatro': ['Poesia', 'Épica', 'Soneto', 'Verso livre', 'Teatro', 'Dramaturgia'],
+  'Não Ficção': ['Biografia', 'Autobiografia', 'Memórias', 'Diário', 'Jornalismo literário', 'Ensaios'],
+  'Filosofia': ['Filosofia Antiga', 'Filosofia Moderna', 'Ética', 'Metafísica', 'Existencialismo', 'Estoicismo', 'Filosofia Política'],
+  'Sociologia': ['Sociologia', 'Teoria Social', 'Sociologia Política', 'Sociologia da Cultura'],
+  'Economia': ['Economia', 'Macroeconomia', 'Economia Política', 'Investimentos', 'História Econômica'],
+  'Política': ['Ciência Política', 'Geopolítica', 'Relações Internacionais', 'Teoria do Estado'],
+  'História': ['História Geral', 'História do Brasil', 'História Antiga', 'História Medieval', 'História Contemporânea'],
+  'Psicologia': ['Psicologia', 'Psicanálise', 'Psicologia Social', 'Neurociência', 'Terapia Cognitiva'],
+  'Direito': ['Direito', 'Filosofia do Direito', 'Direito Constitucional', 'Criminologia', 'Direitos Humanos'],
+  'Antropologia': ['Antropologia', 'Etnografia', 'Arqueologia', 'Estudos Culturais'],
+  'Educação e Ciência': ['Pedagogia', 'Didática', 'Divulgação Científica', 'Metodologia'],
+  'Outros': ['Autoajuda', 'Espiritualidade', 'Religião', 'Outros']
 };
 
-const genreBarColors: Record<string, string> = {
-    'História': 'bg-amber-500', 'Medicina': 'bg-emerald-500', 'Psicologia': 'bg-indigo-500',
-    'Filosofia': 'bg-stone-700', 'Romance': 'bg-rose-500', 'Autoajuda': 'bg-zinc-500', 'Outros': 'bg-stone-300'
+// Mapeamento de Cores por "Família" de Gênero
+const getGenreStyle = (genre: string): string => {
+  if (!genre) return 'bg-stone-100 text-stone-500 border-stone-200';
+  
+  // Ficção / Narrativa (Amarelo/Laranja)
+  if (genreStructure['Narrativos (Ficção)'].includes(genre)) return 'bg-amber-100 text-amber-800 border-amber-200';
+  // Especulativa / Terror (Roxo/Indigo)
+  if (genreStructure['Ficção Especulativa'].includes(genre)) return 'bg-purple-100 text-purple-900 border-purple-200';
+  // Policial (Cinza Escuro)
+  if (genreStructure['Suspense e Policial'].includes(genre)) return 'bg-slate-200 text-slate-800 border-slate-300';
+  // Romance (Rosa)
+  if (genreStructure['Romance e Drama'].includes(genre)) return 'bg-rose-100 text-rose-800 border-rose-200';
+  // Poesia (Ciano)
+  if (genreStructure['Poesia e Teatro'].includes(genre)) return 'bg-cyan-100 text-cyan-900 border-cyan-200';
+  // Não Ficção (Azul)
+  if (genreStructure['Não Ficção'].includes(genre)) return 'bg-blue-100 text-blue-900 border-blue-200';
+  
+  // Ciências Humanas (Cores de Pedra/Sóbrias)
+  if (genreStructure['Filosofia'].includes(genre)) return 'bg-stone-800 text-stone-100 border-stone-600'; // Pedra escura para filosofia
+  if (genreStructure['História'].includes(genre)) return 'bg-yellow-100 text-yellow-900 border-yellow-200';
+  if (genreStructure['Sociologia'].includes(genre)) return 'bg-orange-100 text-orange-900 border-orange-200';
+  if (genreStructure['Economia'].includes(genre)) return 'bg-emerald-100 text-emerald-900 border-emerald-200';
+  if (genreStructure['Política'].includes(genre)) return 'bg-blue-50 text-blue-900 border-blue-200';
+  if (genreStructure['Direito'].includes(genre)) return 'bg-red-50 text-red-900 border-red-100';
+  if (genreStructure['Psicologia'].includes(genre)) return 'bg-indigo-100 text-indigo-900 border-indigo-200';
+  if (genreStructure['Antropologia'].includes(genre)) return 'bg-lime-100 text-lime-900 border-lime-200';
+  if (genreStructure['Educação e Ciência'].includes(genre)) return 'bg-teal-100 text-teal-900 border-teal-200';
+
+  return 'bg-stone-100 text-stone-500 border-stone-200';
 };
 
 export default function App() {
@@ -111,6 +147,13 @@ export default function App() {
     setEditingEntryId(entry.id);
   }
 
+  // --- BUSCA DE CAPA NO GOOGLE ---
+  function searchCoverOnGoogle() {
+    if (!formData.title) return alert('Digite o título do livro primeiro.');
+    const query = encodeURIComponent(`capa livro ${formData.title} ${formData.author || ''}`);
+    window.open(`https://www.google.com/search?tbm=isch&q=${query}`, '_blank');
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     try {
@@ -133,13 +176,13 @@ export default function App() {
       const random = queue[Math.floor(Math.random() * queue.length)];
       setShuffledBook(random as any);
       counter++;
-      if (counter > 20) { // Tempo da animação
+      if (counter > 20) {
         clearInterval(interval);
         const finalBook = queue[Math.floor(Math.random() * queue.length)];
         setShuffledBook(finalBook as any);
         setIsShuffling(false);
       }
-    }, 80); // Velocidade da troca de capas
+    }, 80);
   }
 
   async function startReadingShuffled() {
@@ -152,7 +195,6 @@ export default function App() {
       setCurrentView('insights');
     } catch (e: any) { alert(e.message); }
   }
-  // ----------------------------------
 
   const analytics = useMemo(() => {
     const finished = books.filter(b => b.status === 'Concluído');
@@ -208,7 +250,7 @@ export default function App() {
                   <div key={typedBook.id} className="bg-white p-6 rounded-[2.5rem] border border-stone-100 flex gap-6 group hover:shadow-xl transition-all relative overflow-hidden">
                     <div className="w-32 h-44 bg-stone-50 rounded-2xl overflow-hidden shrink-0 shadow-inner border border-stone-100">{typedBook.cover_url ? <img src={typedBook.cover_url} className="w-full h-full object-cover" alt={typedBook.title} /> : <div className="w-full h-full flex items-center justify-center"><BookMarked className="text-stone-200"/></div>}</div>
                     <div className="flex-1 py-1">
-                      <span className={`text-[8px] font-black uppercase px-2 py-1 rounded-md border mb-3 block w-fit ${genreColors[typedBook.genre || 'Outros']}`}>{typedBook.genre}</span>
+                      <span className={`text-[8px] font-black uppercase px-2 py-1 rounded-md border mb-3 block w-fit ${getGenreStyle(typedBook.genre || '')}`}>{typedBook.genre}</span>
                       <h3 className="font-black text-lg text-stone-900 leading-tight mb-1">{typedBook.title}</h3>
                       <p className="text-xs text-stone-400 font-bold uppercase flex items-center gap-1">{typedBook.author_nationality ? (countryFlags[typedBook.author_nationality.toLowerCase().trim()] || <Globe size={10}/>) : <Globe size={10}/>} {typedBook.author}</p>
                       <div className="mt-6"><div className="flex justify-between text-[9px] font-black text-stone-400 mb-1.5 uppercase tracking-widest"><span>Progresso</span><span className="text-amber-600">{progress}%</span></div><div className="w-full bg-stone-100 h-1.5 rounded-full overflow-hidden shadow-inner"><div className="bg-amber-500 h-full transition-all duration-1000" style={{ width: `${progress}%` }}></div></div></div>
@@ -225,7 +267,7 @@ export default function App() {
           </>
         )}
 
-        {/* ... (Insights e Analytics mantidos iguais) ... */}
+        {/* ... (Insights mantido igual) ... */}
         {currentView === 'insights' && (
           <div className="space-y-6 animate-in slide-in-from-right duration-500">
             <div className="bg-white p-6 rounded-[2rem] border border-stone-200 flex items-center gap-4 print:hidden shadow-sm">
@@ -290,7 +332,7 @@ export default function App() {
                     <div className="flex items-center gap-3 mb-8 text-stone-900"><div className="p-2 bg-indigo-50 rounded-xl text-indigo-600"><BarChart3 size={20}/></div><h3 className="font-black uppercase tracking-widest text-xs">Top Gêneros</h3></div>
                     <div className="space-y-5">
                         {analytics.sortedGenres.map(([genre, count]) => (
-                            <div key={genre}><div className="flex justify-between text-[10px] font-black uppercase mb-2 text-stone-500"><span>{genre}</span><span>{count}</span></div><div className="w-full bg-stone-50 h-2 rounded-full overflow-hidden"><div className={`h-full ${genreBarColors[genre] || 'bg-stone-400'}`} style={{ width: `${(count / analytics.totalBooks) * 100}%` }}></div></div></div>
+                            <div key={genre}><div className="flex justify-between text-[10px] font-black uppercase mb-2 text-stone-500"><span>{genre}</span><span>{count}</span></div><div className="w-full bg-stone-50 h-2 rounded-full overflow-hidden"><div className="h-full bg-stone-400" style={{ width: `${(count / analytics.totalBooks) * 100}%` }}></div></div></div>
                         ))}
                     </div>
                 </div>
@@ -344,18 +386,35 @@ export default function App() {
         </div>
       )}
 
+      {/* MODAL DE CADASTRO COM BUSCA DE CAPA E NOVOS GÊNEROS */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-stone-950/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 print:hidden animate-in fade-in duration-300">
           <div className="bg-white w-full max-w-xl rounded-[2.5rem] p-8 shadow-2xl overflow-y-auto max-h-[90vh] border border-stone-100">
             <div className="flex justify-between items-center mb-6 pb-6 border-b border-stone-50"><h2 className="font-black uppercase tracking-widest text-stone-900">{editingBookId ? 'Editar Obra' : 'Nova Obra'}</h2><button onClick={() => setIsModalOpen(false)} className="p-2 bg-stone-50 rounded-full hover:bg-stone-100"><X/></button></div>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <input className="w-full bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none border-2 border-transparent focus:border-stone-100 transition-all shadow-sm" placeholder="Título" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required/>
-              <div className="grid grid-cols-2 gap-4"><input className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none border-2 border-transparent focus:border-stone-100 shadow-sm" placeholder="Autor" value={formData.author} onChange={e => setFormData({...formData, author: e.target.value})}/><input className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none border-2 border-transparent focus:border-stone-100 shadow-sm" placeholder="País" value={formData.author_nationality} onChange={e => setFormData({...formData, author_nationality: e.target.value})}/></div>
-              <input className="w-full bg-stone-50 rounded-2xl px-6 py-4 text-xs font-bold outline-none border-2 border-transparent focus:border-stone-100 shadow-sm" placeholder="URL da Capa" value={formData.cover_url} onChange={e => setFormData({...formData, cover_url: e.target.value})}/>
+              
+              {/* TÍTULO COM BOTÃO DE BUSCA */}
+              <div className="flex gap-2">
+                  <input className="flex-1 bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none border-2 border-transparent focus:border-stone-100 transition-all shadow-sm" placeholder="Título da Obra" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required/>
+                  <button type="button" onClick={searchCoverOnGoogle} className="bg-blue-50 text-blue-600 p-4 rounded-2xl hover:bg-blue-100 transition-all" title="Buscar capa no Google"><ImagePlus size={20}/></button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4"><input className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none border-2 border-transparent focus:border-stone-100 shadow-sm" placeholder="Autor" value={formData.author} onChange={e => setFormData({...formData, author: e.target.value})}/><input className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none border-2 border-transparent focus:border-stone-100 shadow-sm" placeholder="País (ex: Brasil)" value={formData.author_nationality} onChange={e => setFormData({...formData, author_nationality: e.target.value})}/></div>
+              <input className="w-full bg-stone-50 rounded-2xl px-6 py-4 text-xs font-bold outline-none border-2 border-transparent focus:border-stone-100 shadow-sm" placeholder="URL da Capa (Cole o link aqui)" value={formData.cover_url} onChange={e => setFormData({...formData, cover_url: e.target.value})}/>
               <div className="grid grid-cols-2 gap-4"><input type="number" className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none border-2 border-transparent focus:border-stone-100 shadow-sm" placeholder="Total Páginas" value={formData.total_pages} onChange={e => setFormData({...formData, total_pages: Number(e.target.value)})}/><input type="number" className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none border-2 border-transparent focus:border-stone-100 shadow-sm" placeholder="Lidas" value={formData.read_pages} onChange={e => setFormData({...formData, read_pages: Number(e.target.value)})}/></div>
+              
               <div className="grid grid-cols-2 gap-4">
                 <select className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none appearance-none cursor-pointer shadow-sm" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}><option value="Na Fila">Na Fila</option><option value="Lendo">Lendo</option><option value="Concluído">Concluído</option><option value="Abandonado">Abandonado</option></select>
-                <select className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none appearance-none cursor-pointer shadow-sm" value={formData.genre} onChange={e => setFormData({...formData, genre: e.target.value})}>{Object.keys(genreColors).map(g => <option key={g} value={g}>{g}</option>)}</select>
+                
+                {/* SELECT DE GÊNEROS COM OPTGROUP */}
+                <select className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none appearance-none cursor-pointer shadow-sm text-sm" value={formData.genre} onChange={e => setFormData({...formData, genre: e.target.value})}>
+                  <option value="Outros">Selecione o Gênero</option>
+                  {Object.entries(genreStructure).map(([category, subgenres]) => (
+                    <optgroup key={category} label={category}>
+                      {subgenres.map(sub => <option key={sub} value={sub}>{sub}</option>)}
+                    </optgroup>
+                  ))}
+                </select>
               </div>
               <button type="submit" className="w-full bg-stone-900 text-white py-5 rounded-2xl font-black uppercase tracking-[0.2em] hover:bg-amber-600 transition-all shadow-xl active:scale-95">Salvar na Estante</button>
             </form>
