@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { useBooks } from './contexts/BookContext'
 import { supabase } from './lib/supabase'
 import { 
-  Library, Save, History, 
+  Library, Globe, Save, History, 
   PieChart, LayoutGrid, Quote, MessageSquare, PenTool, Clock, FileDown,
   BookMarked, StickyNote, X, Pencil, Trash2, Plus, Trophy, CheckCircle2,
   BarChart3, BookOpen, MapPin
@@ -111,18 +111,15 @@ export default function App() {
     } catch (e: any) { alert(e.message); }
   }
 
-  // CÁLCULO DE ESTATÍSTICAS AVANÇADAS
   const analytics = useMemo(() => {
     const finished = books.filter(b => b.status === 'Concluído');
     const reading = books.filter(b => b.status === 'Lendo');
     const totalPages = books.reduce((acc, b) => acc + (b.read_pages || 0), 0);
     
-    // Gêneros
     const genres: Record<string, number> = {};
     books.forEach(b => { if(b.genre) genres[b.genre] = (genres[b.genre] || 0) + 1; });
     const sortedGenres = Object.entries(genres).sort((a,b) => b[1] - a[1]).slice(0, 5);
 
-    // Nacionalidades
     const nations: Record<string, number> = {};
     books.forEach(b => { 
         if(b.author_nationality) {
@@ -132,7 +129,6 @@ export default function App() {
     });
     const sortedNations = Object.entries(nations).sort((a,b) => b[1] - a[1]).slice(0, 6);
 
-    // Performance
     const avgPages = finished.length > 0 ? Math.round(finished.reduce((acc, b) => acc + (b.total_pages || 0), 0) / finished.length) : 0;
     const thickestBook = finished.length > 0 ? finished.reduce((prev, current) => (prev.total_pages > current.total_pages) ? prev : current) : null;
 
@@ -164,7 +160,6 @@ export default function App() {
       </header>
 
       <main className="max-w-[1600px] mx-auto p-6 space-y-8 print:p-0">
-        {/* CARDS KPI */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 print:hidden">
           <div className="bg-white p-6 rounded-[2rem] border border-stone-100 shadow-sm flex flex-col items-center justify-center"><Library className="text-stone-300 mb-2 w-6 h-6"/><p className="text-2xl font-black text-stone-900">{analytics.totalBooks}</p><p className="text-[9px] font-black uppercase text-stone-400 tracking-widest">Acervo</p></div>
           <div className="bg-white p-6 rounded-[2rem] border border-stone-100 shadow-sm flex flex-col items-center justify-center"><Trophy className="text-amber-400 mb-2 w-6 h-6"/><p className="text-2xl font-black text-stone-900">{analytics.totalPages.toLocaleString()}</p><p className="text-[9px] font-black uppercase text-stone-400 tracking-widest">Páginas</p></div>
@@ -245,81 +240,42 @@ export default function App() {
           </div>
         )}
 
-        {/* 📊 NOVA DASHBOARD DE RELATÓRIOS */}
         {currentView === 'analytics' && (
           <div className="space-y-6 animate-in slide-in-from-bottom-4">
             <div className="bg-white p-12 rounded-[3rem] border border-stone-100 shadow-xl">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-[11px] font-black uppercase text-amber-600 tracking-[0.3em]">Reading Challenge 2026</h2>
-                <div className="flex items-center gap-2 text-stone-400 text-xs font-bold">
-                    <Trophy size={14} className="text-amber-500"/> Meta: {readingGoal}
-                </div>
+                <div className="flex items-center gap-2 text-stone-400 text-xs font-bold"><Trophy size={14} className="text-amber-500"/> Meta: {readingGoal}</div>
               </div>
               <div className="w-full bg-stone-50 h-5 rounded-full overflow-hidden shadow-inner border border-stone-100"><div className="bg-amber-500 h-full transition-all duration-1000 shadow-[0_0_20px_rgba(245,158,11,0.5)]" style={{ width: `${Math.min((analytics.completed/readingGoal)*100, 100)}%` }}></div></div>
               <p className="text-4xl font-black mt-8 text-stone-900 tracking-tighter">{analytics.completed} <span className="text-stone-300 text-xl font-bold">de {readingGoal} livros lidos</span></p>
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Ranking de Gêneros */}
                 <div className="bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm">
-                    <div className="flex items-center gap-3 mb-8 text-stone-900">
-                        <div className="p-2 bg-indigo-50 rounded-xl text-indigo-600"><BarChart3 size={20}/></div>
-                        <h3 className="font-black uppercase tracking-widest text-xs">Top Gêneros</h3>
-                    </div>
+                    <div className="flex items-center gap-3 mb-8 text-stone-900"><div className="p-2 bg-indigo-50 rounded-xl text-indigo-600"><BarChart3 size={20}/></div><h3 className="font-black uppercase tracking-widest text-xs">Top Gêneros</h3></div>
                     <div className="space-y-5">
                         {analytics.sortedGenres.map(([genre, count]) => (
-                            <div key={genre}>
-                                <div className="flex justify-between text-[10px] font-black uppercase mb-2 text-stone-500"><span>{genre}</span><span>{count}</span></div>
-                                <div className="w-full bg-stone-50 h-2 rounded-full overflow-hidden">
-                                    <div className={`h-full ${genreBarColors[genre] || 'bg-stone-400'}`} style={{ width: `${(count / analytics.totalBooks) * 100}%` }}></div>
-                                </div>
-                            </div>
+                            <div key={genre}><div className="flex justify-between text-[10px] font-black uppercase mb-2 text-stone-500"><span>{genre}</span><span>{count}</span></div><div className="w-full bg-stone-50 h-2 rounded-full overflow-hidden"><div className={`h-full ${genreBarColors[genre] || 'bg-stone-400'}`} style={{ width: `${(count / analytics.totalBooks) * 100}%` }}></div></div></div>
                         ))}
                     </div>
                 </div>
-
-                {/* Mapa de Nacionalidades */}
                 <div className="bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm">
-                    <div className="flex items-center gap-3 mb-8 text-stone-900">
-                        <div className="p-2 bg-emerald-50 rounded-xl text-emerald-600"><MapPin size={20}/></div>
-                        <h3 className="font-black uppercase tracking-widest text-xs">Origem dos Autores</h3>
-                    </div>
+                    <div className="flex items-center gap-3 mb-8 text-stone-900"><div className="p-2 bg-emerald-50 rounded-xl text-emerald-600"><MapPin size={20}/></div><h3 className="font-black uppercase tracking-widest text-xs">Origem dos Autores</h3></div>
                     <div className="grid grid-cols-1 gap-3">
                         {analytics.sortedNations.map(([nation, count]) => (
-                            <div key={nation} className="flex items-center justify-between p-3 rounded-2xl bg-stone-50 border border-stone-100">
-                                <div className="flex items-center gap-3"><span className="text-xl">{countryFlags[nation] || '🏳️'}</span><span className="text-[10px] font-black uppercase text-stone-600">{nation}</span></div>
-                                <span className="text-[10px] font-black bg-white px-2 py-1 rounded-lg shadow-sm text-stone-900">{count}</span>
-                            </div>
+                            <div key={nation} className="flex items-center justify-between p-3 rounded-2xl bg-stone-50 border border-stone-100"><div className="flex items-center gap-3"><span className="text-xl">{countryFlags[nation] || '🏳️'}</span><span className="text-[10px] font-black uppercase text-stone-600">{nation}</span></div><span className="text-[10px] font-black bg-white px-2 py-1 rounded-lg shadow-sm text-stone-900">{count}</span></div>
                         ))}
                     </div>
                 </div>
-
-                {/* Stats Rápidos */}
                 <div className="bg-stone-900 text-white p-8 rounded-[2.5rem] shadow-xl flex flex-col justify-between">
-                    <div>
-                        <div className="flex items-center gap-3 mb-8 text-white/50">
-                            <div className="p-2 bg-white/10 rounded-xl text-white"><BookOpen size={20}/></div>
-                            <h3 className="font-black uppercase tracking-widest text-xs">Performance</h3>
-                        </div>
-                        <div className="space-y-6">
-                            <div><p className="text-[9px] font-black uppercase text-white/40 mb-1">Média de Páginas</p><p className="text-3xl font-black">{analytics.avgPages}</p></div>
-                            <div><p className="text-[9px] font-black uppercase text-white/40 mb-1">Leituras Ativas</p><p className="text-3xl font-black text-amber-500">{analytics.reading}</p></div>
-                        </div>
-                    </div>
-                    {analytics.thickestBook && (
-                        <div className="mt-8 p-4 bg-white/5 rounded-2xl border border-white/10">
-                            <p className="text-[8px] font-black uppercase text-white/40 mb-2">Maior Calhamaço</p>
-                            <p className="text-xs font-bold line-clamp-1">{analytics.thickestBook.title}</p>
-                            <p className="text-[10px] text-white/60">{analytics.thickestBook.total_pages} págs</p>
-                        </div>
-                    )}
+                    <div><div className="flex items-center gap-3 mb-8 text-white/50"><div className="p-2 bg-white/10 rounded-xl text-white"><BookOpen size={20}/></div><h3 className="font-black uppercase tracking-widest text-xs">Performance</h3></div><div className="space-y-6"><div><p className="text-[9px] font-black uppercase text-white/40 mb-1">Média de Páginas</p><p className="text-3xl font-black">{analytics.avgPages}</p></div><div><p className="text-[9px] font-black uppercase text-white/40 mb-1">Leituras Ativas</p><p className="text-3xl font-black text-amber-500">{analytics.reading}</p></div></div></div>
+                    {analytics.thickestBook && (<div className="mt-8 p-4 bg-white/5 rounded-2xl border border-white/10"><p className="text-[8px] font-black uppercase text-white/40 mb-2">Maior Calhamaço</p><p className="text-xs font-bold line-clamp-1">{analytics.thickestBook.title}</p><p className="text-[10px] text-white/60">{analytics.thickestBook.total_pages} págs</p></div>)}
                 </div>
             </div>
           </div>
         )}
       </main>
 
-      {/* MODAL E CSS */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-stone-950/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 print:hidden animate-in fade-in duration-300">
           <div className="bg-white w-full max-w-xl rounded-[2.5rem] p-8 shadow-2xl overflow-y-auto max-h-[90vh] border border-stone-100">
@@ -331,9 +287,7 @@ export default function App() {
               <div className="grid grid-cols-2 gap-4"><input type="number" className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none border-2 border-transparent focus:border-stone-100 shadow-sm" placeholder="Total Páginas" value={formData.total_pages} onChange={e => setFormData({...formData, total_pages: Number(e.target.value)})}/><input type="number" className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none border-2 border-transparent focus:border-stone-100 shadow-sm" placeholder="Lidas" value={formData.read_pages} onChange={e => setFormData({...formData, read_pages: Number(e.target.value)})}/></div>
               <div className="grid grid-cols-2 gap-4">
                 <select className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none appearance-none cursor-pointer shadow-sm" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}><option value="Na Fila">Na Fila</option><option value="Lendo">Lendo</option><option value="Concluído">Concluído</option><option value="Abandonado">Abandonado</option></select>
-                <select className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none appearance-none cursor-pointer shadow-sm" value={formData.genre} onChange={e => setFormData({...formData, genre: e.target.value})}>
-                  {Object.keys(genreColors).map(g => <option key={g} value={g}>{g}</option>)}
-                </select>
+                <select className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none appearance-none cursor-pointer shadow-sm" value={formData.genre} onChange={e => setFormData({...formData, genre: e.target.value})}>{Object.keys(genreColors).map(g => <option key={g} value={g}>{g}</option>)}</select>
               </div>
               <button type="submit" className="w-full bg-stone-900 text-white py-5 rounded-2xl font-black uppercase tracking-[0.2em] hover:bg-amber-600 transition-all shadow-xl active:scale-95">Salvar na Estante</button>
             </form>
