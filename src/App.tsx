@@ -5,7 +5,7 @@ import {
   Library, Globe, Save, History, 
   PieChart, LayoutGrid, Quote, MessageSquare, PenTool, Clock, FileDown,
   BookMarked, StickyNote, X, Pencil, Trash2, Plus, Trophy, CheckCircle2,
-  BarChart3, BookOpen, MapPin
+  BarChart3, BookOpen, MapPin, Search, Shuffle
 } from 'lucide-react'
 
 type BookStatus = 'Lendo' | 'Na Fila' | 'Concluído' | 'Abandonado';
@@ -46,6 +46,10 @@ export default function App() {
   const [editingBookId, setEditingBookId] = useState<string | null>(null)
   const [selectedBookId, setSelectedBookId] = useState<string>('')
   const [readingGoal, setReadingGoal] = useState(30)
+  
+  // Estados de Filtro e Pesquisa
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filterStatus, setFilterStatus] = useState<string | 'Todos'>('Todos')
   
   const [currentEntry, setCurrentEntry] = useState({ quote: '', reflection: '' })
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null)
@@ -111,6 +115,14 @@ export default function App() {
     } catch (e: any) { alert(e.message); }
   }
 
+  // Função Sorteio (Shuffle)
+  function handleShuffle() {
+    const queue = books.filter(b => b.status === 'Na Fila');
+    if (queue.length === 0) return alert('Sua fila está vazia!');
+    const randomBook = queue[Math.floor(Math.random() * queue.length)];
+    alert(`O destino escolheu: ${randomBook.title}`);
+  }
+
   const analytics = useMemo(() => {
     const finished = books.filter(b => b.status === 'Concluído');
     const reading = books.filter(b => b.status === 'Lendo');
@@ -160,6 +172,8 @@ export default function App() {
       </header>
 
       <main className="max-w-[1600px] mx-auto p-6 space-y-8 print:p-0">
+        
+        {/* KPIs (Só aparecem se não estiver na Biblioteca para não poluir, ou podemos manter sempre. Mantendo sempre por consistência visual) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 print:hidden">
           <div className="bg-white p-6 rounded-[2rem] border border-stone-100 shadow-sm flex flex-col items-center justify-center"><Library className="text-stone-300 mb-2 w-6 h-6"/><p className="text-2xl font-black text-stone-900">{analytics.totalBooks}</p><p className="text-[9px] font-black uppercase text-stone-400 tracking-widest">Acervo</p></div>
           <div className="bg-white p-6 rounded-[2rem] border border-stone-100 shadow-sm flex flex-col items-center justify-center"><Trophy className="text-amber-400 mb-2 w-6 h-6"/><p className="text-2xl font-black text-stone-900">{analytics.totalPages.toLocaleString()}</p><p className="text-[9px] font-black uppercase text-stone-400 tracking-widest">Páginas</p></div>
@@ -167,28 +181,55 @@ export default function App() {
         </div>
 
         {currentView === 'library' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in fade-in duration-500">
-            {books.map(book => {
-              const typedBook = book as any as AppBook;
-              const progress = Math.round(((typedBook.read_pages || 0) / (typedBook.total_pages || 1)) * 100);
-              return (
-                <div key={typedBook.id} className="bg-white p-6 rounded-[2.5rem] border border-stone-100 flex gap-6 group hover:shadow-xl transition-all relative overflow-hidden">
-                  <div className="w-32 h-44 bg-stone-50 rounded-2xl overflow-hidden shrink-0 shadow-inner border border-stone-100">{typedBook.cover_url ? <img src={typedBook.cover_url} className="w-full h-full object-cover" alt={typedBook.title} /> : <div className="w-full h-full flex items-center justify-center"><BookMarked className="text-stone-200"/></div>}</div>
-                  <div className="flex-1 py-1">
-                    <span className={`text-[8px] font-black uppercase px-2 py-1 rounded-md border mb-3 block w-fit ${genreColors[typedBook.genre || 'Outros']}`}>{typedBook.genre}</span>
-                    <h3 className="font-black text-lg text-stone-900 leading-tight mb-1">{typedBook.title}</h3>
-                    <p className="text-xs text-stone-400 font-bold uppercase flex items-center gap-1">{typedBook.author_nationality ? (countryFlags[typedBook.author_nationality.toLowerCase().trim()] || <Globe size={10}/>) : <Globe size={10}/>} {typedBook.author}</p>
-                    <div className="mt-6"><div className="flex justify-between text-[9px] font-black text-stone-400 mb-1.5 uppercase tracking-widest"><span>Progresso</span><span className="text-amber-600">{progress}%</span></div><div className="w-full bg-stone-100 h-1.5 rounded-full overflow-hidden shadow-inner"><div className="bg-amber-500 h-full transition-all duration-1000" style={{ width: `${progress}%` }}></div></div></div>
-                    <div className="mt-5 flex gap-2"><span className="text-[9px] font-black px-3 py-1 rounded-lg bg-stone-50 text-stone-500 uppercase">{typedBook.status}</span>{typedBook.notes && <div className="bg-amber-100 text-amber-700 px-3 py-1 rounded-lg text-[9px] font-black flex items-center gap-1 shadow-sm uppercase"><StickyNote size={10}/> Nota</div>}</div>
+          <>
+            {/* BARRA DE FERRAMENTAS RESTAURADA */}
+            <div className="bg-white/60 backdrop-blur-md p-2 rounded-[1.5rem] border border-stone-200 flex flex-col lg:flex-row gap-2 shadow-sm animate-in fade-in duration-500">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300 w-5 h-5"/>
+                <input 
+                  className="w-full pl-12 pr-4 bg-transparent font-bold outline-none text-stone-800 placeholder:text-stone-300 h-full py-3" 
+                  placeholder="Pesquisar título ou autor..." 
+                  value={searchTerm} 
+                  onChange={e => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-2 p-1 overflow-x-auto">
+                {['Todos', 'Na Fila', 'Lendo', 'Concluído'].map((s) => (
+                  <button 
+                    key={s} 
+                    onClick={() => setFilterStatus(s)} 
+                    className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${filterStatus === s ? 'bg-stone-900 text-white shadow-md' : 'text-stone-400 hover:bg-white hover:shadow-sm'}`}
+                  >
+                    {s}
+                  </button>
+                ))}
+                <button onClick={handleShuffle} className="p-3 bg-stone-100 text-stone-500 rounded-xl hover:bg-amber-500 hover:text-white transition-all shadow-sm"><Shuffle size={18}/></button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in fade-in duration-500">
+              {books.filter(b => (b.title.toLowerCase().includes(searchTerm.toLowerCase()) || b.author.toLowerCase().includes(searchTerm.toLowerCase())) && (filterStatus === 'Todos' || b.status === filterStatus)).map(book => {
+                const typedBook = book as any as AppBook;
+                const progress = Math.round(((typedBook.read_pages || 0) / (typedBook.total_pages || 1)) * 100);
+                return (
+                  <div key={typedBook.id} className="bg-white p-6 rounded-[2.5rem] border border-stone-100 flex gap-6 group hover:shadow-xl transition-all relative overflow-hidden">
+                    <div className="w-32 h-44 bg-stone-50 rounded-2xl overflow-hidden shrink-0 shadow-inner border border-stone-100">{typedBook.cover_url ? <img src={typedBook.cover_url} className="w-full h-full object-cover" alt={typedBook.title} /> : <div className="w-full h-full flex items-center justify-center"><BookMarked className="text-stone-200"/></div>}</div>
+                    <div className="flex-1 py-1">
+                      <span className={`text-[8px] font-black uppercase px-2 py-1 rounded-md border mb-3 block w-fit ${genreColors[typedBook.genre || 'Outros']}`}>{typedBook.genre}</span>
+                      <h3 className="font-black text-lg text-stone-900 leading-tight mb-1">{typedBook.title}</h3>
+                      <p className="text-xs text-stone-400 font-bold uppercase flex items-center gap-1">{typedBook.author_nationality ? (countryFlags[typedBook.author_nationality.toLowerCase().trim()] || <Globe size={10}/>) : <Globe size={10}/>} {typedBook.author}</p>
+                      <div className="mt-6"><div className="flex justify-between text-[9px] font-black text-stone-400 mb-1.5 uppercase tracking-widest"><span>Progresso</span><span className="text-amber-600">{progress}%</span></div><div className="w-full bg-stone-100 h-1.5 rounded-full overflow-hidden shadow-inner"><div className="bg-amber-500 h-full transition-all duration-1000" style={{ width: `${progress}%` }}></div></div></div>
+                      <div className="mt-5 flex gap-2"><span className="text-[9px] font-black px-3 py-1 rounded-lg bg-stone-50 text-stone-500 uppercase">{typedBook.status}</span>{typedBook.notes && <div className="bg-amber-100 text-amber-700 px-3 py-1 rounded-lg text-[9px] font-black flex items-center gap-1 shadow-sm uppercase"><StickyNote size={10}/> Nota</div>}</div>
+                    </div>
+                    <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                      <button onClick={() => { setEditingBookId(typedBook.id); setFormData(typedBook); setIsModalOpen(true); }} className="p-2.5 text-stone-300 hover:text-stone-900 bg-stone-50 rounded-xl hover:bg-white border border-transparent hover:border-stone-100 shadow-sm transition-all"><Pencil size={16}/></button>
+                      <button onClick={() => { if(confirm('Excluir este livro?')) supabase.from('books').delete().eq('id', typedBook.id).then(refreshBooks); }} className="p-2.5 text-stone-300 hover:text-red-600 bg-stone-50 rounded-xl hover:bg-white border border-transparent hover:border-stone-100 shadow-sm transition-all"><Trash2 size={16}/></button>
+                    </div>
                   </div>
-                  <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                    <button onClick={() => { setEditingBookId(typedBook.id); setFormData(typedBook); setIsModalOpen(true); }} className="p-2.5 text-stone-300 hover:text-stone-900 bg-stone-50 rounded-xl hover:bg-white border border-transparent hover:border-stone-100 shadow-sm transition-all"><Pencil size={16}/></button>
-                    <button onClick={() => { if(confirm('Excluir este livro?')) supabase.from('books').delete().eq('id', typedBook.id).then(refreshBooks); }} className="p-2.5 text-stone-300 hover:text-red-600 bg-stone-50 rounded-xl hover:bg-white border border-transparent hover:border-stone-100 shadow-sm transition-all"><Trash2 size={16}/></button>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+                )
+              })}
+            </div>
+          </>
         )}
 
         {currentView === 'insights' && (
@@ -276,6 +317,7 @@ export default function App() {
         )}
       </main>
 
+      {/* MODAL E CSS MANTIDOS */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-stone-950/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 print:hidden animate-in fade-in duration-300">
           <div className="bg-white w-full max-w-xl rounded-[2.5rem] p-8 shadow-2xl overflow-y-auto max-h-[90vh] border border-stone-100">
