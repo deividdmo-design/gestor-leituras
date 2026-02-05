@@ -5,7 +5,7 @@ import {
   Library, Globe, Save, History, 
   PieChart, LayoutGrid, Quote, MessageSquare, PenTool, Clock, FileDown,
   BookMarked, StickyNote, X, Pencil, Trash2, Plus, Trophy, CheckCircle2,
-  BarChart3, BookOpen, MapPin, Search, Shuffle
+  BarChart3, BookOpen, MapPin, Search, Shuffle, Sparkles, PlayCircle
 } from 'lucide-react'
 
 type BookStatus = 'Lendo' | 'Na Fila' | 'Concluído' | 'Abandonado';
@@ -42,15 +42,25 @@ const genreBarColors: Record<string, string> = {
 export default function App() {
   const { books, refreshBooks } = useBooks()
   const [currentView, setCurrentView] = useState<'library' | 'analytics' | 'insights'>('library')
+  
+  // Estados de Modals
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isShuffleOpen, setIsShuffleOpen] = useState(false) // Estado do Sorteador
+  
+  // Estados de Edição/Seleção
   const [editingBookId, setEditingBookId] = useState<string | null>(null)
   const [selectedBookId, setSelectedBookId] = useState<string>('')
   const [readingGoal, setReadingGoal] = useState(30)
   
-  // Estados de Filtro e Pesquisa
+  // Estados do Sorteador
+  const [isShuffling, setIsShuffling] = useState(false)
+  const [shuffledBook, setShuffledBook] = useState<AppBook | null>(null)
+
+  // Estados de Filtro
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState<string | 'Todos'>('Todos')
   
+  // Estados de Insights
   const [currentEntry, setCurrentEntry] = useState({ quote: '', reflection: '' })
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null)
 
@@ -78,6 +88,43 @@ export default function App() {
     }
     loadSettings();
   }, []);
+
+  // --- LÓGICA DO SORTEADOR PREMIUM ---
+  async function handleShuffle() {
+    const queue = books.filter(b => b.status === 'Na Fila');
+    if (queue.length === 0) return alert('Sua fila de leitura está vazia!');
+    
+    setIsShuffleOpen(true);
+    setIsShuffling(true);
+    
+    let counter = 0;
+    const interval = setInterval(() => {
+      const random = queue[Math.floor(Math.random() * queue.length)];
+      setShuffledBook(random as any);
+      counter++;
+      if (counter > 15) { // Animação dura ~1.5s
+        clearInterval(interval);
+        const finalBook = queue[Math.floor(Math.random() * queue.length)];
+        setShuffledBook(finalBook as any);
+        setIsShuffling(false);
+      }
+    }, 100);
+  }
+
+  async function startReadingShuffled() {
+    if (!shuffledBook) return;
+    try {
+      // Atualiza status para Lendo
+      await supabase.from('books').update({ status: 'Lendo' }).eq('id', shuffledBook.id);
+      await refreshBooks();
+      setIsShuffleOpen(false);
+      
+      // Configura a view para Insights com esse livro já selecionado
+      setSelectedBookId(shuffledBook.id);
+      setCurrentView('insights');
+    } catch (e: any) { alert(e.message); }
+  }
+  // -----------------------------------
 
   async function handleSaveEntry() {
     if (!selectedBookId || (!currentEntry.quote && !currentEntry.reflection)) return;
@@ -115,45 +162,19 @@ export default function App() {
     } catch (e: any) { alert(e.message); }
   }
 
-  // Função Sorteio (Shuffle)
-  function handleShuffle() {
-    const queue = books.filter(b => b.status === 'Na Fila');
-    if (queue.length === 0) return alert('Sua fila está vazia!');
-    const randomBook = queue[Math.floor(Math.random() * queue.length)];
-    alert(`O destino escolheu: ${randomBook.title}`);
-  }
-
   const analytics = useMemo(() => {
     const finished = books.filter(b => b.status === 'Concluído');
     const reading = books.filter(b => b.status === 'Lendo');
     const totalPages = books.reduce((acc, b) => acc + (b.read_pages || 0), 0);
-    
     const genres: Record<string, number> = {};
     books.forEach(b => { if(b.genre) genres[b.genre] = (genres[b.genre] || 0) + 1; });
     const sortedGenres = Object.entries(genres).sort((a,b) => b[1] - a[1]).slice(0, 5);
-
     const nations: Record<string, number> = {};
-    books.forEach(b => { 
-        if(b.author_nationality) {
-            const nat = b.author_nationality.toLowerCase().trim();
-            nations[nat] = (nations[nat] || 0) + 1;
-        }
-    });
+    books.forEach(b => { if(b.author_nationality) { const nat = b.author_nationality.toLowerCase().trim(); nations[nat] = (nations[nat] || 0) + 1; } });
     const sortedNations = Object.entries(nations).sort((a,b) => b[1] - a[1]).slice(0, 6);
-
     const avgPages = finished.length > 0 ? Math.round(finished.reduce((acc, b) => acc + (b.total_pages || 0), 0) / finished.length) : 0;
     const thickestBook = finished.length > 0 ? finished.reduce((prev, current) => (prev.total_pages > current.total_pages) ? prev : current) : null;
-
-    return {
-      totalBooks: books.length,
-      completed: finished.length,
-      reading: reading.length,
-      totalPages,
-      avgPages,
-      thickestBook,
-      sortedGenres,
-      sortedNations
-    };
+    return { totalBooks: books.length, completed: finished.length, reading: reading.length, totalPages, avgPages, thickestBook, sortedGenres, sortedNations };
   }, [books]);
 
   return (
@@ -172,8 +193,6 @@ export default function App() {
       </header>
 
       <main className="max-w-[1600px] mx-auto p-6 space-y-8 print:p-0">
-        
-        {/* KPIs (Só aparecem se não estiver na Biblioteca para não poluir, ou podemos manter sempre. Mantendo sempre por consistência visual) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 print:hidden">
           <div className="bg-white p-6 rounded-[2rem] border border-stone-100 shadow-sm flex flex-col items-center justify-center"><Library className="text-stone-300 mb-2 w-6 h-6"/><p className="text-2xl font-black text-stone-900">{analytics.totalBooks}</p><p className="text-[9px] font-black uppercase text-stone-400 tracking-widest">Acervo</p></div>
           <div className="bg-white p-6 rounded-[2rem] border border-stone-100 shadow-sm flex flex-col items-center justify-center"><Trophy className="text-amber-400 mb-2 w-6 h-6"/><p className="text-2xl font-black text-stone-900">{analytics.totalPages.toLocaleString()}</p><p className="text-[9px] font-black uppercase text-stone-400 tracking-widest">Páginas</p></div>
@@ -182,31 +201,13 @@ export default function App() {
 
         {currentView === 'library' && (
           <>
-            {/* BARRA DE FERRAMENTAS RESTAURADA */}
             <div className="bg-white/60 backdrop-blur-md p-2 rounded-[1.5rem] border border-stone-200 flex flex-col lg:flex-row gap-2 shadow-sm animate-in fade-in duration-500">
-              <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300 w-5 h-5"/>
-                <input 
-                  className="w-full pl-12 pr-4 bg-transparent font-bold outline-none text-stone-800 placeholder:text-stone-300 h-full py-3" 
-                  placeholder="Pesquisar título ou autor..." 
-                  value={searchTerm} 
-                  onChange={e => setSearchTerm(e.target.value)}
-                />
-              </div>
+              <div className="relative flex-1"><Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300 w-5 h-5"/><input className="w-full pl-12 pr-4 bg-transparent font-bold outline-none text-stone-800 placeholder:text-stone-300 h-full py-3" placeholder="Pesquisar..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)}/></div>
               <div className="flex gap-2 p-1 overflow-x-auto">
-                {['Todos', 'Na Fila', 'Lendo', 'Concluído'].map((s) => (
-                  <button 
-                    key={s} 
-                    onClick={() => setFilterStatus(s)} 
-                    className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${filterStatus === s ? 'bg-stone-900 text-white shadow-md' : 'text-stone-400 hover:bg-white hover:shadow-sm'}`}
-                  >
-                    {s}
-                  </button>
-                ))}
+                {['Todos', 'Na Fila', 'Lendo', 'Concluído'].map((s) => (<button key={s} onClick={() => setFilterStatus(s as any)} className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${filterStatus === s ? 'bg-stone-900 text-white shadow-md' : 'text-stone-400 hover:bg-white hover:shadow-sm'}`}>{s}</button>))}
                 <button onClick={handleShuffle} className="p-3 bg-stone-100 text-stone-500 rounded-xl hover:bg-amber-500 hover:text-white transition-all shadow-sm"><Shuffle size={18}/></button>
               </div>
             </div>
-
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in fade-in duration-500">
               {books.filter(b => (b.title.toLowerCase().includes(searchTerm.toLowerCase()) || b.author.toLowerCase().includes(searchTerm.toLowerCase())) && (filterStatus === 'Todos' || b.status === filterStatus)).map(book => {
                 const typedBook = book as any as AppBook;
@@ -232,6 +233,7 @@ export default function App() {
           </>
         )}
 
+        {/* ... (Insights e Analytics mantidos iguais, economizando caracteres aqui, mas incluídos no código final) ... */}
         {currentView === 'insights' && (
           <div className="space-y-6 animate-in slide-in-from-right duration-500">
             <div className="bg-white p-6 rounded-[2rem] border border-stone-200 flex items-center gap-4 print:hidden shadow-sm">
@@ -317,7 +319,38 @@ export default function App() {
         )}
       </main>
 
-      {/* MODAL E CSS MANTIDOS */}
+      {/* MODAL DE SORTEIO PREMIUM */}
+      {isShuffleOpen && (
+        <div className="fixed inset-0 bg-stone-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-500">
+          <div className="bg-white w-full max-w-md rounded-[2.5rem] p-10 text-center shadow-2xl relative overflow-hidden">
+            <button onClick={() => setIsShuffleOpen(false)} className="absolute top-6 right-6 p-2 bg-stone-100 rounded-full hover:bg-stone-200"><X size={20}/></button>
+            
+            <div className="mb-8 flex justify-center">
+                <div className={`p-6 rounded-full ${isShuffling ? 'bg-amber-100 text-amber-600 animate-spin' : 'bg-stone-900 text-white'}`}>
+                    <Sparkles size={40} />
+                </div>
+            </div>
+
+            <h2 className="text-sm font-black uppercase tracking-[0.3em] text-stone-400 mb-4">{isShuffling ? 'EMBARALHANDO...' : 'SUA PRÓXIMA LEITURA'}</h2>
+            
+            {shuffledBook ? (
+                <div className="animate-in zoom-in duration-300">
+                    <h3 className="text-3xl font-black text-stone-900 leading-tight mb-2">{shuffledBook.title}</h3>
+                    <p className="text-sm font-bold text-stone-500 uppercase tracking-widest mb-8">{shuffledBook.author}</p>
+                    
+                    {!isShuffling && (
+                        <button onClick={startReadingShuffled} className="w-full bg-stone-900 text-white py-4 rounded-2xl font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-amber-600 transition-all shadow-xl">
+                            <PlayCircle size={20} /> Começar Leitura
+                        </button>
+                    )}
+                </div>
+            ) : (
+                <p className="text-stone-400 font-bold">Preparando sorteio...</p>
+            )}
+          </div>
+        </div>
+      )}
+
       {isModalOpen && (
         <div className="fixed inset-0 bg-stone-950/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 print:hidden animate-in fade-in duration-300">
           <div className="bg-white w-full max-w-xl rounded-[2.5rem] p-8 shadow-2xl overflow-y-auto max-h-[90vh] border border-stone-100">
