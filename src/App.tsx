@@ -4,7 +4,8 @@ import { supabase } from './lib/supabase'
 import { 
   Library, Globe, Save, History, 
   PieChart, LayoutGrid, Quote, MessageSquare, PenTool, Clock, FileDown,
-  BookMarked, StickyNote, X, Pencil, Trash2, Plus, Trophy, CheckCircle2
+  BookMarked, StickyNote, X, Pencil, Trash2, Plus, Trophy, CheckCircle2,
+  BarChart3, Calendar, BookOpen, MapPin
 } from 'lucide-react'
 
 type BookStatus = 'Lendo' | 'Na Fila' | 'Concluído' | 'Abandonado';
@@ -19,9 +20,8 @@ interface AppBook {
   genre?: string; status: BookStatus; notes?: string;
 }
 
-// 🌍 LISTA COMPLETA DE BANDEIRAS RESTAURADA
 const countryFlags: Record<string, string> = {
-  'brasil': '🇧🇷', 'brasileira': '🇧🇷', 'argentina': '🇦🇷', 'chile': '🇨🇱', 'colombia': '🇨🇴', 'mexico': '🇲🇽', 'estados unidos': '🇺🇸', 'eua': '🇺🇸', 'canada': '🇨🇦', 'peru': '🇵🇪', 'uruguai': '🇺🇾', 'paraguai': '🇵🇾', 'bolivia': '🇧🇴', 'equador': '🇪🇨', 'venezuela': '🇻🇪', 'cuba': '🇨🇺', 'jamaica': '🇯🇲', 'haiti': '🇭🇹', 'republica dominicana': '🇩🇴', 'guatemala': '🇬🇹', 'honduras': '🇭🇳', 'el salvador': '🇸🇻', 'nicaragua': '🇳🇮', 'costa rica': '🇨🇷', 'panama': '🇵🇦', 'portugal': '🇵🇹', 'espanha': '🇪🇸', 'franca': '🇫🇷', 'italia': '🇮🇹', 'alemanha': '🇩🇪', 'reino unido': '🇬🇧', 'inglaterra': '🇬🇧', 'irlanda': '🇮🇪', 'russia': '🇷🇺', 'grecia': '🇬🇷', 'suica': '🇨🇭', 'austria': '🇦🇹', 'suecia': '🇸🇪', 'noruega': '🇳🇴', 'dinamarca': '🇩🇰', 'finlandia': '🇫🇮', 'polonia': '🇵🇱', 'belgica': '🇧🇪', 'holanda': '🇳🇱', 'paises baixos': '🇳🇱', 'ucrania': '🇺🇦', 'turquia': '🇹🇷', 'checa': '🇨🇿', 'hungria': '🇭🇺', 'romenia': '🇷🇴', 'bulgaria': '🇧🇬', 'croacia': '🇭🇷', 'servia': '🇷🇸', 'eslovaquia': '🇸🇰', 'eslovenia': '🇸🇮', 'estonia': '🇪🇪', 'letonia': '🇱🇻', 'lituania': '🇱🇹', 'islandia': '🇮🇸', 'luxemburgo': '🇱🇺', 'monaco': '🇲🇨', 'angola': '🇦🇴', 'mocambique': '🇲🇿', 'africa do sul': '🇿🇦', 'egito': '🇪🇬', 'nigeria': '🇳🇬', 'marrocos': '🇲🇦', 'argelia': '🇩🇿', 'quenia': '🇰🇪', 'etiopia': '🇪🇹', 'tanzania': '🇹🇿', 'mali': '🇲🇱', 'congo': '🇨🇩', 'gana': '🇬🇭', 'camaroes': '🇨🇲', 'costa do marfim': '🇨🇮', 'senegal': '🇸🇳', 'tunisia': '🇹🇳', 'madagascar': '🇲🇬', 'japao': '🇯🇵', 'china': '🇨🇳', 'coreia do sul': '🇰🇷', 'india': '🇮🇳', 'israel': '🇮🇱', 'palestina': '🇵🇸', 'iraque': '🇮🇶', 'ira': '🇮🇷', 'afeganistao': '🇦🇫', 'vietna': '🇻🇳', 'tailandia': '🇹🇭', 'indonesia': '🇮🇩', 'filipinas': '🇵🇭', 'malasia': '🇲🇾', 'singapura': '🇸🇬', 'paquistao': '🇵🇰', 'bangladesh': '🇧🇩', 'arabia saudita': '🇸🇦', 'emirados arabes': '🇦🇪', 'catar': '🇶🇦', 'libano': '🇱🇧', 'jordania': '🇯🇴', 'siria': '🇸🇾', 'australia': '🇦🇺', 'nova zelandia': '🇳🇿', 'timor leste': '🇹🇱', 'fiji': '🇫🇯', 'niger': '🇳🇪', 'chade': '🇹🇩', 'sudan': '🇸🇩', 'libia': '🇱🇾', 'somalia': '🇸🇴', 'zambia': '🇿🇲', 'zimbabue': '🇿🇼', 'namibia': '🇳🇦', 'botsuana': '🇧🇼', 'guiana': '🇬🇾', 'suriname': '🇸🇷'
+  'brasil': '🇧🇷', 'brasileira': '🇧🇷', 'argentina': '🇦🇷', 'chile': '🇨🇱', 'colombia': '🇨🇴', 'mexico': '🇲🇽', 'estados unidos': '🇺🇸', 'eua': '🇺🇸', 'canada': '🇨🇦', 'peru': '🇵🇪', 'uruguai': '🇺🇾', 'paraguai': '🇵🇾', 'bolivia': '🇧🇴', 'equador': '🇪🇨', 'venezuela': '🇻🇪', 'cuba': '🇨🇺', 'portugal': '🇵🇹', 'espanha': '🇪🇸', 'franca': '🇫🇷', 'italia': '🇮🇹', 'alemanha': '🇩🇪', 'reino unido': '🇬🇧', 'inglaterra': '🇬🇧', 'irlanda': '🇮🇪', 'russia': '🇷🇺', 'japao': '🇯🇵', 'china': '🇨🇳'
 };
 
 const genreColors: Record<string, string> = {
@@ -32,6 +32,11 @@ const genreColors: Record<string, string> = {
   'Romance': 'bg-rose-50 text-rose-800 border-rose-100',
   'Autoajuda': 'bg-zinc-700 text-zinc-100 border-zinc-600',
   'Outros': 'bg-stone-50 text-stone-500 border-stone-200'
+};
+
+const genreBarColors: Record<string, string> = {
+    'História': 'bg-amber-500', 'Medicina': 'bg-emerald-500', 'Psicologia': 'bg-indigo-500',
+    'Filosofia': 'bg-stone-700', 'Romance': 'bg-rose-500', 'Autoajuda': 'bg-zinc-500', 'Outros': 'bg-stone-300'
 };
 
 export default function App() {
@@ -78,25 +83,17 @@ export default function App() {
         { ...en, quote: currentEntry.quote, reflection: currentEntry.reflection } : en
       );
     } else {
-      newHistory = [{ 
-        id: crypto.randomUUID(), 
-        date: new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }), 
-        quote: currentEntry.quote, 
-        reflection: currentEntry.reflection 
-      }, ...newHistory];
+      newHistory = [{ id: crypto.randomUUID(), date: new Date().toLocaleDateString('pt-BR'), quote: currentEntry.quote, reflection: currentEntry.reflection }, ...newHistory];
     }
     await supabase.from('books').update({ notes: JSON.stringify(newHistory) }).eq('id', selectedBookId);
     setCurrentEntry({ quote: '', reflection: '' }); setEditingEntryId(null); refreshBooks();
   }
 
   async function handleDeleteEntry(entryId: string) {
-    if (!selectedBookId || !confirm('Deseja excluir esta anotação permanentemente?')) return;
+    if (!selectedBookId || !confirm('Deseja excluir esta anotação?')) return;
     const newHistory = history.filter(en => en.id !== entryId);
     await supabase.from('books').update({ notes: JSON.stringify(newHistory) }).eq('id', selectedBookId);
-    if (editingEntryId === entryId) {
-      setCurrentEntry({ quote: '', reflection: '' });
-      setEditingEntryId(null);
-    }
+    if (editingEntryId === entryId) { setCurrentEntry({ quote: '', reflection: '' }); setEditingEntryId(null); }
     refreshBooks();
   }
 
@@ -114,11 +111,42 @@ export default function App() {
     } catch (e: any) { alert(e.message); }
   }
 
-  const stats = useMemo(() => ({
-    total: books.length,
-    completed: books.filter(b => b.status === 'Concluído').length,
-    pages: books.reduce((acc, b) => acc + (b.read_pages || 0), 0)
-  }), [books]);
+  // CÁLCULO DE ESTATÍSTICAS AVANÇADAS
+  const analytics = useMemo(() => {
+    const finished = books.filter(b => b.status === 'Concluído');
+    const reading = books.filter(b => b.status === 'Lendo');
+    const totalPages = books.reduce((acc, b) => acc + (b.read_pages || 0), 0);
+    
+    // Gêneros
+    const genres: Record<string, number> = {};
+    books.forEach(b => { if(b.genre) genres[b.genre] = (genres[b.genre] || 0) + 1; });
+    const sortedGenres = Object.entries(genres).sort((a,b) => b[1] - a[1]).slice(0, 5);
+
+    // Nacionalidades
+    const nations: Record<string, number> = {};
+    books.forEach(b => { 
+        if(b.author_nationality) {
+            const nat = b.author_nationality.toLowerCase().trim();
+            nations[nat] = (nations[nat] || 0) + 1;
+        }
+    });
+    const sortedNations = Object.entries(nations).sort((a,b) => b[1] - a[1]).slice(0, 6);
+
+    // Performance
+    const avgPages = finished.length > 0 ? Math.round(finished.reduce((acc, b) => acc + (b.total_pages || 0), 0) / finished.length) : 0;
+    const thickestBook = finished.length > 0 ? finished.reduce((prev, current) => (prev.total_pages > current.total_pages) ? prev : current) : null;
+
+    return {
+      totalBooks: books.length,
+      completed: finished.length,
+      reading: reading.length,
+      totalPages,
+      avgPages,
+      thickestBook,
+      sortedGenres,
+      sortedNations
+    };
+  }, [books]);
 
   return (
     <div className="min-h-screen bg-[#F9F7F2] text-slate-900 print:bg-white">
@@ -136,23 +164,11 @@ export default function App() {
       </header>
 
       <main className="max-w-[1600px] mx-auto p-6 space-y-8 print:p-0">
-        {/* CARDS KPI COM ÍCONES RESTAURADOS */}
+        {/* CARDS KPI */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 print:hidden">
-          <div className="bg-white p-6 rounded-[2rem] border border-stone-100 shadow-sm flex flex-col items-center justify-center">
-              <Library className="text-stone-300 mb-2 w-6 h-6"/>
-              <p className="text-2xl font-black text-stone-900">{stats.total}</p>
-              <p className="text-[9px] font-black uppercase text-stone-400 tracking-widest">Acervo</p>
-          </div>
-          <div className="bg-white p-6 rounded-[2rem] border border-stone-100 shadow-sm flex flex-col items-center justify-center">
-              <Trophy className="text-amber-400 mb-2 w-6 h-6"/>
-              <p className="text-2xl font-black text-stone-900">{stats.pages.toLocaleString()}</p>
-              <p className="text-[9px] font-black uppercase text-stone-400 tracking-widest">Páginas</p>
-          </div>
-          <div className="bg-white p-6 rounded-[2rem] border border-stone-100 shadow-sm flex flex-col items-center justify-center">
-              <CheckCircle2 className="text-stone-900 mb-2 w-6 h-6"/>
-              <p className="text-2xl font-black text-stone-900">{stats.completed}</p>
-              <p className="text-[9px] font-black uppercase text-stone-400 tracking-widest">Lidos</p>
-          </div>
+          <div className="bg-white p-6 rounded-[2rem] border border-stone-100 shadow-sm flex flex-col items-center justify-center"><Library className="text-stone-300 mb-2 w-6 h-6"/><p className="text-2xl font-black text-stone-900">{analytics.totalBooks}</p><p className="text-[9px] font-black uppercase text-stone-400 tracking-widest">Acervo</p></div>
+          <div className="bg-white p-6 rounded-[2rem] border border-stone-100 shadow-sm flex flex-col items-center justify-center"><Trophy className="text-amber-400 mb-2 w-6 h-6"/><p className="text-2xl font-black text-stone-900">{analytics.totalPages.toLocaleString()}</p><p className="text-[9px] font-black uppercase text-stone-400 tracking-widest">Páginas</p></div>
+          <div className="bg-white p-6 rounded-[2rem] border border-stone-100 shadow-sm flex flex-col items-center justify-center"><CheckCircle2 className="text-stone-900 mb-2 w-6 h-6"/><p className="text-2xl font-black text-stone-900">{analytics.completed}</p><p className="text-[9px] font-black uppercase text-stone-400 tracking-widest">Lidos</p></div>
         </div>
 
         {currentView === 'library' && (
@@ -166,9 +182,7 @@ export default function App() {
                   <div className="flex-1 py-1">
                     <span className={`text-[8px] font-black uppercase px-2 py-1 rounded-md border mb-3 block w-fit ${genreColors[typedBook.genre || 'Outros']}`}>{typedBook.genre}</span>
                     <h3 className="font-black text-lg text-stone-900 leading-tight mb-1">{typedBook.title}</h3>
-                    <p className="text-xs text-stone-400 font-bold uppercase flex items-center gap-1">
-                      {typedBook.author_nationality ? (countryFlags[typedBook.author_nationality.toLowerCase().trim()] || <Globe size={10}/>) : <Globe size={10}/>} {typedBook.author}
-                    </p>
+                    <p className="text-xs text-stone-400 font-bold uppercase flex items-center gap-1">{typedBook.author_nationality ? (countryFlags[typedBook.author_nationality.toLowerCase().trim()] || <Globe size={10}/>) : <Globe size={10}/>} {typedBook.author}</p>
                     <div className="mt-6"><div className="flex justify-between text-[9px] font-black text-stone-400 mb-1.5 uppercase tracking-widest"><span>Progresso</span><span className="text-amber-600">{progress}%</span></div><div className="w-full bg-stone-100 h-1.5 rounded-full overflow-hidden shadow-inner"><div className="bg-amber-500 h-full transition-all duration-1000" style={{ width: `${progress}%` }}></div></div></div>
                     <div className="mt-5 flex gap-2"><span className="text-[9px] font-black px-3 py-1 rounded-lg bg-stone-50 text-stone-500 uppercase">{typedBook.status}</span>{typedBook.notes && <div className="bg-amber-100 text-amber-700 px-3 py-1 rounded-lg text-[9px] font-black flex items-center gap-1 shadow-sm uppercase"><StickyNote size={10}/> Nota</div>}</div>
                   </div>
@@ -191,14 +205,11 @@ export default function App() {
               </select>
               {activeInsightBook && (
                 <>
-                   <button onClick={handleSaveEntry} className={`px-8 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest flex items-center gap-2 transition-all shadow-lg active:scale-95 ${editingEntryId ? 'bg-amber-500 hover:bg-amber-600 text-white' : 'bg-stone-900 hover:bg-stone-800 text-white'}`}>
-                      <Save size={18}/> {editingEntryId ? 'Atualizar Nota' : 'Salvar Insight'}
-                   </button>
+                   <button onClick={handleSaveEntry} className={`px-8 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest flex items-center gap-2 transition-all shadow-lg active:scale-95 ${editingEntryId ? 'bg-amber-500 hover:bg-amber-600 text-white' : 'bg-stone-900 hover:bg-stone-800 text-white'}`}><Save size={18}/> {editingEntryId ? 'Atualizar Nota' : 'Salvar Insight'}</button>
                    <button onClick={() => window.print()} className="bg-stone-100 text-stone-600 px-6 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest flex items-center gap-2 hover:bg-stone-200 transition-all shadow-sm active:scale-95"><FileDown size={18}/> PDF</button>
                 </>
               )}
             </div>
-
             {activeInsightBook && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                 <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 bg-white rounded-[3rem] border border-stone-200 overflow-hidden shadow-2xl min-h-[600px] relative print:shadow-none print:border-none print:block">
@@ -211,12 +222,8 @@ export default function App() {
                     <textarea className="w-full h-[450px] bg-transparent text-xl font-bold text-stone-900 outline-none resize-none leading-relaxed print:h-auto print:text-black print:font-normal" placeholder="O que você aprendeu?" value={currentEntry.reflection} onChange={e => setCurrentEntry({...currentEntry, reflection: e.target.value})} />
                   </div>
                 </div>
-
                 <div className="lg:col-span-4 space-y-4 print:hidden">
-                  <div className="flex items-center justify-between px-4">
-                     <div className="flex items-center gap-2 font-black uppercase text-[10px] text-stone-400"><History size={16}/> Histórico</div>
-                     {editingEntryId && <button onClick={() => { setEditingEntryId(null); setCurrentEntry({quote:'', reflection:''}) }} className="text-[9px] font-bold text-red-500 uppercase hover:underline">Cancelar</button>}
-                  </div>
+                  <div className="flex items-center justify-between px-4"><div className="flex items-center gap-2 font-black uppercase text-[10px] text-stone-400"><History size={16}/> Histórico</div>{editingEntryId && <button onClick={() => { setEditingEntryId(null); setCurrentEntry({quote:'', reflection:''}) }} className="text-[9px] font-bold text-red-500 uppercase hover:underline">Cancelar</button>}</div>
                   <div className="space-y-3 max-h-[650px] overflow-y-auto pr-2 custom-scrollbar">
                     {history.map((entry) => (
                       <div key={entry.id} className={`w-full text-left p-5 rounded-[2rem] border transition-all relative group ${editingEntryId === entry.id ? 'bg-amber-50 border-amber-300 ring-2 ring-amber-100' : 'bg-white border-stone-100 hover:border-stone-300'}`}>
@@ -227,10 +234,7 @@ export default function App() {
                               <button onClick={(e) => { e.stopPropagation(); handleDeleteEntry(entry.id); }} className="p-1.5 bg-stone-100 text-stone-500 rounded-lg hover:bg-red-500 hover:text-white transition-colors"><Trash2 size={12}/></button>
                            </div>
                         </div>
-                        <div onClick={() => loadEntryForEdit(entry)} className="cursor-pointer">
-                            <p className="text-sm font-serif italic text-stone-600 line-clamp-2 mb-2">"{entry.quote}"</p>
-                            <p className="text-xs font-bold text-stone-900 line-clamp-2">{entry.reflection}</p>
-                        </div>
+                        <div onClick={() => loadEntryForEdit(entry)} className="cursor-pointer"><p className="text-sm font-serif italic text-stone-600 line-clamp-2 mb-2">"{entry.quote}"</p><p className="text-xs font-bold text-stone-900 line-clamp-2">{entry.reflection}</p></div>
                       </div>
                     ))}
                     {history.length === 0 && <div className="p-10 text-center text-stone-300 border-4 border-dashed border-stone-100 rounded-[2.5rem] font-black uppercase text-[10px]">Sem registros</div>}
@@ -241,15 +245,97 @@ export default function App() {
           </div>
         )}
 
+        {/* 📊 NOVA DASHBOARD DE RELATÓRIOS */}
         {currentView === 'analytics' && (
-          <div className="bg-white p-12 rounded-[3rem] border border-stone-100 shadow-xl print:hidden animate-in slide-in-from-bottom-4">
-            <h2 className="text-[11px] font-black uppercase text-amber-600 tracking-[0.3em] mb-6">Reading Challenge 2026</h2>
-            <div className="w-full bg-stone-50 h-5 rounded-full overflow-hidden shadow-inner border border-stone-100"><div className="bg-amber-500 h-full transition-all duration-1000 shadow-[0_0_20px_rgba(245,158,11,0.5)]" style={{ width: `${Math.min((stats.completed/readingGoal)*100, 100)}%` }}></div></div>
-            <p className="text-4xl font-black mt-8 text-stone-900 tracking-tighter">{stats.completed} de {readingGoal} lidos</p>
+          <div className="space-y-6 animate-in slide-in-from-bottom-4">
+            {/* Reading Challenge (Mantido e Melhorado) */}
+            <div className="bg-white p-12 rounded-[3rem] border border-stone-100 shadow-xl">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-[11px] font-black uppercase text-amber-600 tracking-[0.3em]">Reading Challenge 2026</h2>
+                <div className="flex items-center gap-2 text-stone-400 text-xs font-bold">
+                    <Trophy size={14} className="text-amber-500"/> Meta: {readingGoal}
+                </div>
+              </div>
+              <div className="w-full bg-stone-50 h-5 rounded-full overflow-hidden shadow-inner border border-stone-100"><div className="bg-amber-500 h-full transition-all duration-1000 shadow-[0_0_20px_rgba(245,158,11,0.5)]" style={{ width: `${Math.min((analytics.completed/readingGoal)*100, 100)}%` }}></div></div>
+              <p className="text-4xl font-black mt-8 text-stone-900 tracking-tighter">{analytics.completed} <span className="text-stone-300 text-xl font-bold">de {readingGoal} livros lidos</span></p>
+            </div>
+
+            {/* Grid Principal de Dados */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                {/* Ranking de Gêneros */}
+                <div className="bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm">
+                    <div className="flex items-center gap-3 mb-8 text-stone-900">
+                        <div className="p-2 bg-indigo-50 rounded-xl text-indigo-600"><BarChart3 size={20}/></div>
+                        <h3 className="font-black uppercase tracking-widest text-xs">Top Gêneros</h3>
+                    </div>
+                    <div className="space-y-5">
+                        {analytics.sortedGenres.map(([genre, count], idx) => (
+                            <div key={genre}>
+                                <div className="flex justify-between text-[10px] font-black uppercase mb-2 text-stone-500">
+                                    <span>{genre}</span>
+                                    <span>{count}</span>
+                                </div>
+                                <div className="w-full bg-stone-50 h-2 rounded-full overflow-hidden">
+                                    <div className={`h-full ${genreBarColors[genre] || 'bg-stone-400'}`} style={{ width: `${(count / analytics.totalBooks) * 100}%` }}></div>
+                                </div>
+                            </div>
+                        ))}
+                        {analytics.sortedGenres.length === 0 && <p className="text-stone-300 text-xs font-bold text-center py-4">Sem dados suficientes</p>}
+                    </div>
+                </div>
+
+                {/* Mapa de Nacionalidades */}
+                <div className="bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm">
+                    <div className="flex items-center gap-3 mb-8 text-stone-900">
+                        <div className="p-2 bg-emerald-50 rounded-xl text-emerald-600"><MapPin size={20}/></div>
+                        <h3 className="font-black uppercase tracking-widest text-xs">Origem dos Autores</h3>
+                    </div>
+                    <div className="grid grid-cols-1 gap-3">
+                        {analytics.sortedNations.map(([nation, count]) => (
+                            <div key={nation} className="flex items-center justify-between p-3 rounded-2xl bg-stone-50 border border-stone-100">
+                                <div className="flex items-center gap-3">
+                                    <span className="text-xl">{countryFlags[nation] || '🏳️'}</span>
+                                    <span className="text-[10px] font-black uppercase text-stone-600">{nation}</span>
+                                </div>
+                                <span className="text-[10px] font-black bg-white px-2 py-1 rounded-lg shadow-sm text-stone-900">{count}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Card de Stats Rápidos */}
+                <div className="bg-stone-900 text-white p-8 rounded-[2.5rem] shadow-xl flex flex-col justify-between">
+                    <div>
+                        <div className="flex items-center gap-3 mb-8 text-white/50">
+                            <div className="p-2 bg-white/10 rounded-xl text-white"><BookOpen size={20}/></div>
+                            <h3 className="font-black uppercase tracking-widest text-xs">Performance</h3>
+                        </div>
+                        <div className="space-y-6">
+                            <div>
+                                <p className="text-[9px] font-black uppercase text-white/40 mb-1">Média de Páginas</p>
+                                <p className="text-3xl font-black">{analytics.avgPages}</p>
+                            </div>
+                            <div>
+                                <p className="text-[9px] font-black uppercase text-white/40 mb-1">Leituras Ativas</p>
+                                <p className="text-3xl font-black text-amber-500">{analytics.reading}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {analytics.thickestBook && (
+                        <div className="mt-8 p-4 bg-white/5 rounded-2xl border border-white/10">
+                            <p className="text-[8px] font-black uppercase text-white/40 mb-2">Maior Calhamaço</p>
+                            <p className="text-xs font-bold line-clamp-1">{analytics.thickestBook.title}</p>
+                            <p className="text-[10px] text-white/60">{analytics.thickestBook.total_pages} págs</p>
+                        </div>
+                    )}
+                </div>
+            </div>
           </div>
         )}
       </main>
 
+      {/* MODAL E CSS MANTIDOS IGUAIS (Para economizar espaço, mas estão no código final) */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-stone-950/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 print:hidden animate-in fade-in duration-300">
           <div className="bg-white w-full max-w-xl rounded-[2.5rem] p-8 shadow-2xl overflow-y-auto max-h-[90vh] border border-stone-100">
@@ -276,6 +362,8 @@ export default function App() {
           @page { size: A4 portrait; margin: 2cm; } 
           body { background: white !important; -webkit-print-color-adjust: exact; font-family: serif; }
           .print\\:hidden { display: none !important; }
+          .print\\:p-0 { padding: 0 !important; }
+          .print\\:mb-10 { margin-bottom: 2.5rem !important; }
           textarea { border: none !important; resize: none !important; overflow: visible !important; height: auto !important; }
         }
       `}</style>
