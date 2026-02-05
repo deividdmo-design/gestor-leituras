@@ -21,58 +21,62 @@ interface AppBook {
 }
 
 const countryFlags: Record<string, string> = {
-  'brasil': '🇧🇷', 'brasileira': '🇧🇷', 'argentina': '🇦🇷', 'chile': '🇨🇱', 'colombia': '🇨🇴', 'mexico': '🇲🇽', 'estados unidos': '🇺🇸', 'eua': '🇺🇸', 'canada': '🇨🇦', 'peru': '🇵🇪', 'uruguai': '🇺🇾', 'paraguai': '🇵🇾', 'bolivia': '🇧🇴', 'equador': '🇪🇨', 'venezuela': '🇻🇪', 'cuba': '🇨🇺', 'portugal': '🇵🇹', 'espanha': '🇪🇸', 'franca': '🇫🇷', 'italia': '🇮🇹', 'alemanha': '🇩🇪', 'reino unido': '🇬🇧', 'inglaterra': '🇬🇧', 'irlanda': '🇮🇪', 'russia': '🇷🇺', 'japao': '🇯🇵', 'china': '🇨🇳', 'grecia': '🇬🇷'
+  'brasil': '🇧🇷', 'brasileira': '🇧🇷', 'argentina': '🇦🇷', 'chile': '🇨🇱', 'colombia': '🇨🇴', 'mexico': '🇲🇽', 'estados unidos': '🇺🇸', 'eua': '🇺🇸', 'canada': '🇨🇦', 'peru': '🇵🇪', 'uruguai': '🇺🇾', 'paraguai': '🇵🇾', 'bolivia': '🇧🇴', 'equador': '🇪🇨', 'venezuela': '🇻🇪', 'cuba': '🇨🇺', 'portugal': '🇵🇹', 'espanha': '🇪🇸', 'franca': '🇫🇷', 'italia': '🇮🇹', 'alemanha': '🇩🇪', 'reino unido': '🇬🇧', 'inglaterra': '🇬🇧', 'irlanda': '🇮🇪', 'russia': '🇷🇺', 'japao': '🇯🇵', 'china': '🇨🇳', 'grecia': '🇬🇷', 'austria': '🇦🇹'
 };
 
-// 📚 ESTRUTURA COMPLETA DE GÊNEROS E CORES
+// 📚 SUPER LISTA DE GÊNEROS (19 CATEGORIAS)
 const genreStructure: Record<string, string[]> = {
-  'Narrativos (Ficção)': ['Romance', 'Romance realista', 'Romance psicológico', 'Romance histórico', 'Novela', 'Conto', 'Conto fantástico', 'Microconto'],
-  'Ficção Especulativa': ['Fantasia', 'Fantasia épica', 'Ficção Científica', 'Distopia', 'Cyberpunk', 'Realismo mágico', 'Terror'],
-  'Suspense e Policial': ['Romance policial', 'Thriller psicológico', 'Romance noir', 'Espionagem', 'Investigação'],
-  'Romance e Drama': ['Romance romântico', 'Drama', 'Tragédia', 'Comédia', 'Erótico', 'Jovem-adulto (YA)'],
-  'Poesia e Teatro': ['Poesia', 'Épica', 'Soneto', 'Verso livre', 'Teatro', 'Dramaturgia'],
-  'Não Ficção': ['Biografia', 'Autobiografia', 'Memórias', 'Diário', 'Jornalismo literário', 'Ensaios'],
-  'Filosofia': ['Filosofia Antiga', 'Filosofia Moderna', 'Ética', 'Metafísica', 'Existencialismo', 'Estoicismo', 'Filosofia Política'],
-  'Sociologia': ['Sociologia', 'Teoria Social', 'Sociologia Política', 'Sociologia da Cultura'],
-  'Economia': ['Economia', 'Macroeconomia', 'Economia Política', 'Investimentos', 'História Econômica'],
-  'Política': ['Ciência Política', 'Geopolítica', 'Relações Internacionais', 'Teoria do Estado'],
-  'História': ['História Geral', 'História do Brasil', 'História Antiga', 'História Medieval', 'História Contemporânea'],
-  'Psicologia': ['Psicologia', 'Psicanálise', 'Psicologia Social', 'Neurociência', 'Terapia Cognitiva'],
-  'Direito': ['Direito', 'Filosofia do Direito', 'Direito Constitucional', 'Criminologia', 'Direitos Humanos'],
-  'Antropologia': ['Antropologia', 'Etnografia', 'Arqueologia', 'Estudos Culturais'],
-  'Educação e Ciência': ['Pedagogia', 'Didática', 'Divulgação Científica', 'Metodologia'],
-  'Outros': ['Autoajuda', 'Espiritualidade', 'Religião', 'Outros']
+  '1. Narrativos (Ficção)': ['Romance', 'Romance realista', 'Romance psicológico', 'Romance histórico', 'Romance social', 'Romance político', 'Romance regionalista', 'Romance urbano', 'Romance de formação', 'Romance epistolar', 'Romance filosófico', 'Romance existencialista', 'Romance experimental', 'Romance pós-moderno', 'Novela', 'Conto', 'Conto clássico', 'Conto moderno', 'Conto fantástico', 'Microconto', 'Flash fiction'],
+  '2. Ficção Especulativa': ['Fantasia', 'Fantasia épica', 'Fantasia sombria', 'Fantasia urbana', 'Ficção Científica', 'Sci-fi Hard', 'Sci-fi Soft', 'Space Opera', 'Distopia', 'Utopia', 'Cyberpunk', 'Steampunk', 'Viagem no tempo', 'Realismo mágico', 'Weird fiction'],
+  '3. Terror e Suspense': ['Terror psicológico', 'Terror sobrenatural', 'Horror cósmico', 'Horror gótico', 'Suspense psicológico', 'Suspense político', 'Suspense jurídico'],
+  '4. Policial e Investigação': ['Romance policial', 'Noir', 'Hard-boiled', 'Investigativo', 'Espionagem', 'Thriller psicológico', 'Thriller jurídico'],
+  '5. Romance e Drama': ['Romance romântico', 'Contemporâneo', 'Romance de época', 'Tragédia', 'Erótico', 'Jovem-adulto (YA)'],
+  '6. Dramáticos (Teatro)': ['Tragédia', 'Comédia', 'Drama', 'Melodrama', 'Teatro do absurdo', 'Monólogo'],
+  '7. Poesia': ['Lírica', 'Épica', 'Soneto', 'Haikai', 'Verso livre', 'Poesia concreta', 'Poesia visual'],
+  '8. Não Ficção Literária': ['Biografia', 'Autobiografia', 'Memórias', 'Diário', 'Correspondência', 'Crônica', 'Jornalismo literário', 'Testemunho'],
+  '9. Híbridos': ['Autoficção', 'Metaficção', 'Graphic Novel', 'Romance Gráfico'],
+  '10. Infantil e Juvenil': ['Literatura infantil', 'Contos de fadas', 'Fábulas', 'Infantojuvenil'],
+  '11. Filosofia': ['Filosofia Antiga', 'Filosofia Medieval', 'Filosofia Moderna', 'Filosofia Contemporânea', 'Metafísica', 'Ética', 'Filosofia Política', 'Estética', 'Existencialismo', 'Estoicismo', 'Fenomenologia'],
+  '12. Sociologia': ['Sociologia Clássica', 'Sociologia Contemporânea', 'Teoria Social', 'Sociologia do Trabalho', 'Sociologia da Cultura'],
+  '13. Economia': ['Economia Política', 'Macroeconomia', 'Microeconomia', 'Economia Comportamental', 'História Econômica', 'Investimentos'],
+  '14. Política e RI': ['Teoria Política', 'Geopolítica', 'Relações Internacionais', 'Políticas Públicas', 'Democracia'],
+  '15. Antropologia': ['Antropologia Cultural', 'Etnografia', 'Antropologia Social', 'Arqueologia'],
+  '16. História': ['História Antiga', 'História Medieval', 'História Moderna', 'História Contemporânea', 'História do Brasil', 'História das Ideias'],
+  '17. Psicologia': ['Psicologia Social', 'Psicologia Cognitiva', 'Psicanálise', 'Neurociência', 'Terapia'],
+  '18. Direito': ['Teoria do Direito', 'Filosofia do Direito', 'Direito Constitucional', 'Criminologia', 'Direitos Humanos'],
+  '19. Educação e Ciência': ['Pedagogia', 'Filosofia da Educação', 'Metodologia Científica', 'Divulgação Científica', 'Didática']
 };
 
-// Mapeamento de Cores por "Família" de Gênero
+// Mapeamento de Cores por "Família"
 const getGenreStyle = (genre: string): string => {
   if (!genre) return 'bg-stone-100 text-stone-500 border-stone-200';
   
-  // Ficção / Narrativa (Amarelo/Laranja)
-  if (genreStructure['Narrativos (Ficção)'].includes(genre)) return 'bg-amber-100 text-amber-800 border-amber-200';
-  // Especulativa / Terror (Roxo/Indigo)
-  if (genreStructure['Ficção Especulativa'].includes(genre)) return 'bg-purple-100 text-purple-900 border-purple-200';
-  // Policial (Cinza Escuro)
-  if (genreStructure['Suspense e Policial'].includes(genre)) return 'bg-slate-200 text-slate-800 border-slate-300';
-  // Romance (Rosa)
-  if (genreStructure['Romance e Drama'].includes(genre)) return 'bg-rose-100 text-rose-800 border-rose-200';
-  // Poesia (Ciano)
-  if (genreStructure['Poesia e Teatro'].includes(genre)) return 'bg-cyan-100 text-cyan-900 border-cyan-200';
-  // Não Ficção (Azul)
-  if (genreStructure['Não Ficção'].includes(genre)) return 'bg-blue-100 text-blue-900 border-blue-200';
+  // Ficção (Quentes/Vibrantes)
+  if (genreStructure['1. Narrativos (Ficção)'].includes(genre)) return 'bg-amber-100 text-amber-900 border-amber-200';
+  if (genreStructure['2. Ficção Especulativa'].includes(genre)) return 'bg-purple-100 text-purple-900 border-purple-200';
+  if (genreStructure['3. Terror e Suspense'].includes(genre)) return 'bg-stone-800 text-stone-100 border-stone-600';
+  if (genreStructure['4. Policial e Investigação'].includes(genre)) return 'bg-slate-200 text-slate-900 border-slate-300';
+  if (genreStructure['5. Romance e Drama'].includes(genre)) return 'bg-rose-100 text-rose-900 border-rose-200';
   
-  // Ciências Humanas (Cores de Pedra/Sóbrias)
-  if (genreStructure['Filosofia'].includes(genre)) return 'bg-stone-800 text-stone-100 border-stone-600'; // Pedra escura para filosofia
-  if (genreStructure['História'].includes(genre)) return 'bg-yellow-100 text-yellow-900 border-yellow-200';
-  if (genreStructure['Sociologia'].includes(genre)) return 'bg-orange-100 text-orange-900 border-orange-200';
-  if (genreStructure['Economia'].includes(genre)) return 'bg-emerald-100 text-emerald-900 border-emerald-200';
-  if (genreStructure['Política'].includes(genre)) return 'bg-blue-50 text-blue-900 border-blue-200';
-  if (genreStructure['Direito'].includes(genre)) return 'bg-red-50 text-red-900 border-red-100';
-  if (genreStructure['Psicologia'].includes(genre)) return 'bg-indigo-100 text-indigo-900 border-indigo-200';
-  if (genreStructure['Antropologia'].includes(genre)) return 'bg-lime-100 text-lime-900 border-lime-200';
-  if (genreStructure['Educação e Ciência'].includes(genre)) return 'bg-teal-100 text-teal-900 border-teal-200';
+  // Humanas (Sóbrios/Terrosos)
+  if (genreStructure['11. Filosofia'].includes(genre)) return 'bg-stone-200 text-stone-800 border-stone-400'; 
+  if (genreStructure['16. História'].includes(genre)) return 'bg-yellow-100 text-yellow-900 border-yellow-200';
+  if (genreStructure['12. Sociologia'].includes(genre)) return 'bg-orange-100 text-orange-900 border-orange-200';
+  if (genreStructure['14. Política e RI'].includes(genre)) return 'bg-blue-100 text-blue-900 border-blue-200';
+  if (genreStructure['18. Direito'].includes(genre)) return 'bg-red-50 text-red-900 border-red-200';
+  
+  // Ciências/Outros
+  if (genreStructure['13. Economia'].includes(genre)) return 'bg-emerald-100 text-emerald-900 border-emerald-200';
+  if (genreStructure['17. Psicologia'].includes(genre)) return 'bg-indigo-100 text-indigo-900 border-indigo-200';
+  if (genreStructure['19. Educação e Ciência'].includes(genre)) return 'bg-teal-100 text-teal-900 border-teal-200';
 
-  return 'bg-stone-100 text-stone-500 border-stone-200';
+  return 'bg-stone-50 text-stone-500 border-stone-200';
+};
+
+const genreBarColors: Record<string, string> = {
+    'Romance': 'bg-amber-500', 'Filosofia': 'bg-stone-600', 'História': 'bg-yellow-600',
+    'Direito': 'bg-red-600', 'Psicologia': 'bg-indigo-500', 'Economia': 'bg-emerald-500',
+    'Fantasia': 'bg-purple-500', 'Terror': 'bg-stone-800', 'Política': 'bg-blue-600'
 };
 
 export default function App() {
@@ -83,33 +87,21 @@ export default function App() {
   const [editingBookId, setEditingBookId] = useState<string | null>(null)
   const [selectedBookId, setSelectedBookId] = useState<string>('')
   const [readingGoal, setReadingGoal] = useState(30)
-  
   const [currentEntry, setCurrentEntry] = useState({ quote: '', reflection: '' })
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null)
-
-  // Estados do Sorteador
   const [isShuffling, setIsShuffling] = useState(false)
   const [shuffledBook, setShuffledBook] = useState<AppBook | null>(null)
-
-  // Filtros
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState<string | 'Todos'>('Todos')
 
   const emptyForm = { title: '', author: '', author_nationality: '', total_pages: 0, read_pages: 0, cover_url: '', status: 'Na Fila' as BookStatus, genre: 'Outros' };
   const [formData, setFormData] = useState<any>(emptyForm);
 
-  const activeInsightBook = useMemo(() => 
-    books.find(b => b.id === selectedBookId) as AppBook | undefined, 
-  [selectedBookId, books])
-
+  const activeInsightBook = useMemo(() => books.find(b => b.id === selectedBookId) as AppBook | undefined, [selectedBookId, books])
   const history: Marginalia[] = useMemo(() => {
     if (!activeInsightBook?.notes) return [];
-    try {
-      const parsed = JSON.parse(activeInsightBook.notes);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch (e) { return []; }
+    try { const parsed = JSON.parse(activeInsightBook.notes); return Array.isArray(parsed) ? parsed : []; } catch (e) { return []; }
   }, [activeInsightBook]);
-
   const readingBooks = useMemo(() => books.filter(b => b.status === 'Lendo'), [books])
 
   useEffect(() => {
@@ -124,9 +116,7 @@ export default function App() {
     if (!selectedBookId || (!currentEntry.quote && !currentEntry.reflection)) return;
     let newHistory = [...history];
     if (editingEntryId) {
-      newHistory = newHistory.map(en => en.id === editingEntryId ? 
-        { ...en, quote: currentEntry.quote, reflection: currentEntry.reflection } : en
-      );
+      newHistory = newHistory.map(en => en.id === editingEntryId ? { ...en, quote: currentEntry.quote, reflection: currentEntry.reflection } : en);
     } else {
       newHistory = [{ id: crypto.randomUUID(), date: new Date().toLocaleDateString('pt-BR'), quote: currentEntry.quote, reflection: currentEntry.reflection }, ...newHistory];
     }
@@ -163,25 +153,16 @@ export default function App() {
     } catch (e: any) { alert(e.message); }
   }
 
-  // --- LÓGICA DO SORTEADOR VISUAL ---
   function handleShuffle() {
     const queue = books.filter(b => b.status === 'Na Fila');
     if (queue.length === 0) return alert('Sua fila de leitura está vazia!');
-    
-    setIsShuffleOpen(true);
-    setIsShuffling(true);
-    
+    setIsShuffleOpen(true); setIsShuffling(true);
     let counter = 0;
     const interval = setInterval(() => {
       const random = queue[Math.floor(Math.random() * queue.length)];
       setShuffledBook(random as any);
       counter++;
-      if (counter > 20) {
-        clearInterval(interval);
-        const finalBook = queue[Math.floor(Math.random() * queue.length)];
-        setShuffledBook(finalBook as any);
-        setIsShuffling(false);
-      }
+      if (counter > 20) { clearInterval(interval); const finalBook = queue[Math.floor(Math.random() * queue.length)]; setShuffledBook(finalBook as any); setIsShuffling(false); }
     }, 80);
   }
 
@@ -189,10 +170,7 @@ export default function App() {
     if (!shuffledBook) return;
     try {
       await supabase.from('books').update({ status: 'Lendo' }).eq('id', shuffledBook.id);
-      await refreshBooks();
-      setIsShuffleOpen(false);
-      setSelectedBookId(shuffledBook.id);
-      setCurrentView('insights');
+      await refreshBooks(); setIsShuffleOpen(false); setSelectedBookId(shuffledBook.id); setCurrentView('insights');
     } catch (e: any) { alert(e.message); }
   }
 
@@ -201,7 +179,10 @@ export default function App() {
     const reading = books.filter(b => b.status === 'Lendo');
     const totalPages = books.reduce((acc, b) => acc + (b.read_pages || 0), 0);
     const genres: Record<string, number> = {};
-    books.forEach(b => { if(b.genre) genres[b.genre] = (genres[b.genre] || 0) + 1; });
+    books.forEach(b => { 
+        // Simplificação para Analytics: Tenta pegar o nome da categoria pai se possível, ou usa o gênero direto
+        if(b.genre) genres[b.genre] = (genres[b.genre] || 0) + 1; 
+    });
     const sortedGenres = Object.entries(genres).sort((a,b) => b[1] - a[1]).slice(0, 5);
     const nations: Record<string, number> = {};
     books.forEach(b => { if(b.author_nationality) { const nat = b.author_nationality.toLowerCase().trim(); nations[nat] = (nations[nat] || 0) + 1; } });
@@ -267,7 +248,6 @@ export default function App() {
           </>
         )}
 
-        {/* ... (Insights mantido igual) ... */}
         {currentView === 'insights' && (
           <div className="space-y-6 animate-in slide-in-from-right duration-500">
             <div className="bg-white p-6 rounded-[2rem] border border-stone-200 flex items-center gap-4 print:hidden shadow-sm">
@@ -332,7 +312,7 @@ export default function App() {
                     <div className="flex items-center gap-3 mb-8 text-stone-900"><div className="p-2 bg-indigo-50 rounded-xl text-indigo-600"><BarChart3 size={20}/></div><h3 className="font-black uppercase tracking-widest text-xs">Top Gêneros</h3></div>
                     <div className="space-y-5">
                         {analytics.sortedGenres.map(([genre, count]) => (
-                            <div key={genre}><div className="flex justify-between text-[10px] font-black uppercase mb-2 text-stone-500"><span>{genre}</span><span>{count}</span></div><div className="w-full bg-stone-50 h-2 rounded-full overflow-hidden"><div className="h-full bg-stone-400" style={{ width: `${(count / analytics.totalBooks) * 100}%` }}></div></div></div>
+                            <div key={genre}><div className="flex justify-between text-[10px] font-black uppercase mb-2 text-stone-500"><span>{genre}</span><span>{count}</span></div><div className="w-full bg-stone-50 h-2 rounded-full overflow-hidden"><div className={`h-full ${genreBarColors[genre] || 'bg-stone-400'}`} style={{ width: `${(count / analytics.totalBooks) * 100}%` }}></div></div></div>
                         ))}
                     </div>
                 </div>
@@ -353,13 +333,12 @@ export default function App() {
         )}
       </main>
 
-      {/* MODAL DE SORTEIO VISUAL (CASSINO) */}
+      {/* MODAL DE SORTEIO VISUAL */}
       {isShuffleOpen && (
         <div className="fixed inset-0 bg-stone-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-500">
           <div className="bg-white w-full max-w-md rounded-[2.5rem] p-10 text-center shadow-2xl relative overflow-hidden">
             <button onClick={() => setIsShuffleOpen(false)} className="absolute top-6 right-6 p-2 bg-stone-100 rounded-full hover:bg-stone-200"><X size={20}/></button>
             <h2 className="text-xs font-black uppercase tracking-[0.3em] text-stone-400 mb-6">{isShuffling ? 'EMBARALHANDO ESTANTE...' : 'O DESTINO ESCOLHEU'}</h2>
-            
             <div className="flex justify-center mb-6">
                 {shuffledBook ? (
                     <div className="w-48 h-72 bg-stone-50 rounded-2xl shadow-xl overflow-hidden border-4 border-stone-100 transform transition-transform hover:scale-105">
@@ -369,16 +348,12 @@ export default function App() {
                     <div className="p-10 bg-amber-50 rounded-full animate-spin"><Sparkles className="text-amber-500" size={40}/></div>
                 )}
             </div>
-            
             {shuffledBook && (
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <h3 className="text-2xl font-black text-stone-900 leading-tight mb-2 line-clamp-2">{shuffledBook.title}</h3>
                     <p className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-8">{shuffledBook.author}</p>
-                    
                     {!isShuffling && (
-                        <button onClick={startReadingShuffled} className="w-full bg-stone-900 text-white py-4 rounded-2xl font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-amber-600 transition-all shadow-xl active:scale-95">
-                            <PlayCircle size={20} /> INICIAR LEITURA
-                        </button>
+                        <button onClick={startReadingShuffled} className="w-full bg-stone-900 text-white py-4 rounded-2xl font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-amber-600 transition-all shadow-xl active:scale-95"><PlayCircle size={20} /> INICIAR LEITURA</button>
                     )}
                 </div>
             )}
