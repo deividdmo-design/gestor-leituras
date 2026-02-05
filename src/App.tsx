@@ -2,10 +2,10 @@ import { useState, useMemo, useEffect } from 'react'
 import { useBooks } from './contexts/BookContext'
 import { supabase } from './lib/supabase'
 import { 
-  Library, Globe, Save, History, 
+  Library, Save, History, 
   PieChart, LayoutGrid, Quote, MessageSquare, PenTool, Clock, FileDown,
   BookMarked, StickyNote, X, Pencil, Trash2, Plus, Trophy, CheckCircle2,
-  BarChart3, Calendar, BookOpen, MapPin
+  BarChart3, BookOpen, MapPin
 } from 'lucide-react'
 
 type BookStatus = 'Lendo' | 'Na Fila' | 'Concluído' | 'Abandonado';
@@ -248,7 +248,6 @@ export default function App() {
         {/* 📊 NOVA DASHBOARD DE RELATÓRIOS */}
         {currentView === 'analytics' && (
           <div className="space-y-6 animate-in slide-in-from-bottom-4">
-            {/* Reading Challenge (Mantido e Melhorado) */}
             <div className="bg-white p-12 rounded-[3rem] border border-stone-100 shadow-xl">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-[11px] font-black uppercase text-amber-600 tracking-[0.3em]">Reading Challenge 2026</h2>
@@ -260,9 +259,7 @@ export default function App() {
               <p className="text-4xl font-black mt-8 text-stone-900 tracking-tighter">{analytics.completed} <span className="text-stone-300 text-xl font-bold">de {readingGoal} livros lidos</span></p>
             </div>
 
-            {/* Grid Principal de Dados */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                
                 {/* Ranking de Gêneros */}
                 <div className="bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm">
                     <div className="flex items-center gap-3 mb-8 text-stone-900">
@@ -270,18 +267,14 @@ export default function App() {
                         <h3 className="font-black uppercase tracking-widest text-xs">Top Gêneros</h3>
                     </div>
                     <div className="space-y-5">
-                        {analytics.sortedGenres.map(([genre, count], idx) => (
+                        {analytics.sortedGenres.map(([genre, count]) => (
                             <div key={genre}>
-                                <div className="flex justify-between text-[10px] font-black uppercase mb-2 text-stone-500">
-                                    <span>{genre}</span>
-                                    <span>{count}</span>
-                                </div>
+                                <div className="flex justify-between text-[10px] font-black uppercase mb-2 text-stone-500"><span>{genre}</span><span>{count}</span></div>
                                 <div className="w-full bg-stone-50 h-2 rounded-full overflow-hidden">
                                     <div className={`h-full ${genreBarColors[genre] || 'bg-stone-400'}`} style={{ width: `${(count / analytics.totalBooks) * 100}%` }}></div>
                                 </div>
                             </div>
                         ))}
-                        {analytics.sortedGenres.length === 0 && <p className="text-stone-300 text-xs font-bold text-center py-4">Sem dados suficientes</p>}
                     </div>
                 </div>
 
@@ -294,17 +287,14 @@ export default function App() {
                     <div className="grid grid-cols-1 gap-3">
                         {analytics.sortedNations.map(([nation, count]) => (
                             <div key={nation} className="flex items-center justify-between p-3 rounded-2xl bg-stone-50 border border-stone-100">
-                                <div className="flex items-center gap-3">
-                                    <span className="text-xl">{countryFlags[nation] || '🏳️'}</span>
-                                    <span className="text-[10px] font-black uppercase text-stone-600">{nation}</span>
-                                </div>
+                                <div className="flex items-center gap-3"><span className="text-xl">{countryFlags[nation] || '🏳️'}</span><span className="text-[10px] font-black uppercase text-stone-600">{nation}</span></div>
                                 <span className="text-[10px] font-black bg-white px-2 py-1 rounded-lg shadow-sm text-stone-900">{count}</span>
                             </div>
                         ))}
                     </div>
                 </div>
 
-                {/* Card de Stats Rápidos */}
+                {/* Stats Rápidos */}
                 <div className="bg-stone-900 text-white p-8 rounded-[2.5rem] shadow-xl flex flex-col justify-between">
                     <div>
                         <div className="flex items-center gap-3 mb-8 text-white/50">
@@ -312,14 +302,8 @@ export default function App() {
                             <h3 className="font-black uppercase tracking-widest text-xs">Performance</h3>
                         </div>
                         <div className="space-y-6">
-                            <div>
-                                <p className="text-[9px] font-black uppercase text-white/40 mb-1">Média de Páginas</p>
-                                <p className="text-3xl font-black">{analytics.avgPages}</p>
-                            </div>
-                            <div>
-                                <p className="text-[9px] font-black uppercase text-white/40 mb-1">Leituras Ativas</p>
-                                <p className="text-3xl font-black text-amber-500">{analytics.reading}</p>
-                            </div>
+                            <div><p className="text-[9px] font-black uppercase text-white/40 mb-1">Média de Páginas</p><p className="text-3xl font-black">{analytics.avgPages}</p></div>
+                            <div><p className="text-[9px] font-black uppercase text-white/40 mb-1">Leituras Ativas</p><p className="text-3xl font-black text-amber-500">{analytics.reading}</p></div>
                         </div>
                     </div>
                     {analytics.thickestBook && (
@@ -335,7 +319,7 @@ export default function App() {
         )}
       </main>
 
-      {/* MODAL E CSS MANTIDOS IGUAIS (Para economizar espaço, mas estão no código final) */}
+      {/* MODAL E CSS */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-stone-950/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 print:hidden animate-in fade-in duration-300">
           <div className="bg-white w-full max-w-xl rounded-[2.5rem] p-8 shadow-2xl overflow-y-auto max-h-[90vh] border border-stone-100">
