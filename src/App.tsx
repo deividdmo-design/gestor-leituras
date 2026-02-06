@@ -5,7 +5,8 @@ import {
   Library, Globe, Save, History, 
   PieChart, LayoutGrid, Quote, MessageSquare, PenTool, Clock, FileDown,
   BookMarked, StickyNote, X, Pencil, Trash2, Plus, Trophy, CheckCircle2,
-  BarChart3, BookOpen, MapPin, Search, Shuffle, Sparkles, PlayCircle
+  BarChart3, BookOpen, MapPin, Search, Shuffle, Sparkles, PlayCircle, ImagePlus,
+  Filter, Star, Bell, Target, TrendingUp, Download, Award, FileText
 } from 'lucide-react'
 
 type BookStatus = 'Lendo' | 'Na Fila' | 'Concluído' | 'Abandonado';
@@ -18,8 +19,10 @@ interface AppBook {
   id: string; title: string; author: string; author_nationality?: string;
   total_pages: number; read_pages: number; cover_url?: string;
   genre?: string; status: BookStatus; notes?: string;
+  rating?: number;
 }
 
+// 🌍 DICIONÁRIO DE 195 PAÍSES
 const countryFlags: Record<string, string> = {
   'afeganistão': '🇦🇫', 'áfrica do sul': '🇿🇦', 'albânia': '🇦🇱', 'alemanha': '🇩🇪', 'andorra': '🇦🇩', 'angola': '🇦🇴', 'antígua e barbuda': '🇦🇬', 'arábia saudita': '🇸🇦', 'argélia': '🇩🇿', 'argentina': '🇦🇷', 'armênia': '🇦🇲', 'austrália': '🇦🇺', 'áustria': '🇦🇹', 'azerbaijão': '🇦🇿', 'bahamas': '🇧🇸', 'bahrein': '🇧🇭', 'bangladesh': '🇧🇩', 'barbados': '🇧🇧', 'bélgica': '🇧🇪', 'belize': '🇧🇿', 'benin': '🇧🇯', 'bielorrússia': '🇧🇾', 'bolívia': '🇧🇴', 'bósnia e herzegovina': '🇧🇦', 'botsuana': '🇧🇼', 'brasil': '🇧🇷', 'brasileira': '🇧🇷', 'brunei': '🇧🇳', 'bulgária': '🇧🇬', 'burkina faso': '🇧🇫', 'burundi': '🇧🇮', 'camboja': '🇰🇭', 'camarões': '🇨🇲', 'canadá': '🇨🇦', 'cabo verde': '🇨🇻', 'cazaquistão': '🇰🇿', 'chade': '🇹🇩', 'chile': '🇨🇱', 'china': '🇨🇳', 'chipre': '🇨🇾', 'colômbia': '🇨🇴', 'comores': '🇰🇲', 'congo': '🇨🇬', 'coreia do norte': '🇰🇵', 'coreia do sul': '🇰🇷', 'costa do marfim': '🇨🇮', 'costa rica': '🇨🇷', 'croácia': '🇭🇷', 'cuba': '🇨🇺', 'dinamarca': '🇩🇰', 'djibuti': '🇩🇯', 'dominica': '🇩🇲', 'egito': '🇪🇬', 'el salvador': '🇸🇻', 'emirados árabes unidos': '🇦🇪', 'equador': '🇪🇨', 'eritreia': '🇪🇷', 'eslováquia': '🇸🇰', 'eslovênia': '🇸🇮', 'espanha': '🇪🇸', 'estados unidos': '🇺🇸', 'eua': '🇺🇸', 'estônia': '🇪🇪', 'etiópia': '🇪🇹', 'fiji': '🇫🇯', 'filipinas': '🇵🇭', 'finlândia': '🇫🇮', 'frança': '🇫🇷', 'gabão': '🇬🇦', 'gâmbia': '🇬🇲', 'gana': '🇬🇭', 'geórgia': '🇬🇪', 'granada': '🇬🇩', 'grécia': '🇬🇷', 'guatemala': '🇬🇹', 'guiana': '🇬🇾', 'guiné': '🇬🇳', 'guiné-bissau': '🇬🇼', 'guiné equatorial': '🇬🇶', 'haiti': '🇭🇹', 'honduras': '🇭🇳', 'hungria': '🇭🇺', 'iêmen': '🇾🇪', 'índia': '🇮🇳', 'indonésia': '🇮🇩', 'irã': '🇮🇷', 'iraque': '🇮🇶', 'irlanda': '🇮🇪', 'islândia': '🇮🇸', 'israel': '🇮🇱', 'itália': '🇮🇹', 'jamaica': '🇯🇲', 'japão': '🇯🇵', 'jordânia': '🇯🇴', 'kuwait': '🇰🇼', 'laos': '🇱🇦', 'lesoto': '🇱🇸', 'letônia': '🇱🇻', 'líbano': '🇱🇧', 'libéria': '🇱🇷', 'líbia': '🇱🇾', 'liechtenstein': '🇱🇮', 'lituânia': '🇱🇹', 'luxemburgo': '🇱🇺', 'macedônia do norte': '🇲🇰', 'madagascar': '🇲🇬', 'malásia': '🇲🇾', 'malaui': '🇲🇼', 'maldivas': '🇲🇻', 'mali': '🇲🇱', 'malta': '🇲🇹', 'marrocos': '🇲🇦', 'maurício': '🇲🇺', 'mauritânia': '🇲🇷', 'méxico': '🇲🇽', 'mianmar': '🇲🇲', 'moçambique': '🇲🇿', 'moldávia': '🇲🇩', 'mônaco': '🇲🇨', 'mongólia': '🇲🇳', 'montenegro': '🇲🇪', 'namíbia': '🇳🇦', 'nauru': '🇳🇷', 'nepal': '🇳🇵', 'nicarágua': '🇳🇮', 'níger': '🇳🇪', 'nigéria': '🇳🇬', 'noruega': '🇳🇴', 'nova zelândia': '🇳🇿', 'omã': '🇴🇲', 'países baixos': '🇳🇱', 'panamá': '🇵🇦', 'paquistão': '🇵🇰', 'paraguai': '🇵🇾', 'peru': '🇵🇪', 'polônia': '🇵🇱', 'portugal': '🇵🇹', 'qatar': '🇶🇦', 'quênia': '🇰🇪', 'reino unido': '🇬🇧', 'inglaterra': '🇬🇧', 'república dominicana': '🇩🇴', 'república tcheca': '🇨🇿', 'romênia': '🇷🇴', 'ruanda': '🇷🇼', 'rússia': '🇷🇺', 'samoa': '🇼🇸', 'senegal': '🇸🇳', 'sérvia': '🇷🇸', 'singapura': '🇸🇬', 'síria': '🇸🇾', 'somália': '🇸🇴', 'sri lanka': '🇱🇰', 'sudão': '🇸🇩', 'suécia': '🇸🇪', 'suíça': '🇨🇭', 'suriname': '🇸🇷', 'tailândia': '🇹🇭', 'tanzânia': '🇹🇿', 'timor-leste': '🇹🇱', 'togo': '🇹🇬', 'tunísia': '🇹🇳', 'turquia': '🇹🇷', 'ucrânia': '🇺🇦', 'uganda': '🇺🇬', 'uruguai': '🇺🇾', 'uzbequistão': '🇺🇿', 'vaticano': '🇻🇦', 'venezuela': '🇻🇪', 'vietnã': '🇻🇳', 'zâmbia': '🇿🇲', 'zimbábue': '🇿🇼'
 };
@@ -53,6 +56,23 @@ const getGenreStyle = (genre: string): string => {
   if (genreStructure['18. Direito'].includes(genre)) return 'bg-red-50 text-red-900 border-red-200';
   return 'bg-stone-50 text-stone-500 border-stone-200';
 };
+
+// Componentes Auxiliares (Tags e Stars)
+const StatusTag = ({ status }: { status: string }) => {
+  const configs: any = {
+    'Lendo': 'bg-blue-100 text-blue-700 border-blue-200',
+    'Na Fila': 'bg-stone-100 text-stone-700 border-stone-200',
+    'Concluído': 'bg-emerald-100 text-emerald-700 border-emerald-200',
+    'Abandonado': 'bg-rose-100 text-rose-700 border-rose-200'
+  };
+  return <span className={`text-[9px] px-2 py-1 rounded-lg border font-bold uppercase ${configs[status] || configs['Na Fila']}`}>{status}</span>;
+};
+
+const RatingStars = ({ rating = 0 }: { rating?: number }) => (
+  <div className="flex gap-0.5">
+    {[1, 2, 3, 4, 5].map((s) => <Star key={s} size={12} className={s <= rating ? 'fill-amber-400 text-amber-400' : 'text-stone-200'} />)}
+  </div>
+);
 
 export default function App() {
   const { books, refreshBooks } = useBooks()
@@ -143,14 +163,11 @@ export default function App() {
   const analytics = useMemo(() => {
     const finished = books.filter(b => b.status === 'Concluído');
     const totalPages = books.reduce((acc, b) => acc + (b.read_pages || 0), 0);
-    const genres: Record<string, number> = {};
-    books.forEach(b => { if(b.genre) genres[b.genre] = (genres[b.genre] || 0) + 1; });
-    const sortedGenres = Object.entries(genres).sort((a,b) => b[1] - a[1]).slice(0, 5);
     const nations: Record<string, number> = {};
     books.forEach(b => { if(b.author_nationality) { const nat = b.author_nationality.toLowerCase().trim(); nations[nat] = (nations[nat] || 0) + 1; } });
     const sortedNations = Object.entries(nations).sort((a,b) => b[1] - a[1]).slice(0, 6);
     const avgPages = finished.length > 0 ? Math.round(finished.reduce((acc, b) => acc + (b.total_pages || 0), 0) / finished.length) : 0;
-    return { totalBooks: books.length, completed: finished.length, totalPages, avgPages, sortedGenres, sortedNations };
+    return { totalBooks: books.length, completed: finished.length, totalPages, avgPages, sortedNations };
   }, [books]);
 
   return (
@@ -161,11 +178,11 @@ export default function App() {
           <h1 className="text-xl font-black uppercase tracking-widest hidden md:block">Estante Premium</h1>
         </div>
         <div className="flex bg-stone-100/50 p-1 rounded-xl">
-          <button onClick={() => setCurrentView('library')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${currentView === 'library' ? 'bg-white shadow-sm' : 'text-stone-400'}`}><LayoutGrid className="w-3.5 h-3.5 inline mr-1"/> Biblioteca</button>
-          <button onClick={() => setCurrentView('insights')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${currentView === 'insights' ? 'bg-white shadow-sm text-stone-900' : 'text-stone-400'}`}><PenTool className="w-3.5 h-3.5 inline mr-1"/> Insights</button>
-          <button onClick={() => setCurrentView('analytics')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${currentView === 'analytics' ? 'bg-white shadow-sm' : 'text-stone-400'}`}><PieChart className="w-3.5 h-3.5 inline mr-1"/> Relatórios</button>
+          <button onClick={() => setCurrentView('library')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${currentView === 'library' ? 'bg-white shadow-sm' : 'text-stone-400'}`}><LayoutGrid size={14} className="inline mr-1"/> Biblioteca</button>
+          <button onClick={() => setCurrentView('insights')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${currentView === 'insights' ? 'bg-white shadow-sm text-stone-900' : 'text-stone-400'}`}><PenTool size={14} className="inline mr-1"/> Insights</button>
+          <button onClick={() => setCurrentView('analytics')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${currentView === 'analytics' ? 'bg-white shadow-sm' : 'text-stone-400'}`}><PieChart size={14} className="inline mr-1"/> Relatórios</button>
         </div>
-        <button onClick={() => { setEditingBookId(null); setFormData(emptyForm); setIsModalOpen(true); }} className="bg-stone-900 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-amber-700 shadow-lg transition-all"><Plus size={20}/> Novo</button>
+        <button onClick={() => { setEditingBookId(null); setFormData(emptyForm); setIsModalOpen(true); }} className="bg-stone-900 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-amber-700 shadow-lg active:scale-95 transition-all"><Plus size={20}/> Novo</button>
       </header>
 
       <main className="max-w-[1600px] mx-auto p-6 space-y-8 print:p-0">
@@ -178,10 +195,10 @@ export default function App() {
         {currentView === 'library' && (
           <>
             <div className="bg-white/60 backdrop-blur-md p-2 rounded-[1.5rem] border border-stone-200 flex flex-col lg:flex-row gap-2 shadow-sm">
-              <div className="relative flex-1"><Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300 w-5 h-5"/><input className="w-full pl-12 pr-4 bg-transparent font-bold outline-none h-full py-3" placeholder="Pesquisar..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)}/></div>
-              <div className="flex gap-2 p-1">
-                {['Todos', 'Na Fila', 'Lendo', 'Concluído'].map((s) => (<button key={s} onClick={() => setFilterStatus(s as any)} className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all ${filterStatus === s ? 'bg-stone-900 text-white shadow-md' : 'text-stone-400 hover:bg-white hover:shadow-sm'}`}>{s}</button>))}
-                <button onClick={handleShuffle} className="p-3 bg-stone-100 text-stone-500 rounded-xl hover:bg-amber-500 hover:text-white transition-all"><Shuffle size={18}/></button>
+              <div className="relative flex-1"><Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300 w-5 h-5"/><input className="w-full pl-12 pr-4 bg-transparent font-bold outline-none h-full py-3 text-sm" placeholder="Pesquisar título ou autor..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)}/></div>
+              <div className="flex gap-2 p-1 overflow-x-auto">
+                {['Todos', 'Na Fila', 'Lendo', 'Concluído'].map((s) => (<button key={s} onClick={() => setFilterStatus(s as any)} className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all whitespace-nowrap ${filterStatus === s ? 'bg-stone-900 text-white shadow-md' : 'text-stone-400 hover:bg-white hover:shadow-sm'}`}>{s}</button>))}
+                <button onClick={handleShuffle} className="p-3 bg-stone-100 text-stone-500 rounded-xl hover:bg-amber-500 hover:text-white transition-all shadow-sm"><Shuffle size={18}/></button>
               </div>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -197,8 +214,9 @@ export default function App() {
                       <p className="text-xs text-stone-400 font-bold uppercase flex items-center gap-1">
                         {typedBook.author_nationality ? (countryFlags[typedBook.author_nationality.toLowerCase().trim()] || <Globe size={10}/>) : <Globe size={10}/>} {typedBook.author}
                       </p>
-                      <div className="mt-6"><div className="flex justify-between text-[9px] font-black text-stone-400 mb-1.5 uppercase tracking-widest"><span>Progresso</span><span className="text-amber-600">{progress}%</span></div><div className="w-full bg-stone-100 h-1.5 rounded-full overflow-hidden shadow-inner"><div className="bg-amber-500 h-full transition-all duration-1000" style={{ width: `${progress}%` }}></div></div></div>
-                      <div className="mt-5 flex gap-2"><span className="text-[9px] font-black px-3 py-1 rounded-lg bg-stone-50 text-stone-500 uppercase">{typedBook.status}</span>{typedBook.notes && <div className="bg-amber-100 text-amber-700 px-3 py-1 rounded-lg text-[9px] font-black flex items-center gap-1 shadow-sm uppercase"><StickyNote size={10}/> Nota</div>}</div>
+                      <div className="mt-4"><RatingStars /></div>
+                      <div className="mt-4"><div className="flex justify-between text-[9px] font-black text-stone-400 mb-1.5 uppercase tracking-widest"><span>Progresso</span><span className="text-amber-600">{progress}%</span></div><div className="w-full bg-stone-100 h-1.5 rounded-full overflow-hidden shadow-inner"><div className="bg-amber-500 h-full transition-all duration-1000" style={{ width: `${progress}%` }}></div></div></div>
+                      <div className="mt-5 flex gap-2"><StatusTag status={typedBook.status} />{typedBook.notes && <div className="bg-amber-100 text-amber-700 px-3 py-1 rounded-lg text-[9px] font-black flex items-center gap-1 shadow-sm uppercase"><StickyNote size={10}/> Nota</div>}</div>
                     </div>
                     <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all">
                       <button onClick={() => { setEditingBookId(typedBook.id); setFormData(typedBook); setIsModalOpen(true); }} className="p-2.5 text-stone-300 hover:text-stone-900 bg-stone-50 rounded-xl transition-all"><Pencil size={16}/></button>
@@ -271,14 +289,6 @@ export default function App() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm">
-                    <div className="flex items-center gap-3 mb-8 text-stone-900"><BarChart3 size={20}/><h3 className="font-black uppercase tracking-widest text-xs">Top Gêneros</h3></div>
-                    <div className="space-y-5">
-                        {analytics.sortedGenres.map(([genre, count]) => (
-                            <div key={genre}><div className="flex justify-between text-[10px] font-black uppercase mb-2 text-stone-500"><span>{genre}</span><span>{count}</span></div><div className="w-full bg-stone-50 h-2 rounded-full overflow-hidden"><div className="h-full bg-stone-400" style={{ width: `${(count / analytics.totalBooks) * 100}%` }}></div></div></div>
-                        ))}
-                    </div>
-                </div>
-                <div className="bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm">
                     <div className="flex items-center gap-3 mb-8 text-stone-900"><MapPin size={20}/><h3 className="font-black uppercase tracking-widest text-xs">Nacionalidades</h3></div>
                     <div className="grid grid-cols-1 gap-3">
                         {analytics.sortedNations.map(([nation, count]) => (
@@ -286,7 +296,7 @@ export default function App() {
                         ))}
                     </div>
                 </div>
-                <div className="bg-stone-900 text-white p-8 rounded-[2.5rem] shadow-xl flex flex-col justify-between">
+                <div className="bg-stone-900 text-white p-8 rounded-[2.5rem] shadow-xl flex flex-col justify-between min-h-[300px]">
                     <div><div className="flex items-center gap-3 mb-8 text-white/50"><BookOpen size={20}/><h3 className="font-black uppercase tracking-widest text-xs">Performance</h3></div><div className="space-y-6"><div><p className="text-[9px] font-black uppercase text-white/40 mb-1">Média de Páginas</p><p className="text-3xl font-black">{analytics.avgPages}</p></div></div></div>
                 </div>
             </div>
@@ -294,22 +304,23 @@ export default function App() {
         )}
       </main>
 
+      {/* MODAL SORTEADOR */}
       {isShuffleOpen && (
         <div className="fixed inset-0 bg-stone-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-white w-full max-w-md rounded-[2.5rem] p-10 text-center shadow-2xl relative">
-            <button onClick={() => setIsShuffleOpen(false)} className="absolute top-6 right-6 p-2 bg-stone-100 rounded-full"><X size={20}/></button>
-            <h2 className="text-xs font-black uppercase tracking-[0.3em] text-stone-400 mb-6">{isShuffling ? 'SORTEANDO...' : 'O DESTINO ESCOLHEU'}</h2>
+          <div className="bg-white w-full max-w-md rounded-[2.5rem] p-10 text-center shadow-2xl relative overflow-hidden">
+            <button onClick={() => setIsShuffleOpen(false)} className="absolute top-6 right-6 p-2 bg-stone-100 rounded-full hover:bg-stone-200"><X size={20}/></button>
+            <h2 className="text-xs font-black uppercase tracking-[0.3em] text-stone-400 mb-6">{isShuffling ? 'EMBARALHANDO ESTANTE...' : 'O DESTINO ESCOLHEU'}</h2>
             <div className="flex justify-center mb-6">
                 {shuffledBook ? (
                     <div className="w-48 h-72 bg-stone-50 rounded-2xl shadow-xl overflow-hidden border-4 border-stone-100 transform transition-transform hover:scale-105">
-                       {shuffledBook.cover_url ? <img src={shuffledBook.cover_url} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-stone-300"><BookMarked size={40}/></div>}
+                       {shuffledBook.cover_url ? <img src={shuffledBook.cover_url} className="w-full h-full object-cover" alt={shuffledBook.title}/> : <div className="w-full h-full flex items-center justify-center text-stone-300"><BookMarked size={40}/></div>}
                     </div>
                 ) : <div className="p-10 bg-amber-50 rounded-full animate-spin"><Sparkles className="text-amber-500" size={40}/></div>}
             </div>
             {shuffledBook && (
-                <div className="animate-in fade-in slide-in-from-bottom-4">
-                    <h3 className="text-2xl font-black text-stone-900 mb-2">{shuffledBook.title}</h3>
-                    <p className="text-xs font-bold text-stone-400 uppercase mb-8">{shuffledBook.author}</p>
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <h3 className="text-2xl font-black text-stone-900 leading-tight mb-2 line-clamp-2">{shuffledBook.title}</h3>
+                    <p className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-8">{shuffledBook.author}</p>
                     {!isShuffling && <button onClick={startReadingShuffled} className="w-full bg-stone-900 text-white py-4 rounded-2xl font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-amber-600 transition-all shadow-xl active:scale-95"><PlayCircle size={20} /> INICIAR LEITURA</button>}
                 </div>
             )}
@@ -317,18 +328,19 @@ export default function App() {
         </div>
       )}
 
+      {/* MODAL CADASTRO */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-stone-950/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 print:hidden animate-in fade-in duration-300">
           <div className="bg-white w-full max-w-xl rounded-[2.5rem] p-8 shadow-2xl overflow-y-auto max-h-[90vh] border border-stone-100">
             <div className="flex justify-between items-center mb-6 pb-6 border-b border-stone-50"><h2 className="font-black uppercase tracking-widest text-stone-900">{editingBookId ? 'Editar Obra' : 'Nova Obra'}</h2><button onClick={() => setIsModalOpen(false)} className="p-2 bg-stone-50 rounded-full hover:bg-stone-100"><X/></button></div>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <input className="w-full bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none shadow-sm" placeholder="Título" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required/>
+              <input className="w-full bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none border-2 border-transparent focus:border-stone-100 transition-all shadow-sm" placeholder="Título" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required/>
               <div className="grid grid-cols-2 gap-4"><input className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none" placeholder="Autor" value={formData.author} onChange={e => setFormData({...formData, author: e.target.value})}/><input className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none" placeholder="País (ex: Brasil)" value={formData.author_nationality} onChange={e => setFormData({...formData, author_nationality: e.target.value})}/></div>
-              <input className="w-full bg-stone-50 rounded-2xl px-6 py-4 text-xs font-bold outline-none" placeholder="URL da Capa" value={formData.cover_url} onChange={e => setFormData({...formData, cover_url: e.target.value})}/>
-              <div className="grid grid-cols-2 gap-4"><input type="number" className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none shadow-sm" placeholder="Total Páginas" value={formData.total_pages} onChange={e => setFormData({...formData, total_pages: Number(e.target.value)})}/><input type="number" className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none shadow-sm" placeholder="Lidas" value={formData.read_pages} onChange={e => setFormData({...formData, read_pages: Number(e.target.value)})}/></div>
+              <input className="w-full bg-stone-50 rounded-2xl px-6 py-4 text-xs font-bold outline-none shadow-sm" placeholder="URL da Capa" value={formData.cover_url} onChange={e => setFormData({...formData, cover_url: e.target.value})}/>
+              <div className="grid grid-cols-2 gap-4"><input type="number" className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none" placeholder="Total Páginas" value={formData.total_pages} onChange={e => setFormData({...formData, total_pages: Number(e.target.value)})}/><input type="number" className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none" placeholder="Lidas" value={formData.read_pages} onChange={e => setFormData({...formData, read_pages: Number(e.target.value)})}/></div>
               <div className="grid grid-cols-2 gap-4">
-                <select className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none appearance-none" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}><option value="Na Fila">Na Fila</option><option value="Lendo">Lendo</option><option value="Concluído">Concluído</option><option value="Abandonado">Abandonado</option></select>
-                <select className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none appearance-none text-sm" value={formData.genre} onChange={e => setFormData({...formData, genre: e.target.value})}>
+                <select className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none appearance-none cursor-pointer" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}><option value="Na Fila">Na Fila</option><option value="Lendo">Lendo</option><option value="Concluído">Concluído</option><option value="Abandonado">Abandonado</option></select>
+                <select className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none appearance-none cursor-pointer text-sm" value={formData.genre} onChange={e => setFormData({...formData, genre: e.target.value})}>
                   <option value="Outros">Selecione o Gênero</option>
                   {Object.entries(genreStructure).map(([category, subgenres]) => (
                     <optgroup key={category} label={category}>{subgenres.map(sub => <option key={sub} value={sub}>{sub}</option>)}</optgroup>
@@ -348,7 +360,7 @@ export default function App() {
           .print\\:hidden { display: none !important; }
           textarea { border: none !important; resize: none !important; overflow: visible !important; height: auto !important; }
         }
-      `}</style>
+      `}`}</style>
     </div>
   )
 }
