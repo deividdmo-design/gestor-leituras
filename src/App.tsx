@@ -5,9 +5,8 @@ import {
   Library, Globe, Save, History, 
   PieChart, LayoutGrid, Quote, MessageSquare, PenTool, Clock, FileDown,
   BookMarked, StickyNote, X, Pencil, Trash2, Plus, Trophy, CheckCircle2,
-  BarChart3, BookOpen, MapPin, Search, Shuffle, Sparkles, PlayCircle, ImagePlus,
-  Filter, Star, Bell, Target, TrendingUp, Download, Award, FileText
-} from 'lucide-react' // REMOVIDO: Calendar (não usado)
+  BarChart3, BookOpen, MapPin, Search, Shuffle, Sparkles, PlayCircle, ImagePlus
+} from 'lucide-react'
 
 type BookStatus = 'Lendo' | 'Na Fila' | 'Concluído' | 'Abandonado';
 
@@ -19,7 +18,6 @@ interface AppBook {
   id: string; title: string; author: string; author_nationality?: string;
   total_pages: number; read_pages: number; cover_url?: string;
   genre?: string; status: BookStatus; notes?: string;
-  rating?: number;
 }
 
 // 🌍 DICIONÁRIO COMPLETO DE 195 PAÍSES
@@ -28,1056 +26,35 @@ const countryFlags: Record<string, string> = {
 };
 
 const genreStructure: Record<string, string[]> = {
-  '1. Narrativos (Ficção)': ['Romance', 'Romance realista', 'Romance psicológico', 'Romance histórico', 'Romance social', 'Romance político', 'Romance regionalista', 'Romance urbano', 'Romance de formação', 'Romance epistolar', 'Romance filosófico', 'Romance existencialista', 'Romance experimental', 'Romance pós-moderno', 'Novela', 'Conto', 'Conto clássico', 'Conto moderno', 'Conto fantástico', 'Microconto', 'Flash fiction'],
-  '2. Ficção Especulativa': ['Fantasia', 'Fantasia épica', 'Fantasia sombria', 'Fantasia urbana', 'Ficção Científica', 'Sci-fi Hard', 'Sci-fi Soft', 'Space Opera', 'Distopia', 'Utopia', 'Cyberpunk', 'Steampunk', 'Viagem no tempo', 'Realismo mágico', 'Weird fiction'],
-  '3. Terror e Suspense': ['Terror psicológico', 'Terror sobrenatural', 'Horror cósmico', 'Horror gótico', 'Suspense psicológico', 'Suspense político', 'Suspense jurídico'],
-  '4. Policial e Investigação': ['Romance policial', 'Noir', 'Hard-boiled', 'Investigativo', 'Espionagem', 'Thriller psicológico', 'Thriller jurídico'],
-  '5. Romance e Drama': ['Romance romântico', 'Contemporâneo', 'Romance de época', 'Tragédia', 'Erótico', 'Jovem-adulto (YA)'],
-  '6. Dramáticos (Teatro)': ['Tragédia', 'Comédia', 'Drama', 'Melodrama', 'Teatro do absurdo', 'Monólogo'],
-  '7. Poesia': ['Lírica', 'Épica', 'Soneto', 'Haikai', 'Verso livre', 'Poesia concreta', 'Poesia visual'],
-  '8. Não Ficção Literária': ['Biografia', 'Autobiografia', 'Memórias', 'Diário', 'Correspondência', 'Crônica', 'Jornalismo literário', 'Testemunho'],
-  '9. Híbridos': ['Autoficção', 'Metaficção', 'Graphic Novel', 'Romance Gráfico'],
-  '10. Infantil e Juvenil': ['Literatura infantil', 'Contos de fadas', 'Fábulas', 'Infantojuvenil'],
-  '11. Filosofia': ['Filosofia Antiga', 'Filosofia Medieval', 'Filosofia Moderna', 'Filosofia Contemporânea', 'Metafísica', 'Ética', 'Filosofia Política', 'Estética', 'Existencialismo', 'Estoicismo', 'Fenomenologia'],
-  '12. Sociologia': ['Sociologia Clássica', 'Sociologia Contemporânea', 'Teoria Social', 'Sociologia do Trabalho', 'Sociologia da Cultura'],
-  '13. Economia': ['Economia Política', 'Macroeconomia', 'Microeconomia', 'Economia Comportamental', 'História Econômica', 'Investimentos'],
-  '14. Política e RI': ['Teoria Política', 'Geopolítica', 'Relações Internacionais', 'Políticas Públicas', 'Democracia'],
-  '15. Antropologia': ['Antropologia Cultural', 'Etnografia', 'Antropologia Social', 'Arqueologia'],
-  '16. História': ['História Antiga', 'História Medieval', 'História Moderna', 'História Contemporânea', 'História do Brasil', 'História das Ideias'],
-  '17. Psicologia': ['Psicologia Social', 'Psicologia Cognitiva', 'Psicanálise', 'Neurociência', 'Terapia'],
-  '18. Direito': ['Teoria do Direito', 'Filosofia do Direito', 'Direito Constitucional', 'Criminologia', 'Direitos Humanos'],
-  '19. Educação e Ciência': ['Pedagogia', 'Filosofia da Educação', 'Metodologia Científica', 'Divulgação Científica', 'Didática']
+  '1. Narrativos (Ficção)': ['Romance', 'Romance realista', 'Romance psicológico', 'Romance histórico', 'Novela', 'Conto', 'Microconto'],
+  '2. Ficção Especulativa': ['Fantasia', 'Ficção Científica', 'Distopia', 'Cyberpunk', 'Realismo mágico'],
+  '3. Terror e Suspense': ['Terror psicológico', 'Terror sobrenatural', 'Horror gótico', 'Suspense'],
+  '4. Policial': ['Romance policial', 'Investigativo', 'Espionagem', 'Thriller'],
+  '5. Romance e Drama': ['Romance romântico', 'Contemporâneo', 'Romance de época', 'Tragédia', 'YA'],
+  '6. Dramáticos (Teatro)': ['Tragédia', 'Comédia', 'Drama', 'Teatro do absurdo'],
+  '7. Poesia': ['Lírica', 'Épica', 'Soneto', 'Verso livre', 'Poesia visual'],
+  '8. Não Ficção Literária': ['Biografia', 'Autobiografia', 'Memórias', 'Diário', 'Jornalismo literário'],
+  '9. Híbridos': ['Autoficção', 'Metaficção', 'Graphic Novel'],
+  '10. Infantil e Juvenil': ['Literatura infantil', 'Fábulas', 'Infantojuvenil'],
+  '11. Filosofia': ['Filosofia Antiga', 'Filosofia Medieval', 'Filosofia Moderna', 'Filosofia Contemporânea', 'Ética', 'Existencialismo'],
+  '12. Sociologia': ['Sociologia Clássica', 'Teoria Social', 'Sociologia Política', 'Sociologia da Cultura'],
+  '13. Economia': ['Economia Política', 'Macroeconomia', 'História Econômica', 'Investimentos'],
+  '14. Política': ['Teoria Política', 'Geopolítica', 'Relações Internacionais', 'Democracia'],
+  '15. Antropologia': ['Antropologia Cultural', 'Etnografia', 'Arqueologia'],
+  '16. História': ['História do Brasil', 'História Antiga', 'História Medieval', 'História Moderna', 'História Contemporânea'],
+  '17. Psicologia': ['Psicologia Social', 'Psicologia Cognitiva', 'Psicanálise', 'Neurociência'],
+  '18. Direito': ['Teoria do Direito', 'Filosofia do Direito', 'Direito Constitucional', 'Criminologia'],
+  '19. Educação e Ciência': ['Pedagogia', 'Metodologia Científica', 'Divulgação Científica']
 };
 
 const getGenreStyle = (genre: string): string => {
   if (!genre) return 'bg-stone-100 text-stone-500 border-stone-200';
-  if (genreStructure['1. Narrativos (Ficção)'].includes(genre)) return 'bg-amber-100 text-amber-900 border-amber-200';
-  if (genreStructure['2. Ficção Especulativa'].includes(genre)) return 'bg-purple-100 text-purple-900 border-purple-200';
-  if (genreStructure['3. Terror e Suspense'].includes(genre)) return 'bg-stone-800 text-stone-100 border-stone-600';
-  if (genreStructure['11. Filosofia'].includes(genre)) return 'bg-stone-200 text-stone-800 border-stone-400'; 
+  if (genreStructure['11. Filosofia'].includes(genre)) return 'bg-stone-200 text-stone-800 border-stone-400';
   if (genreStructure['16. História'].includes(genre)) return 'bg-yellow-100 text-yellow-900 border-yellow-200';
   if (genreStructure['18. Direito'].includes(genre)) return 'bg-red-50 text-red-900 border-red-200';
   return 'bg-stone-50 text-stone-500 border-stone-200';
 };
 
-// ========== COMPONENTES DE ETIQUETAS DE STATUS ==========
-interface StatusTagProps {
-  status: string;
-  size?: 'sm' | 'md' | 'lg';
-}
-
-const StatusTag: React.FC<StatusTagProps> = ({ status, size = 'md' }) => {
-  const getStatusConfig = (status: string) => {
-    const configs: Record<string, { color: string; icon: React.ReactNode; label: string }> = {
-      'Na Fila': { 
-        color: 'bg-stone-100 text-stone-700 border-stone-200', 
-        icon: <Clock size={size === 'sm' ? 10 : 12} />,
-        label: 'Na Fila'
-      },
-      'Lendo': { 
-        color: 'bg-blue-100 text-blue-700 border-blue-200', 
-        icon: <BookOpen size={size === 'sm' ? 10 : 12} />,
-        label: 'Lendo'
-      },
-      'Concluído': { 
-        color: 'bg-emerald-100 text-emerald-700 border-emerald-200', 
-        icon: <CheckCircle2 size={size === 'sm' ? 10 : 12} />,
-        label: 'Concluído'
-      },
-      'Abandonado': { 
-        color: 'bg-rose-100 text-rose-700 border-rose-200', 
-        icon: <X size={size === 'sm' ? 10 : 12} />,
-        label: 'Abandonado'
-      }
-    };
-    
-    return configs[status] || configs['Na Fila'];
-  };
-
-  const config = getStatusConfig(status);
-  const sizeClasses = {
-    sm: 'text-[8px] px-2 py-1 gap-1',
-    md: 'text-[9px] px-3 py-1 gap-1.5',
-    lg: 'text-xs px-4 py-2 gap-2'
-  };
-
-  return (
-    <span className={`inline-flex items-center rounded-lg border font-bold uppercase ${config.color} ${sizeClasses[size]}`}>
-      {config.icon}
-      {config.label}
-    </span>
-  );
-};
-
-// ========== COMPONENTE DE AVALIAÇÃO ==========
-interface RatingStarsProps {
-  bookId: string;
-  initialRating?: number;
-  onRatingChange?: (rating: number) => void;
-  size?: 'sm' | 'md' | 'lg';
-}
-
-const RatingStars: React.FC<RatingStarsProps> = ({ 
-  bookId, 
-  initialRating = 0, 
-  onRatingChange,
-  size = 'md'
-}) => {
-  const [rating, setRating] = useState(initialRating);
-  const [hoverRating, setHoverRating] = useState(0);
-
-  const sizeClasses = {
-    sm: 'w-4 h-4',
-    md: 'w-6 h-6',
-    lg: 'w-8 h-8'
-  };
-
-  useEffect(() => {
-    const loadRating = async () => {
-      const { data } = await supabase
-        .from('book_ratings')
-        .select('rating')
-        .eq('book_id', bookId)
-        .single();
-      
-      if (data) {
-        setRating(data.rating);
-      }
-    };
-    
-    loadRating();
-  }, [bookId]);
-
-  const handleRating = async (newRating: number) => {
-    setRating(newRating);
-    
-    await supabase
-      .from('book_ratings')
-      .upsert({ 
-        book_id: bookId, 
-        rating: newRating,
-        updated_at: new Date().toISOString()
-      });
-    
-    if (onRatingChange) {
-      onRatingChange(newRating);
-    }
-  };
-
-  return (
-    <div className="flex gap-1">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <button
-          key={star}
-          type="button"
-          onClick={() => handleRating(star)}
-          onMouseEnter={() => setHoverRating(star)}
-          onMouseLeave={() => setHoverRating(0)}
-          className="transition-transform hover:scale-110"
-        >
-          <Star
-            className={`${sizeClasses[size]} ${
-              star <= (hoverRating || rating)
-                ? 'fill-amber-400 text-amber-400'
-                : 'text-stone-300'
-            }`}
-          />
-        </button>
-      ))}
-      {rating > 0 && (
-        <span className={`ml-2 font-bold ${size === 'sm' ? 'text-xs' : 'text-sm'} text-stone-600`}>
-          {rating.toFixed(1)}
-        </span>
-      )}
-    </div>
-  );
-};
-
-// ========== COMPONENTE DE FILTROS AVANÇADOS ==========
-interface AdvancedFiltersProps {
-  books: any[];
-  onFilterChange: (filteredBooks: any[]) => void;
-}
-
-const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ books, onFilterChange }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [filters, setFilters] = useState({
-    search: '',
-    genre: '',
-    authorNationality: '',
-    status: 'Todos',
-    minPages: '',
-    maxPages: '',
-    hasNotes: false,
-  });
-
-  const uniqueGenres = useMemo(() => {
-    const genres = books.map(b => b.genre).filter(Boolean);
-    return [...new Set(genres)];
-  }, [books]);
-
-  const uniqueNationalities = useMemo(() => {
-    const nationalities = books.map(b => b.author_nationality).filter(Boolean);
-    return [...new Set(nationalities)];
-  }, [books]);
-
-  useEffect(() => {
-    const filtered = books.filter(book => {
-      if (filters.search && !`${book.title} ${book.author}`.toLowerCase().includes(filters.search.toLowerCase())) {
-        return false;
-      }
-      
-      if (filters.genre && book.genre !== filters.genre) {
-        return false;
-      }
-      
-      if (filters.authorNationality && book.author_nationality !== filters.authorNationality) {
-        return false;
-      }
-      
-      if (filters.status !== 'Todos' && book.status !== filters.status) {
-        return false;
-      }
-      
-      if (filters.minPages && (book.total_pages || 0) < parseInt(filters.minPages)) {
-        return false;
-      }
-      if (filters.maxPages && (book.total_pages || 0) > parseInt(filters.maxPages)) {
-        return false;
-      }
-      
-      if (filters.hasNotes && !book.notes) {
-        return false;
-      }
-      
-      return true;
-    });
-    
-    onFilterChange(filtered);
-  }, [filters, books, onFilterChange]);
-
-  const resetFilters = () => {
-    setFilters({
-      search: '',
-      genre: '',
-      authorNationality: '',
-      status: 'Todos',
-      minPages: '',
-      maxPages: '',
-      hasNotes: false,
-    });
-  };
-
-  return (
-    <div className="bg-white/60 backdrop-blur-md rounded-[1.5rem] border border-stone-200 shadow-sm mb-6 overflow-hidden">
-      <button 
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full p-4 flex items-center justify-between hover:bg-stone-50/50 transition-colors"
-      >
-        <div className="flex items-center gap-3">
-          <Filter className="text-stone-500" size={20} />
-          <span className="font-black text-sm uppercase tracking-wider text-stone-700">
-            Filtros Avançados
-          </span>
-        </div>
-        {isOpen ? <X size={20} /> : <Filter size={20} />}
-      </button>
-      
-      {isOpen && (
-        <div className="p-6 border-t border-stone-100 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-stone-500 mb-2 uppercase">Busca</label>
-              <input
-                type="text"
-                placeholder="Título, autor..."
-                value={filters.search}
-                onChange={(e) => setFilters({...filters, search: e.target.value})}
-                className="w-full bg-stone-50 rounded-xl px-4 py-3 text-sm outline-none"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-xs font-bold text-stone-500 mb-2 uppercase">Gênero</label>
-              <select
-                value={filters.genre}
-                onChange={(e) => setFilters({...filters, genre: e.target.value})}
-                className="w-full bg-stone-50 rounded-xl px-4 py-3 text-sm outline-none"
-              >
-                <option value="">Todos os gêneros</option>
-                {uniqueGenres.map(genre => (
-                  <option key={genre} value={genre}>{genre}</option>
-                ))}
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-xs font-bold text-stone-500 mb-2 uppercase">Nacionalidade</label>
-              <select
-                value={filters.authorNationality}
-                onChange={(e) => setFilters({...filters, authorNationality: e.target.value})}
-                className="w-full bg-stone-50 rounded-xl px-4 py-3 text-sm outline-none"
-              >
-                <option value="">Todas nacionalidades</option>
-                {uniqueNationalities.map(nat => (
-                  <option key={nat} value={nat}>{nat}</option>
-                ))}
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-xs font-bold text-stone-500 mb-2 uppercase">Status</label>
-              <select
-                value={filters.status}
-                onChange={(e) => setFilters({...filters, status: e.target.value})}
-                className="w-full bg-stone-50 rounded-xl px-4 py-3 text-sm outline-none"
-              >
-                <option value="Todos">Todos</option>
-                <option value="Na Fila">Na Fila</option>
-                <option value="Lendo">Lendo</option>
-                <option value="Concluído">Concluído</option>
-                <option value="Abandonado">Abandonado</option>
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-xs font-bold text-stone-500 mb-2 uppercase">Páginas (min)</label>
-              <input
-                type="number"
-                placeholder="Ex: 100"
-                value={filters.minPages}
-                onChange={(e) => setFilters({...filters, minPages: e.target.value})}
-                className="w-full bg-stone-50 rounded-xl px-4 py-3 text-sm outline-none"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-xs font-bold text-stone-500 mb-2 uppercase">Páginas (max)</label>
-              <input
-                type="number"
-                placeholder="Ex: 500"
-                value={filters.maxPages}
-                onChange={(e) => setFilters({...filters, maxPages: e.target.value})}
-                className="w-full bg-stone-50 rounded-xl px-4 py-3 text-sm outline-none"
-              />
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-4 pt-4 border-t border-stone-100">
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={filters.hasNotes}
-                onChange={(e) => setFilters({...filters, hasNotes: e.target.checked})}
-                className="rounded border-stone-300"
-              />
-              <span className="text-xs font-bold text-stone-600">Apenas com anotações</span>
-            </label>
-            
-            <button
-              onClick={resetFilters}
-              className="ml-auto px-4 py-2 bg-stone-100 hover:bg-stone-200 rounded-xl text-xs font-bold uppercase transition-colors"
-            >
-              Limpar Filtros
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// ========== COMPONENTE DE ESTATÍSTICAS AVANÇADAS ==========
-interface AdvancedStatsProps {
-  books: any[];
-}
-
-const AdvancedStats: React.FC<AdvancedStatsProps> = ({ books }) => {
-  const stats = useMemo(() => {
-    const completed = books.filter(b => b.status === 'Concluído');
-    const reading = books.filter(b => b.status === 'Lendo');
-    const inQueue = books.filter(b => b.status === 'Na Fila');
-    const abandoned = books.filter(b => b.status === 'Abandonado');
-    
-    const genreCount: Record<string, number> = {};
-    completed.forEach(b => {
-      if (b.genre) {
-        genreCount[b.genre] = (genreCount[b.genre] || 0) + 1;
-      }
-    });
-    
-    const topGenres = Object.entries(genreCount)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 3);
-    
-    return {
-      totalBooks: books.length,
-      completed: completed.length,
-      reading: reading.length,
-      inQueue: inQueue.length,
-      abandoned: abandoned.length,
-      completionRate: books.length > 0 ? (completed.length / books.length) * 100 : 0,
-      avgPagesPerBook: completed.length > 0 
-        ? Math.round(completed.reduce((acc, b) => acc + (b.total_pages || 0), 0) / completed.length)
-        : 0,
-      topGenres,
-    };
-  }, [books]);
-
-  return (
-    <div className="bg-white p-6 rounded-[2.5rem] border border-stone-100 shadow-sm">
-      <div className="flex items-center gap-3 mb-6">
-        <TrendingUp className="text-stone-900" size={20} />
-        <h3 className="font-black uppercase tracking-widest text-xs text-stone-700">
-          Estatísticas Avançadas
-        </h3>
-      </div>
-      
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-stone-50 p-4 rounded-2xl">
-          <p className="text-[10px] font-black uppercase text-stone-400 mb-1">Taxa Conclusão</p>
-          <p className="text-2xl font-black text-stone-900">{stats.completionRate.toFixed(1)}%</p>
-        </div>
-        
-        <div className="bg-stone-50 p-4 rounded-2xl">
-          <p className="text-[10px] font-black uppercase text-stone-400 mb-1">Em Leitura</p>
-          <p className="text-2xl font-black text-stone-900">{stats.reading}</p>
-        </div>
-        
-        <div className="bg-stone-50 p-4 rounded-2xl">
-          <p className="text-[10px] font-black uppercase text-stone-400 mb-1">Na Fila</p>
-          <p className="text-2xl font-black text-stone-900">{stats.inQueue}</p>
-        </div>
-        
-        <div className="bg-stone-50 p-4 rounded-2xl">
-          <p className="text-[10px] font-black uppercase text-stone-400 mb-1">Média Páginas</p>
-          <p className="text-2xl font-black text-stone-900">{stats.avgPagesPerBook}</p>
-        </div>
-      </div>
-      
-      {stats.topGenres.length > 0 && (
-        <div className="border-t border-stone-100 pt-4">
-          <p className="text-[10px] font-black uppercase text-stone-400 mb-3">Gêneros Mais Concluídos</p>
-          <div className="space-y-2">
-            {stats.topGenres.map(([genre, count]) => (
-              <div key={genre} className="flex items-center justify-between">
-                <span className="text-xs font-bold text-stone-600">{genre}</span>
-                <span className="text-xs font-black bg-stone-100 px-3 py-1 rounded-lg">
-                  {count} {count === 1 ? 'livro' : 'livros'}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// ========== COMPONENTE DE DESAFIOS PERSONALIZÁVEIS ==========
-interface CustomChallenge {
-  id: string;
-  title: string;
-  description: string;
-  target: number;
-  current: number;
-  type: 'books' | 'pages' | 'genres' | 'authors';
-  deadline?: string;
-  reward?: string;
-}
-
-interface CustomChallengesProps {
-  books: any[];
-}
-
-const CustomChallenges: React.FC<CustomChallengesProps> = ({ books }) => {
-  const [challenges, setChallenges] = useState<CustomChallenge[]>([
-    {
-      id: '1',
-      title: 'Explorar Novos Gêneros',
-      description: 'Ler pelo menos 3 gêneros diferentes',
-      target: 3,
-      current: 2,
-      type: 'genres'
-    },
-    {
-      id: '2',
-      title: 'Clássicos do Século XX',
-      description: 'Completar 5 clássicos do século XX',
-      target: 5,
-      current: 3,
-      type: 'books'
-    },
-    {
-      id: '3',
-      title: 'Maratona de Páginas',
-      description: 'Ler 1000 páginas em um mês',
-      target: 1000,
-      current: 450,
-      type: 'pages'
-    }
-  ]);
-  
-  const [isCreating, setIsCreating] = useState(false);
-  const [newChallenge, setNewChallenge] = useState({
-    title: '',
-    description: '',
-    target: 10,
-    type: 'books' as const
-  });
-
-  const addChallenge = () => {
-    if (!newChallenge.title.trim()) return;
-    
-    const challenge: CustomChallenge = {
-      id: crypto.randomUUID(),
-      title: newChallenge.title,
-      description: newChallenge.description,
-      target: newChallenge.target,
-      current: 0,
-      type: newChallenge.type
-    };
-    
-    setChallenges([...challenges, challenge]);
-    setNewChallenge({ title: '', description: '', target: 10, type: 'books' });
-    setIsCreating(false);
-  };
-
-  const deleteChallenge = (id: string) => {
-    setChallenges(challenges.filter(c => c.id !== id));
-  };
-
-  return (
-    <div className="bg-white p-6 rounded-[2.5rem] border border-stone-100 shadow-sm">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <Target className="text-stone-900" size={20} />
-          <h3 className="font-black uppercase tracking-widest text-xs text-stone-700">
-            Desafios Personalizados
-          </h3>
-        </div>
-        <button
-          onClick={() => setIsCreating(true)}
-          className="bg-stone-900 text-white px-4 py-2 rounded-xl text-xs font-bold uppercase hover:bg-amber-600 transition-colors"
-        >
-          + Novo
-        </button>
-      </div>
-      
-      {isCreating && (
-        <div className="mb-6 p-4 bg-amber-50 rounded-2xl border border-amber-100">
-          <div className="space-y-3">
-            <input
-              type="text"
-              placeholder="Título do desafio"
-              value={newChallenge.title}
-              onChange={(e) => setNewChallenge({...newChallenge, title: e.target.value})}
-              className="w-full bg-white rounded-xl px-4 py-3 text-sm outline-none border border-stone-200"
-            />
-            <textarea
-              placeholder="Descrição"
-              value={newChallenge.description}
-              onChange={(e) => setNewChallenge({...newChallenge, description: e.target.value})}
-              className="w-full bg-white rounded-xl px-4 py-3 text-sm outline-none border border-stone-200 resize-none"
-              rows={2}
-            />
-            <div className="grid grid-cols-2 gap-3">
-              <select
-                value={newChallenge.type}
-                onChange={(e) => setNewChallenge({...newChallenge, type: e.target.value as any})}
-                className="bg-white rounded-xl px-4 py-3 text-sm outline-none border border-stone-200"
-              >
-                <option value="books">Livros</option>
-                <option value="pages">Páginas</option>
-                <option value="genres">Gêneros</option>
-                <option value="authors">Autores</option>
-              </select>
-              <input
-                type="number"
-                placeholder="Meta"
-                value={newChallenge.target}
-                onChange={(e) => setNewChallenge({...newChallenge, target: parseInt(e.target.value)})}
-                className="bg-white rounded-xl px-4 py-3 text-sm outline-none border border-stone-200"
-              />
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={addChallenge}
-                className="flex-1 bg-stone-900 text-white py-3 rounded-xl text-xs font-bold uppercase hover:bg-amber-600 transition-colors"
-              >
-                Criar
-              </button>
-              <button
-                onClick={() => setIsCreating(false)}
-                className="px-4 bg-stone-100 text-stone-600 py-3 rounded-xl text-xs font-bold uppercase hover:bg-stone-200 transition-colors"
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      
-      <div className="space-y-4">
-        {challenges.map((challenge) => {
-          const progress = (challenge.current / challenge.target) * 100;
-          
-          return (
-            <div key={challenge.id} className="p-4 bg-stone-50 rounded-2xl hover:bg-stone-100 transition-colors">
-              <div className="flex justify-between items-start mb-3">
-                <div>
-                  <h4 className="font-bold text-stone-900">{challenge.title}</h4>
-                  <p className="text-xs text-stone-500 mt-1">{challenge.description}</p>
-                </div>
-                <button
-                  onClick={() => deleteChallenge(challenge.id)}
-                  className="text-stone-400 hover:text-rose-500 transition-colors"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-              
-              <div className="mb-2">
-                <div className="flex justify-between text-[10px] font-black uppercase text-stone-400 mb-1">
-                  <span>Progresso</span>
-                  <span>{challenge.current}/{challenge.target}</span>
-                </div>
-                <div className="w-full bg-stone-200 h-2 rounded-full overflow-hidden">
-                  <div 
-                    className="bg-amber-500 h-full transition-all duration-1000"
-                    style={{ width: `${Math.min(progress, 100)}%` }}
-                  ></div>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-stone-600">
-                  {challenge.type === 'books' && '📚 Livros'}
-                  {challenge.type === 'pages' && '📖 Páginas'}
-                  {challenge.type === 'genres' && '🏷️ Gêneros'}
-                  {challenge.type === 'authors' && '👤 Autores'}
-                </span>
-                <span className="font-black text-stone-700">
-                  {progress.toFixed(0)}% concluído
-                </span>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
-// ========== COMPONENTE DE LEMBRETES DE LEITURA ==========
-interface ReadingRemindersProps {
-  books: any[];
-}
-
-const ReadingReminders: React.FC<ReadingRemindersProps> = ({ books }) => {
-  const [reminders, setReminders] = useState<any[]>([]);
-  const [isSettingReminder, setIsSettingReminder] = useState(false);
-  const [newReminder, setNewReminder] = useState({
-    bookId: '',
-    time: '20:00',
-    days: ['seg', 'ter', 'qua', 'qui', 'sex'],
-    enabled: true
-  });
-
-  useEffect(() => {
-    loadReminders();
-  }, []);
-
-  const loadReminders = async () => {
-    const { data } = await supabase
-      .from('reading_reminders')
-      .select('*')
-      .order('created_at', { ascending: false });
-    
-    if (data) {
-      setReminders(data);
-    }
-  };
-
-  const requestNotificationPermission = async () => {
-    if (!('Notification' in window)) {
-      alert('Este navegador não suporta notificações.');
-      return false;
-    }
-    
-    if (Notification.permission === 'granted') {
-      return true;
-    }
-    
-    const permission = await Notification.requestPermission();
-    return permission === 'granted';
-  };
-
-  const scheduleReminder = async () => {
-    const hasPermission = await requestNotificationPermission();
-    if (!hasPermission) {
-      alert('Permissão para notificações é necessária.');
-      return;
-    }
-
-    const selectedBook = books.find(b => b.id === newReminder.bookId);
-    if (!selectedBook) return;
-
-    await supabase
-      .from('reading_reminders')
-      .insert([{
-        book_id: newReminder.bookId,
-        book_title: selectedBook.title,
-        time: newReminder.time,
-        days: newReminder.days,
-        enabled: newReminder.enabled
-      }]);
-
-    loadReminders();
-    setIsSettingReminder(false);
-    setNewReminder({
-      bookId: '',
-      time: '20:00',
-      days: ['seg', 'ter', 'qua', 'qui', 'sex'],
-      enabled: true
-    });
-  };
-
-  const toggleReminder = async (id: string, enabled: boolean) => {
-    await supabase
-      .from('reading_reminders')
-      .update({ enabled: !enabled })
-      .eq('id', id);
-    
-    loadReminders();
-  };
-
-  const deleteReminder = async (id: string) => {
-    await supabase
-      .from('reading_reminders')
-      .delete()
-      .eq('id', id);
-    
-    loadReminders();
-  };
-
-  const readingBooks = books.filter(b => b.status === 'Lendo' || b.status === 'Na Fila');
-
-  return (
-    <div className="bg-white p-6 rounded-[2.5rem] border border-stone-100 shadow-sm">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <Bell className="text-stone-900" size={20} />
-          <h3 className="font-black uppercase tracking-widest text-xs text-stone-700">
-            Lembretes de Leitura
-          </h3>
-        </div>
-        <button
-          onClick={() => setIsSettingReminder(true)}
-          className="bg-stone-900 text-white px-4 py-2 rounded-xl text-xs font-bold uppercase hover:bg-amber-600 transition-colors"
-        >
-          + Agendar
-        </button>
-      </div>
-
-      {isSettingReminder && (
-        <div className="mb-6 p-4 bg-blue-50 rounded-2xl border border-blue-100">
-          <div className="space-y-3">
-            <select
-              value={newReminder.bookId}
-              onChange={(e) => setNewReminder({...newReminder, bookId: e.target.value})}
-              className="w-full bg-white rounded-xl px-4 py-3 text-sm outline-none border border-stone-200"
-            >
-              <option value="">Selecione um livro</option>
-              {readingBooks.map(book => (
-                <option key={book.id} value={book.id}>
-                  {book.title} - {book.author}
-                </option>
-              ))}
-            </select>
-            
-            <div className="grid grid-cols-2 gap-3">
-              <input
-                type="time"
-                value={newReminder.time}
-                onChange={(e) => setNewReminder({...newReminder, time: e.target.value})}
-                className="bg-white rounded-xl px-4 py-3 text-sm outline-none border border-stone-200"
-              />
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={newReminder.enabled}
-                  onChange={(e) => setNewReminder({...newReminder, enabled: e.target.checked})}
-                  className="rounded border-stone-300"
-                />
-                <span className="text-xs font-bold text-stone-600">Ativo</span>
-              </div>
-            </div>
-            
-            <div className="flex gap-1">
-              {['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom'].map(day => (
-                <button
-                  key={day}
-                  onClick={() => {
-                    const days = newReminder.days.includes(day)
-                      ? newReminder.days.filter(d => d !== day)
-                      : [...newReminder.days, day];
-                    setNewReminder({...newReminder, days});
-                  }}
-                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${
-                    newReminder.days.includes(day)
-                      ? 'bg-stone-900 text-white'
-                      : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
-                  }`}
-                >
-                  {day}
-                </button>
-              ))}
-            </div>
-            
-            <div className="flex gap-2">
-              <button
-                onClick={scheduleReminder}
-                disabled={!newReminder.bookId}
-                className={`flex-1 py-3 rounded-xl text-xs font-bold uppercase transition-colors ${
-                  newReminder.bookId
-                    ? 'bg-stone-900 text-white hover:bg-amber-600'
-                    : 'bg-stone-200 text-stone-400 cursor-not-allowed'
-                }`}
-              >
-                Agendar Lembrete
-              </button>
-              <button
-                onClick={() => setIsSettingReminder(false)}
-                className="px-4 bg-stone-100 text-stone-600 py-3 rounded-xl text-xs font-bold uppercase hover:bg-stone-200 transition-colors"
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="space-y-3">
-        {reminders.map(reminder => {
-          const book = books.find(b => b.id === reminder.book_id);
-          
-          return (
-            <div key={reminder.id} className="p-4 bg-stone-50 rounded-2xl">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-3">
-                  <div className={`w-2 h-2 rounded-full ${reminder.enabled ? 'bg-emerald-500' : 'bg-stone-300'}`}></div>
-                  <h4 className="font-bold text-stone-900">
-                    {book?.title || reminder.book_title}
-                  </h4>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => toggleReminder(reminder.id, reminder.enabled)}
-                    className="text-xs font-bold text-stone-600 hover:text-stone-900"
-                  >
-                    {reminder.enabled ? 'Desativar' : 'Ativar'}
-                  </button>
-                  <button
-                    onClick={() => deleteReminder(reminder.id)}
-                    className="text-stone-400 hover:text-rose-500 transition-colors"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-between text-xs text-stone-500">
-                <div className="flex items-center gap-2">
-                  <Clock size={12} />
-                  <span>Todos os dias às {reminder.time}</span>
-                </div>
-                <div className="flex gap-1">
-                  {reminder.days?.map((day: string) => (
-                    <span key={day} className="text-[10px] font-bold bg-white px-2 py-1 rounded">
-                      {day}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-        
-        {reminders.length === 0 && (
-          <div className="text-center py-8 text-stone-400">
-            <Bell className="w-12 h-12 mx-auto mb-3 opacity-50" />
-            <p className="text-sm font-bold">Nenhum lembrete agendado</p>
-            <p className="text-xs mt-1">Agende lembretes para manter o hábito de leitura</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-// ========== COMPONENTE DE RELATÓRIOS ANUAIS ==========
-interface AnnualReportProps {
-  books: any[];
-  year: number;
-}
-
-const AnnualReport: React.FC<AnnualReportProps> = ({ books, year }) => {
-  const [isGenerating, setIsGenerating] = useState(false);
-
-  const annualStats = useMemo(() => {
-    const yearBooks = books.filter(book => book.status === 'Concluído');
-
-    const genreDistribution: Record<string, number> = {};
-    yearBooks.forEach(book => {
-      if (book.genre) {
-        genreDistribution[book.genre] = (genreDistribution[book.genre] || 0) + 1;
-      }
-    });
-
-    const authorDistribution: Record<string, number> = {};
-    yearBooks.forEach(book => {
-      if (book.author) {
-        authorDistribution[book.author] = (authorDistribution[book.author] || 0) + 1;
-      }
-    });
-
-    const totalPages = yearBooks.reduce((acc, book) => acc + (book.total_pages || 0), 0);
-    const avgPagesPerBook = yearBooks.length > 0 ? Math.round(totalPages / yearBooks.length) : 0;
-    const longestBook = yearBooks.reduce((longest: any, book) => 
-      (book.total_pages || 0) > (longest?.total_pages || 0) ? book : longest, null
-    );
-
-    return {
-      totalBooks: yearBooks.length,
-      totalPages,
-      avgPagesPerBook,
-      longestBook,
-      genreDistribution,
-      authorDistribution: Object.entries(authorDistribution)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5),
-    };
-  }, [books, year]);
-
-  const generateReport = () => {
-    setIsGenerating(true);
-    
-    setTimeout(() => {
-      const reportContent = `
-📊 RELATÓRIO ANUAL DE LEITURA ${year}
-
-📚 RESUMO:
-• Livros concluídos: ${annualStats.totalBooks}
-• Páginas lidas: ${annualStats.totalPages.toLocaleString()}
-• Média de páginas por livro: ${annualStats.avgPagesPerBook}
-
-🏆 DESTAQUES:
-${annualStats.longestBook ? `• Livro mais longo: ${annualStats.longestBook.title} (${annualStats.longestBook.total_pages} páginas)` : ''}
-
-📈 DISTRIBUIÇÃO POR GÊNERO:
-${Object.entries(annualStats.genreDistribution)
-  .map(([genre, count]) => `• ${genre}: ${count} livro${count !== 1 ? 's' : ''}`)
-  .join('\n')}
-
-👥 AUTORES MAIS LIDOS:
-${annualStats.authorDistribution
-  .map(([author, count]) => `• ${author}: ${count} livro${count !== 1 ? 's' : ''}`)
-  .join('\n')}
-
-Gerado em ${new Date().toLocaleDateString('pt-BR')}
-      `;
-      
-      const blob = new Blob([reportContent], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `relatorio-leitura-${year}.txt`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      
-      setIsGenerating(false);
-    }, 1500);
-  };
-
-  const generateVisualReport = () => {
-    window.print();
-  };
-
-  return (
-    <div className="bg-gradient-to-br from-stone-900 to-stone-800 text-white p-6 rounded-[2.5rem] shadow-xl">
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-3">
-          <Award className="text-amber-400" size={24} />
-          <div>
-            <h3 className="font-black uppercase tracking-widest text-sm">
-              Relatório Anual {year}
-            </h3>
-            <p className="text-xs text-stone-300 mt-1">Seu ano em livros</p>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={generateReport}
-            disabled={isGenerating}
-            className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-xs font-bold uppercase border border-white/20 transition-colors flex items-center gap-2"
-          >
-            <Download size={14} />
-            {isGenerating ? 'Gerando...' : 'Exportar'}
-          </button>
-          <button
-            onClick={generateVisualReport}
-            className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl text-xs font-bold uppercase transition-colors flex items-center gap-2"
-          >
-            <FileText size={14} />
-            Relatório PDF
-          </button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white/10 p-6 rounded-2xl backdrop-blur-sm border border-white/10">
-          <div className="text-4xl font-black mb-2">{annualStats.totalBooks}</div>
-          <p className="text-xs font-bold uppercase text-stone-300">Livros Concluídos</p>
-        </div>
-        
-        <div className="bg-white/10 p-6 rounded-2xl backdrop-blur-sm border border-white/10">
-          <div className="text-4xl font-black mb-2">{annualStats.totalPages.toLocaleString()}</div>
-          <p className="text-xs font-bold uppercase text-stone-300">Páginas Lidas</p>
-        </div>
-        
-        <div className="bg-white/10 p-6 rounded-2xl backdrop-blur-sm border border-white/10">
-          <div className="text-4xl font-black mb-2">{annualStats.avgPagesPerBook}</div>
-          <p className="text-xs font-bold uppercase text-stone-300">Média por Livro</p>
-        </div>
-      </div>
-
-      {annualStats.authorDistribution.length > 0 && (
-        <div className="mt-6 p-6 bg-white/5 rounded-2xl border border-white/10">
-          <h4 className="text-xs font-black uppercase text-stone-300 mb-4">Top Autores do Ano</h4>
-          <div className="space-y-3">
-            {annualStats.authorDistribution.map(([author, count]) => (
-              <div key={author} className="flex items-center justify-between">
-                <span className="text-sm font-bold">{author}</span>
-                <span className="text-xs font-black bg-white/20 px-3 py-1 rounded-lg">
-                  {count} livro{count !== 1 ? 's' : ''}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <div className="mt-6 text-center text-xs text-stone-400">
-        <p>Relatório gerado em {new Date().toLocaleDateString('pt-BR')}</p>
-      </div>
-    </div>
-  );
-};
-
-// ========== COMPONENTE PRINCIPAL APP ==========
 export default function App() {
   const { books, refreshBooks } = useBooks()
   const [currentView, setCurrentView] = useState<'library' | 'analytics' | 'insights'>('library')
@@ -1092,8 +69,6 @@ export default function App() {
   const [shuffledBook, setShuffledBook] = useState<AppBook | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState<string | 'Todos'>('Todos')
-  const [filteredBooks, setFilteredBooks] = useState<AppBook[]>([])
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
 
   const emptyForm = { title: '', author: '', author_nationality: '', total_pages: 0, read_pages: 0, cover_url: '', status: 'Na Fila' as BookStatus, genre: 'Outros' };
   const [formData, setFormData] = useState<any>(emptyForm);
@@ -1104,10 +79,6 @@ export default function App() {
     try { const parsed = JSON.parse(activeInsightBook.notes); return Array.isArray(parsed) ? parsed : []; } catch (e) { return []; }
   }, [activeInsightBook]);
   const readingBooks = useMemo(() => books.filter(b => b.status === 'Lendo'), [books])
-
-  useEffect(() => {
-    setFilteredBooks(books);
-  }, [books]);
 
   useEffect(() => {
     async function loadSettings() {
@@ -1130,7 +101,7 @@ export default function App() {
   }
 
   async function handleDeleteEntry(entryId: string) {
-    if (!selectedBookId || !confirm('Deseja excluir esta anotação?')) return;
+    if (!selectedBookId || !confirm('Excluir esta anotação?')) return;
     const newHistory = history.filter(en => en.id !== entryId);
     await supabase.from('books').update({ notes: JSON.stringify(newHistory) }).eq('id', selectedBookId);
     if (editingEntryId === entryId) { setCurrentEntry({ quote: '', reflection: '' }); setEditingEntryId(null); }
@@ -1140,12 +111,6 @@ export default function App() {
   function loadEntryForEdit(entry: Marginalia) {
     setCurrentEntry({ quote: entry.quote, reflection: entry.reflection });
     setEditingEntryId(entry.id);
-  }
-
-  function searchCoverOnGoogle() {
-    if (!formData.title) return alert('Digite o título primeiro.');
-    const query = encodeURIComponent(`${formData.title} ${formData.author || ''}`);
-    window.open(`https://www.google.com.br/search?tbm=bks&q=${query}`, '_blank');
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -1201,7 +166,7 @@ export default function App() {
           <button onClick={() => setCurrentView('insights')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${currentView === 'insights' ? 'bg-white shadow-sm text-stone-900' : 'text-stone-400'}`}><PenTool className="w-3.5 h-3.5 inline mr-1"/> Insights</button>
           <button onClick={() => setCurrentView('analytics')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${currentView === 'analytics' ? 'bg-white shadow-sm' : 'text-stone-400'}`}><PieChart className="w-3.5 h-3.5 inline mr-1"/> Relatórios</button>
         </div>
-        <button onClick={() => { setEditingBookId(null); setFormData(emptyForm); setIsModalOpen(true); }} className="bg-stone-900 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-amber-700 shadow-lg transition-all"><Plus size={20}/> Novo</button>
+        <button onClick={() => { setEditingBookId(null); setFormData(emptyForm); setIsModalOpen(true); }} className="bg-stone-900 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-amber-700 shadow-lg active:scale-95 transition-all"><Plus size={20}/> Novo</button>
       </header>
 
       <main className="max-w-[1600px] mx-auto p-6 space-y-8 print:p-0">
@@ -1213,55 +178,34 @@ export default function App() {
 
         {currentView === 'library' && (
           <>
-            <div className="bg-white/60 backdrop-blur-md p-2 rounded-[1.5rem] border border-stone-200 flex flex-col lg:flex-row gap-2 shadow-sm">
-              <div className="relative flex-1"><Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300 w-5 h-5"/><input className="w-full pl-12 pr-4 bg-transparent font-bold outline-none h-full py-3" placeholder="Pesquisar..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)}/></div>
-              <div className="flex gap-2 p-1">
-                {['Todos', 'Na Fila', 'Lendo', 'Concluído'].map((s) => (<button key={s} onClick={() => setFilterStatus(s as any)} className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all ${filterStatus === s ? 'bg-stone-900 text-white shadow-md' : 'text-stone-400 hover:bg-white hover:shadow-sm'}`}>{s}</button>))}
-                <button onClick={() => setShowAdvancedFilters(!showAdvancedFilters)} className="p-3 bg-stone-100 text-stone-500 rounded-xl hover:bg-amber-500 hover:text-white transition-all"><Filter size={18}/></button>
-                <button onClick={handleShuffle} className="p-3 bg-stone-100 text-stone-500 rounded-xl hover:bg-amber-500 hover:text-white transition-all"><Shuffle size={18}/></button>
+            <div className="bg-white/60 backdrop-blur-md p-2 rounded-[1.5rem] border border-stone-200 flex flex-col lg:flex-row gap-2 shadow-sm animate-in fade-in duration-500">
+              <div className="relative flex-1"><Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300 w-5 h-5"/><input className="w-full pl-12 pr-4 bg-transparent font-bold outline-none text-stone-800 placeholder:text-stone-300 h-full py-3" placeholder="Pesquisar..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)}/></div>
+              <div className="flex gap-2 p-1 overflow-x-auto">
+                {['Todos', 'Na Fila', 'Lendo', 'Concluído'].map((s) => (<button key={s} onClick={() => setFilterStatus(s as any)} className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${filterStatus === s ? 'bg-stone-900 text-white shadow-md' : 'text-stone-400 hover:bg-white hover:shadow-sm'}`}>{s}</button>))}
+                <button onClick={handleShuffle} className="p-3 bg-stone-100 text-stone-500 rounded-xl hover:bg-amber-500 hover:text-white transition-all shadow-sm"><Shuffle size={18}/></button>
               </div>
             </div>
-
-            {showAdvancedFilters && (
-              <AdvancedFilters 
-                books={books} 
-                onFilterChange={setFilteredBooks} 
-              />
-            )}
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {filteredBooks
-                .filter(b => (b.title.toLowerCase().includes(searchTerm.toLowerCase()) || b.author.toLowerCase().includes(searchTerm.toLowerCase())) && (filterStatus === 'Todos' || b.status === filterStatus))
-                .map(book => {
-                  const typedBook = book as any as AppBook;
-                  const progress = Math.round(((typedBook.read_pages || 0) / (typedBook.total_pages || 1)) * 100);
-                  return (
-                    <div key={typedBook.id} className="bg-white p-6 rounded-[2.5rem] border border-stone-100 flex gap-6 group hover:shadow-xl transition-all relative overflow-hidden">
-                      <div className="w-32 h-44 bg-stone-50 rounded-2xl overflow-hidden shrink-0 shadow-inner border border-stone-100">{typedBook.cover_url ? <img src={typedBook.cover_url} className="w-full h-full object-cover" alt={typedBook.title} /> : <div className="w-full h-full flex items-center justify-center text-stone-200"><BookMarked size={32}/></div>}</div>
-                      <div className="flex-1 py-1">
-                        <span className={`text-[8px] font-black uppercase px-2 py-1 rounded-md border mb-3 block w-fit ${getGenreStyle(typedBook.genre || '')}`}>{typedBook.genre}</span>
-                        <h3 className="font-black text-lg text-stone-900 leading-tight mb-1">{typedBook.title}</h3>
-                        <p className="text-xs text-stone-400 font-bold uppercase flex items-center gap-1">{typedBook.author_nationality ? (countryFlags[typedBook.author_nationality.toLowerCase().trim()] || <Globe size={10}/>) : <Globe size={10}/>} {typedBook.author}</p>
-                        
-                        {/* Avaliação de estrelas */}
-                        <div className="my-3">
-                          <RatingStars bookId={typedBook.id} size="sm" />
-                        </div>
-                        
-                        <div className="mt-4"><div className="flex justify-between text-[9px] font-black text-stone-400 mb-1.5 uppercase tracking-widest"><span>Progresso</span><span className="text-amber-600">{progress}%</span></div><div className="w-full bg-stone-100 h-1.5 rounded-full overflow-hidden shadow-inner"><div className="bg-amber-500 h-full transition-all duration-1000" style={{ width: `${progress}%` }}></div></div></div>
-                        <div className="mt-5 flex gap-2">
-                          {/* Nova etiqueta de status */}
-                          <StatusTag status={typedBook.status} size="sm" />
-                          {typedBook.notes && <div className="bg-amber-100 text-amber-700 px-3 py-1 rounded-lg text-[9px] font-black flex items-center gap-1 shadow-sm uppercase"><StickyNote size={10}/> Nota</div>}
-                        </div>
-                      </div>
-                      <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                        <button onClick={() => { setEditingBookId(typedBook.id); setFormData(typedBook); setIsModalOpen(true); }} className="p-2.5 text-stone-300 hover:text-stone-900 bg-stone-50 rounded-xl transition-all"><Pencil size={16}/></button>
-                        <button onClick={() => { if(confirm('Excluir este livro?')) supabase.from('books').delete().eq('id', typedBook.id).then(refreshBooks); }} className="p-2.5 text-stone-300 hover:text-red-600 bg-stone-50 rounded-xl transition-all"><Trash2 size={16}/></button>
-                      </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in fade-in duration-500">
+              {books.filter(b => (b.title.toLowerCase().includes(searchTerm.toLowerCase()) || b.author.toLowerCase().includes(searchTerm.toLowerCase())) && (filterStatus === 'Todos' || b.status === filterStatus)).map(book => {
+                const typedBook = book as any as AppBook;
+                const progress = Math.round(((typedBook.read_pages || 0) / (typedBook.total_pages || 1)) * 100);
+                return (
+                  <div key={typedBook.id} className="bg-white p-6 rounded-[2.5rem] border border-stone-100 flex gap-6 group hover:shadow-xl transition-all relative overflow-hidden">
+                    <div className="w-32 h-44 bg-stone-50 rounded-2xl overflow-hidden shrink-0 shadow-inner border border-stone-100">{typedBook.cover_url ? <img src={typedBook.cover_url} className="w-full h-full object-cover" alt={typedBook.title} /> : <div className="w-full h-full flex items-center justify-center text-stone-200"><BookMarked size={32}/></div>}</div>
+                    <div className="flex-1 py-1">
+                      <span className={`text-[8px] font-black uppercase px-2 py-1 rounded-md border mb-3 block w-fit ${getGenreStyle(typedBook.genre || '')}`}>{typedBook.genre}</span>
+                      <h3 className="font-black text-lg text-stone-900 leading-tight mb-1">{typedBook.title}</h3>
+                      <p className="text-xs text-stone-400 font-bold uppercase flex items-center gap-1">{typedBook.author_nationality ? (countryFlags[typedBook.author_nationality.toLowerCase().trim()] || <Globe size={10}/>) : <Globe size={10}/>} {typedBook.author}</p>
+                      <div className="mt-6"><div className="flex justify-between text-[9px] font-black text-stone-400 mb-1.5 uppercase tracking-widest"><span>Progresso</span><span className="text-amber-600">{progress}%</span></div><div className="w-full bg-stone-100 h-1.5 rounded-full overflow-hidden shadow-inner"><div className="bg-amber-500 h-full transition-all duration-1000" style={{ width: `${progress}%` }}></div></div></div>
+                      <div className="mt-5 flex gap-2"><span className="text-[9px] font-black px-3 py-1 rounded-lg bg-stone-50 text-stone-500 uppercase">{typedBook.status}</span>{typedBook.notes && <div className="bg-amber-100 text-amber-700 px-3 py-1 rounded-lg text-[9px] font-black flex items-center gap-1 shadow-sm uppercase"><StickyNote size={10}/> Nota</div>}</div>
                     </div>
-                  )
-                })}
+                    <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                      <button onClick={() => { setEditingBookId(typedBook.id); setFormData(typedBook); setIsModalOpen(true); }} className="p-2.5 text-stone-300 hover:text-stone-900 bg-stone-50 rounded-xl transition-all"><Pencil size={16}/></button>
+                      <button onClick={() => { if(confirm('Excluir este livro?')) supabase.from('books').delete().eq('id', typedBook.id).then(refreshBooks); }} className="p-2.5 text-stone-300 hover:text-red-600 bg-stone-50 rounded-xl transition-all"><Trash2 size={16}/></button>
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           </>
         )}
@@ -1285,11 +229,11 @@ export default function App() {
                 <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 bg-white rounded-[3rem] border border-stone-200 overflow-hidden shadow-2xl min-h-[600px] relative print:shadow-none print:border-none print:block">
                   <div className="p-10 border-r border-stone-100 space-y-6 bg-[#FDFCFB] print:bg-white print:p-0 print:mb-10 print:border-none">
                     <div className="flex items-center gap-3 text-amber-600 print:text-black"><Quote size={24} /><span className="text-[11px] font-black uppercase tracking-[0.4em]">Passagem da Obra</span></div>
-                    <textarea className="w-full h-[450px] bg-transparent text-xl font-serif italic text-stone-700 outline-none resize-none leading-relaxed print:h-auto print:text-black" placeholder="Citação..." value={currentEntry.quote} onChange={e => setCurrentEntry({...currentEntry, quote: e.target.value})} />
+                    <textarea className="w-full h-[450px] bg-transparent text-xl font-serif italic text-stone-700 outline-none resize-none leading-relaxed print:h-auto print:text-black" placeholder="Digite aqui a citação..." value={currentEntry.quote} onChange={e => setCurrentEntry({...currentEntry, quote: e.target.value})} />
                   </div>
                   <div className="p-10 space-y-6 bg-white print:p-0">
                     <div className="flex items-center gap-3 text-blue-600 print:text-black"><MessageSquare size={24} /><span className="text-[11px] font-black uppercase tracking-[0.4em]">Sua Reflexão</span></div>
-                    <textarea className="w-full h-[450px] bg-transparent text-xl font-bold text-stone-900 outline-none resize-none leading-relaxed print:h-auto print:text-black print:font-normal" placeholder="Insights..." value={currentEntry.reflection} onChange={e => setCurrentEntry({...currentEntry, reflection: e.target.value})} />
+                    <textarea className="w-full h-[450px] bg-transparent text-xl font-bold text-stone-900 outline-none resize-none leading-relaxed print:h-auto print:text-black print:font-normal" placeholder="O que você aprendeu?" value={currentEntry.reflection} onChange={e => setCurrentEntry({...currentEntry, reflection: e.target.value})} />
                   </div>
                 </div>
                 <div className="lg:col-span-4 space-y-4 print:hidden">
@@ -1316,15 +260,6 @@ export default function App() {
 
         {currentView === 'analytics' && (
           <div className="space-y-6 animate-in slide-in-from-bottom-4">
-            <AnnualReport books={books} year={2026} />
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <AdvancedStats books={books} />
-              <CustomChallenges books={books} />
-            </div>
-            
-            <ReadingReminders books={books} />
-            
             <div className="bg-white p-12 rounded-[3rem] border border-stone-100 shadow-xl">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-[11px] font-black uppercase text-amber-600 tracking-[0.3em]">Reading Challenge 2026</h2>
@@ -1358,7 +293,6 @@ export default function App() {
         )}
       </main>
 
-      {/* SORTEADOR VISUAL */}
       {isShuffleOpen && (
         <div className="fixed inset-0 bg-stone-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <div className="bg-white w-full max-w-md rounded-[2.5rem] p-10 text-center shadow-2xl relative">
@@ -1366,8 +300,8 @@ export default function App() {
             <h2 className="text-xs font-black uppercase tracking-[0.3em] text-stone-400 mb-6">{isShuffling ? 'SORTEANDO...' : 'O DESTINO ESCOLHEU'}</h2>
             <div className="flex justify-center mb-6">
                 {shuffledBook ? (
-                    <div className="w-48 h-72 bg-stone-50 rounded-2xl shadow-xl overflow-hidden border-4 border-stone-100">
-                       {shuffledBook.cover_url ? <img src={shuffledBook.cover_url} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-stone-300"><BookMarked size={40}/></div>}
+                    <div className="w-48 h-72 bg-stone-50 rounded-2xl shadow-xl overflow-hidden border-4 border-stone-100 transform transition-transform hover:scale-105">
+                       {shuffledBook.cover_url ? <img src={shuffledBook.cover_url} className="w-full h-full object-cover" alt={shuffledBook.title}/> : <div className="w-full h-full flex items-center justify-center text-stone-300"><BookMarked size={40}/></div>}
                     </div>
                 ) : <div className="p-10 bg-amber-50 rounded-full animate-spin"><Sparkles className="text-amber-500" size={40}/></div>}
             </div>
@@ -1375,29 +309,25 @@ export default function App() {
                 <div className="animate-in fade-in slide-in-from-bottom-4">
                     <h3 className="text-2xl font-black text-stone-900 mb-2">{shuffledBook.title}</h3>
                     <p className="text-xs font-bold text-stone-400 uppercase mb-8">{shuffledBook.author}</p>
-                    {!isShuffling && <button onClick={startReadingShuffled} className="w-full bg-stone-900 text-white py-4 rounded-2xl font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-amber-600 shadow-xl transition-all"><PlayCircle size={20} /> INICIAR LEITURA</button>}
+                    {!isShuffling && <button onClick={startReadingShuffled} className="w-full bg-stone-900 text-white py-4 rounded-2xl font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-amber-600 transition-all shadow-xl active:scale-95"><PlayCircle size={20} /> INICIAR LEITURA</button>}
                 </div>
             )}
           </div>
         </div>
       )}
 
-      {/* MODAL DE CADASTRO COM GOOGLE BOOKS E OPTGROUPS */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-stone-950/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-stone-950/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 print:hidden animate-in fade-in duration-300">
           <div className="bg-white w-full max-w-xl rounded-[2.5rem] p-8 shadow-2xl overflow-y-auto max-h-[90vh] border border-stone-100">
             <div className="flex justify-between items-center mb-6 pb-6 border-b border-stone-50"><h2 className="font-black uppercase tracking-widest text-stone-900">{editingBookId ? 'Editar Obra' : 'Nova Obra'}</h2><button onClick={() => setIsModalOpen(false)} className="p-2 bg-stone-50 rounded-full hover:bg-stone-100"><X/></button></div>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="flex gap-2">
-                  <input className="flex-1 bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none shadow-sm" placeholder="Título" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required/>
-                  <button type="button" onClick={searchCoverOnGoogle} className="bg-blue-50 text-blue-600 p-4 rounded-2xl hover:bg-blue-100 transition-all"><ImagePlus size={20}/></button>
-              </div>
-              <div className="grid grid-cols-2 gap-4"><input className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none" placeholder="Autor" value={formData.author} onChange={e => setFormData({...formData, author: e.target.value})}/><input className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none" placeholder="País (ex: Brasil)" value={formData.author_nationality} onChange={e => setFormData({...formData, author_nationality: e.target.value})}/></div>
-              <input className="w-full bg-stone-50 rounded-2xl px-6 py-4 text-xs font-bold outline-none" placeholder="URL da Capa" value={formData.cover_url} onChange={e => setFormData({...formData, cover_url: e.target.value})}/>
-              <div className="grid grid-cols-2 gap-4"><input type="number" className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none" placeholder="Total Páginas" value={formData.total_pages} onChange={e => setFormData({...formData, total_pages: Number(e.target.value)})}/><input type="number" className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none" placeholder="Lidas" value={formData.read_pages} onChange={e => setFormData({...formData, read_pages: Number(e.target.value)})}/></div>
+              <input className="w-full bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none shadow-sm" placeholder="Título" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required/>
+              <div className="grid grid-cols-2 gap-4"><input className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none shadow-sm" placeholder="Autor" value={formData.author} onChange={e => setFormData({...formData, author: e.target.value})}/><input className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none shadow-sm" placeholder="País (ex: Brasil)" value={formData.author_nationality} onChange={e => setFormData({...formData, author_nationality: e.target.value})}/></div>
+              <input className="w-full bg-stone-50 rounded-2xl px-6 py-4 text-xs font-bold outline-none shadow-sm" placeholder="URL da Capa" value={formData.cover_url} onChange={e => setFormData({...formData, cover_url: e.target.value})}/>
+              <div className="grid grid-cols-2 gap-4"><input type="number" className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none shadow-sm" placeholder="Total Páginas" value={formData.total_pages} onChange={e => setFormData({...formData, total_pages: Number(e.target.value)})}/><input type="number" className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none shadow-sm" placeholder="Lidas" value={formData.read_pages} onChange={e => setFormData({...formData, read_pages: Number(e.target.value)})}/></div>
               <div className="grid grid-cols-2 gap-4">
-                <select className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none appearance-none" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}><option value="Na Fila">Na Fila</option><option value="Lendo">Lendo</option><option value="Concluído">Concluído</option><option value="Abandonado">Abandonado</option></select>
-                <select className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none appearance-none text-sm" value={formData.genre} onChange={e => setFormData({...formData, genre: e.target.value})}>
+                <select className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none appearance-none cursor-pointer shadow-sm" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}><option value="Na Fila">Na Fila</option><option value="Lendo">Lendo</option><option value="Concluído">Concluído</option><option value="Abandonado">Abandonado</option></select>
+                <select className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none appearance-none cursor-pointer shadow-sm text-sm" value={formData.genre} onChange={e => setFormData({...formData, genre: e.target.value})}>
                   <option value="Outros">Selecione o Gênero</option>
                   {Object.entries(genreStructure).map(([category, subgenres]) => (
                     <optgroup key={category} label={category}>{subgenres.map(sub => <option key={sub} value={sub}>{sub}</option>)}</optgroup>
