@@ -5,7 +5,7 @@ import {
   Library, Globe, Save, History, 
   PieChart, LayoutGrid, Quote, MessageSquare, PenTool, Clock, FileDown,
   BookMarked, StickyNote, X, Pencil, Trash2, Plus, Trophy, CheckCircle2,
-  BarChart3, BookOpen, MapPin, Search, Shuffle, Sparkles, PlayCircle, ImagePlus
+  BarChart3, BookOpen, MapPin, Search, Shuffle, Sparkles, PlayCircle
 } from 'lucide-react'
 
 type BookStatus = 'Lendo' | 'Na Fila' | 'Concluído' | 'Abandonado';
@@ -20,7 +20,6 @@ interface AppBook {
   genre?: string; status: BookStatus; notes?: string;
 }
 
-// 🌍 DICIONÁRIO COMPLETO DE 195 PAÍSES
 const countryFlags: Record<string, string> = {
   'afeganistão': '🇦🇫', 'áfrica do sul': '🇿🇦', 'albânia': '🇦🇱', 'alemanha': '🇩🇪', 'andorra': '🇦🇩', 'angola': '🇦🇴', 'antígua e barbuda': '🇦🇬', 'arábia saudita': '🇸🇦', 'argélia': '🇩🇿', 'argentina': '🇦🇷', 'armênia': '🇦🇲', 'austrália': '🇦🇺', 'áustria': '🇦🇹', 'azerbaijão': '🇦🇿', 'bahamas': '🇧🇸', 'bahrein': '🇧🇭', 'bangladesh': '🇧🇩', 'barbados': '🇧🇧', 'bélgica': '🇧🇪', 'belize': '🇧🇿', 'benin': '🇧🇯', 'bielorrússia': '🇧🇾', 'bolívia': '🇧🇴', 'bósnia e herzegovina': '🇧🇦', 'botsuana': '🇧🇼', 'brasil': '🇧🇷', 'brasileira': '🇧🇷', 'brunei': '🇧🇳', 'bulgária': '🇧🇬', 'burkina faso': '🇧🇫', 'burundi': '🇧🇮', 'camboja': '🇰🇭', 'camarões': '🇨🇲', 'canadá': '🇨🇦', 'cabo verde': '🇨🇻', 'cazaquistão': '🇰🇿', 'chade': '🇹🇩', 'chile': '🇨🇱', 'china': '🇨🇳', 'chipre': '🇨🇾', 'colômbia': '🇨🇴', 'comores': '🇰🇲', 'congo': '🇨🇬', 'coreia do norte': '🇰🇵', 'coreia do sul': '🇰🇷', 'costa do marfim': '🇨🇮', 'costa rica': '🇨🇷', 'croácia': '🇭🇷', 'cuba': '🇨🇺', 'dinamarca': '🇩🇰', 'djibuti': '🇩🇯', 'dominica': '🇩🇲', 'egito': '🇪🇬', 'el salvador': '🇸🇻', 'emirados árabes unidos': '🇦🇪', 'equador': '🇪🇨', 'eritreia': '🇪🇷', 'eslováquia': '🇸🇰', 'eslovênia': '🇸🇮', 'espanha': '🇪🇸', 'estados unidos': '🇺🇸', 'eua': '🇺🇸', 'estônia': '🇪🇪', 'etiópia': '🇪🇹', 'fiji': '🇫🇯', 'filipinas': '🇵🇭', 'finlândia': '🇫🇮', 'frança': '🇫🇷', 'gabão': '🇬🇦', 'gâmbia': '🇬🇲', 'gana': '🇬🇭', 'geórgia': '🇬🇪', 'granada': '🇬🇩', 'grécia': '🇬🇷', 'guatemala': '🇬🇹', 'guiana': '🇬🇾', 'guiné': '🇬🇳', 'guiné-bissau': '🇬🇼', 'guiné equatorial': '🇬🇶', 'haiti': '🇭🇹', 'honduras': '🇭🇳', 'hungria': '🇭🇺', 'iêmen': '🇾🇪', 'índia': '🇮🇳', 'indonésia': '🇮🇩', 'irã': '🇮🇷', 'iraque': '🇮🇶', 'irlanda': '🇮🇪', 'islândia': '🇮🇸', 'israel': '🇮🇱', 'itália': '🇮🇹', 'jamaica': '🇯🇲', 'japão': '🇯🇵', 'jordânia': '🇯🇴', 'kuwait': '🇰🇼', 'laos': '🇱🇦', 'lesoto': '🇱🇸', 'letônia': '🇱🇻', 'líbano': '🇱🇧', 'libéria': '🇱🇷', 'líbia': '🇱🇾', 'liechtenstein': '🇱🇮', 'lituânia': '🇱🇹', 'luxemburgo': '🇱🇺', 'macedônia do norte': '🇲🇰', 'madagascar': '🇲🇬', 'malásia': '🇲🇾', 'malaui': '🇲🇼', 'maldivas': '🇲🇻', 'mali': '🇲🇱', 'malta': '🇲🇹', 'marrocos': '🇲🇦', 'maurício': '🇲🇺', 'mauritânia': '🇲🇷', 'méxico': '🇲🇽', 'mianmar': '🇲🇲', 'moçambique': '🇲🇿', 'moldávia': '🇲🇩', 'mônaco': '🇲🇨', 'mongólia': '🇲🇳', 'montenegro': '🇲🇪', 'namíbia': '🇳🇦', 'nauru': '🇳🇷', 'nepal': '🇳🇵', 'nicarágua': '🇳🇮', 'níger': '🇳🇪', 'nigéria': '🇳🇬', 'noruega': '🇳🇴', 'nova zelândia': '🇳🇿', 'omã': '🇴🇲', 'países baixos': '🇳🇱', 'panamá': '🇵🇦', 'paquistão': '🇵🇰', 'paraguai': '🇵🇾', 'peru': '🇵🇪', 'polônia': '🇵🇱', 'portugal': '🇵🇹', 'qatar': '🇶🇦', 'quênia': '🇰🇪', 'reino unido': '🇬🇧', 'inglaterra': '🇬🇧', 'república dominicana': '🇩🇴', 'república tcheca': '🇨🇿', 'romênia': '🇷🇴', 'ruanda': '🇷🇼', 'rússia': '🇷🇺', 'samoa': '🇼🇸', 'senegal': '🇸🇳', 'sérvia': '🇷🇸', 'singapura': '🇸🇬', 'síria': '🇸🇾', 'somália': '🇸🇴', 'sri lanka': '🇱🇰', 'sudão': '🇸🇩', 'suécia': '🇸🇪', 'suíça': '🇨🇭', 'suriname': '🇸🇷', 'tailândia': '🇹🇭', 'tanzânia': '🇹🇿', 'timor-leste': '🇹🇱', 'togo': '🇹🇬', 'tunísia': '🇹🇳', 'turquia': '🇹🇷', 'ucrânia': '🇺🇦', 'uganda': '🇺🇬', 'uruguai': '🇺🇾', 'uzbequistão': '🇺🇿', 'vaticano': '🇻🇦', 'venezuela': '🇻🇪', 'vietnã': '🇻🇳', 'zâmbia': '🇿🇲', 'zimbábue': '🇿🇼'
 };
@@ -166,7 +165,7 @@ export default function App() {
           <button onClick={() => setCurrentView('insights')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${currentView === 'insights' ? 'bg-white shadow-sm text-stone-900' : 'text-stone-400'}`}><PenTool className="w-3.5 h-3.5 inline mr-1"/> Insights</button>
           <button onClick={() => setCurrentView('analytics')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${currentView === 'analytics' ? 'bg-white shadow-sm' : 'text-stone-400'}`}><PieChart className="w-3.5 h-3.5 inline mr-1"/> Relatórios</button>
         </div>
-        <button onClick={() => { setEditingBookId(null); setFormData(emptyForm); setIsModalOpen(true); }} className="bg-stone-900 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-amber-700 shadow-lg active:scale-95 transition-all"><Plus size={20}/> Novo</button>
+        <button onClick={() => { setEditingBookId(null); setFormData(emptyForm); setIsModalOpen(true); }} className="bg-stone-900 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-amber-700 shadow-lg transition-all"><Plus size={20}/> Novo</button>
       </header>
 
       <main className="max-w-[1600px] mx-auto p-6 space-y-8 print:p-0">
@@ -178,14 +177,14 @@ export default function App() {
 
         {currentView === 'library' && (
           <>
-            <div className="bg-white/60 backdrop-blur-md p-2 rounded-[1.5rem] border border-stone-200 flex flex-col lg:flex-row gap-2 shadow-sm animate-in fade-in duration-500">
-              <div className="relative flex-1"><Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300 w-5 h-5"/><input className="w-full pl-12 pr-4 bg-transparent font-bold outline-none text-stone-800 placeholder:text-stone-300 h-full py-3" placeholder="Pesquisar..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)}/></div>
-              <div className="flex gap-2 p-1 overflow-x-auto">
-                {['Todos', 'Na Fila', 'Lendo', 'Concluído'].map((s) => (<button key={s} onClick={() => setFilterStatus(s as any)} className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${filterStatus === s ? 'bg-stone-900 text-white shadow-md' : 'text-stone-400 hover:bg-white hover:shadow-sm'}`}>{s}</button>))}
-                <button onClick={handleShuffle} className="p-3 bg-stone-100 text-stone-500 rounded-xl hover:bg-amber-500 hover:text-white transition-all shadow-sm"><Shuffle size={18}/></button>
+            <div className="bg-white/60 backdrop-blur-md p-2 rounded-[1.5rem] border border-stone-200 flex flex-col lg:flex-row gap-2 shadow-sm">
+              <div className="relative flex-1"><Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300 w-5 h-5"/><input className="w-full pl-12 pr-4 bg-transparent font-bold outline-none h-full py-3" placeholder="Pesquisar..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)}/></div>
+              <div className="flex gap-2 p-1">
+                {['Todos', 'Na Fila', 'Lendo', 'Concluído'].map((s) => (<button key={s} onClick={() => setFilterStatus(s as any)} className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all ${filterStatus === s ? 'bg-stone-900 text-white shadow-md' : 'text-stone-400 hover:bg-white hover:shadow-sm'}`}>{s}</button>))}
+                <button onClick={handleShuffle} className="p-3 bg-stone-100 text-stone-500 rounded-xl hover:bg-amber-500 hover:text-white transition-all"><Shuffle size={18}/></button>
               </div>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in fade-in duration-500">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {books.filter(b => (b.title.toLowerCase().includes(searchTerm.toLowerCase()) || b.author.toLowerCase().includes(searchTerm.toLowerCase())) && (filterStatus === 'Todos' || b.status === filterStatus)).map(book => {
                 const typedBook = book as any as AppBook;
                 const progress = Math.round(((typedBook.read_pages || 0) / (typedBook.total_pages || 1)) * 100);
@@ -195,7 +194,9 @@ export default function App() {
                     <div className="flex-1 py-1">
                       <span className={`text-[8px] font-black uppercase px-2 py-1 rounded-md border mb-3 block w-fit ${getGenreStyle(typedBook.genre || '')}`}>{typedBook.genre}</span>
                       <h3 className="font-black text-lg text-stone-900 leading-tight mb-1">{typedBook.title}</h3>
-                      <p className="text-xs text-stone-400 font-bold uppercase flex items-center gap-1">{typedBook.author_nationality ? (countryFlags[typedBook.author_nationality.toLowerCase().trim()] || <Globe size={10}/>) : <Globe size={10}/>} {typedBook.author}</p>
+                      <p className="text-xs text-stone-400 font-bold uppercase flex items-center gap-1">
+                        {typedBook.author_nationality ? (countryFlags[typedBook.author_nationality.toLowerCase().trim()] || <Globe size={10}/>) : <Globe size={10}/>} {typedBook.author}
+                      </p>
                       <div className="mt-6"><div className="flex justify-between text-[9px] font-black text-stone-400 mb-1.5 uppercase tracking-widest"><span>Progresso</span><span className="text-amber-600">{progress}%</span></div><div className="w-full bg-stone-100 h-1.5 rounded-full overflow-hidden shadow-inner"><div className="bg-amber-500 h-full transition-all duration-1000" style={{ width: `${progress}%` }}></div></div></div>
                       <div className="mt-5 flex gap-2"><span className="text-[9px] font-black px-3 py-1 rounded-lg bg-stone-50 text-stone-500 uppercase">{typedBook.status}</span>{typedBook.notes && <div className="bg-amber-100 text-amber-700 px-3 py-1 rounded-lg text-[9px] font-black flex items-center gap-1 shadow-sm uppercase"><StickyNote size={10}/> Nota</div>}</div>
                     </div>
@@ -229,11 +230,11 @@ export default function App() {
                 <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 bg-white rounded-[3rem] border border-stone-200 overflow-hidden shadow-2xl min-h-[600px] relative print:shadow-none print:border-none print:block">
                   <div className="p-10 border-r border-stone-100 space-y-6 bg-[#FDFCFB] print:bg-white print:p-0 print:mb-10 print:border-none">
                     <div className="flex items-center gap-3 text-amber-600 print:text-black"><Quote size={24} /><span className="text-[11px] font-black uppercase tracking-[0.4em]">Passagem da Obra</span></div>
-                    <textarea className="w-full h-[450px] bg-transparent text-xl font-serif italic text-stone-700 outline-none resize-none leading-relaxed print:h-auto print:text-black" placeholder="Digite aqui a citação..." value={currentEntry.quote} onChange={e => setCurrentEntry({...currentEntry, quote: e.target.value})} />
+                    <textarea className="w-full h-[450px] bg-transparent text-xl font-serif italic text-stone-700 outline-none resize-none leading-relaxed print:h-auto print:text-black" placeholder="Citação..." value={currentEntry.quote} onChange={e => setCurrentEntry({...currentEntry, quote: e.target.value})} />
                   </div>
                   <div className="p-10 space-y-6 bg-white print:p-0">
                     <div className="flex items-center gap-3 text-blue-600 print:text-black"><MessageSquare size={24} /><span className="text-[11px] font-black uppercase tracking-[0.4em]">Sua Reflexão</span></div>
-                    <textarea className="w-full h-[450px] bg-transparent text-xl font-bold text-stone-900 outline-none resize-none leading-relaxed print:h-auto print:text-black print:font-normal" placeholder="O que você aprendeu?" value={currentEntry.reflection} onChange={e => setCurrentEntry({...currentEntry, reflection: e.target.value})} />
+                    <textarea className="w-full h-[450px] bg-transparent text-xl font-bold text-stone-900 outline-none resize-none leading-relaxed print:h-auto print:text-black print:font-normal" placeholder="Insights..." value={currentEntry.reflection} onChange={e => setCurrentEntry({...currentEntry, reflection: e.target.value})} />
                   </div>
                 </div>
                 <div className="lg:col-span-4 space-y-4 print:hidden">
@@ -301,7 +302,7 @@ export default function App() {
             <div className="flex justify-center mb-6">
                 {shuffledBook ? (
                     <div className="w-48 h-72 bg-stone-50 rounded-2xl shadow-xl overflow-hidden border-4 border-stone-100 transform transition-transform hover:scale-105">
-                       {shuffledBook.cover_url ? <img src={shuffledBook.cover_url} className="w-full h-full object-cover" alt={shuffledBook.title}/> : <div className="w-full h-full flex items-center justify-center text-stone-300"><BookMarked size={40}/></div>}
+                       {shuffledBook.cover_url ? <img src={shuffledBook.cover_url} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-stone-300"><BookMarked size={40}/></div>}
                     </div>
                 ) : <div className="p-10 bg-amber-50 rounded-full animate-spin"><Sparkles className="text-amber-500" size={40}/></div>}
             </div>
@@ -322,12 +323,12 @@ export default function App() {
             <div className="flex justify-between items-center mb-6 pb-6 border-b border-stone-50"><h2 className="font-black uppercase tracking-widest text-stone-900">{editingBookId ? 'Editar Obra' : 'Nova Obra'}</h2><button onClick={() => setIsModalOpen(false)} className="p-2 bg-stone-50 rounded-full hover:bg-stone-100"><X/></button></div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <input className="w-full bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none shadow-sm" placeholder="Título" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required/>
-              <div className="grid grid-cols-2 gap-4"><input className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none shadow-sm" placeholder="Autor" value={formData.author} onChange={e => setFormData({...formData, author: e.target.value})}/><input className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none shadow-sm" placeholder="País (ex: Brasil)" value={formData.author_nationality} onChange={e => setFormData({...formData, author_nationality: e.target.value})}/></div>
-              <input className="w-full bg-stone-50 rounded-2xl px-6 py-4 text-xs font-bold outline-none shadow-sm" placeholder="URL da Capa" value={formData.cover_url} onChange={e => setFormData({...formData, cover_url: e.target.value})}/>
+              <div className="grid grid-cols-2 gap-4"><input className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none" placeholder="Autor" value={formData.author} onChange={e => setFormData({...formData, author: e.target.value})}/><input className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none" placeholder="País (ex: Brasil)" value={formData.author_nationality} onChange={e => setFormData({...formData, author_nationality: e.target.value})}/></div>
+              <input className="w-full bg-stone-50 rounded-2xl px-6 py-4 text-xs font-bold outline-none" placeholder="URL da Capa" value={formData.cover_url} onChange={e => setFormData({...formData, cover_url: e.target.value})}/>
               <div className="grid grid-cols-2 gap-4"><input type="number" className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none shadow-sm" placeholder="Total Páginas" value={formData.total_pages} onChange={e => setFormData({...formData, total_pages: Number(e.target.value)})}/><input type="number" className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none shadow-sm" placeholder="Lidas" value={formData.read_pages} onChange={e => setFormData({...formData, read_pages: Number(e.target.value)})}/></div>
               <div className="grid grid-cols-2 gap-4">
-                <select className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none appearance-none cursor-pointer shadow-sm" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}><option value="Na Fila">Na Fila</option><option value="Lendo">Lendo</option><option value="Concluído">Concluído</option><option value="Abandonado">Abandonado</option></select>
-                <select className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none appearance-none cursor-pointer shadow-sm text-sm" value={formData.genre} onChange={e => setFormData({...formData, genre: e.target.value})}>
+                <select className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none appearance-none" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}><option value="Na Fila">Na Fila</option><option value="Lendo">Lendo</option><option value="Concluído">Concluído</option><option value="Abandonado">Abandonado</option></select>
+                <select className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none appearance-none text-sm" value={formData.genre} onChange={e => setFormData({...formData, genre: e.target.value})}>
                   <option value="Outros">Selecione o Gênero</option>
                   {Object.entries(genreStructure).map(([category, subgenres]) => (
                     <optgroup key={category} label={category}>{subgenres.map(sub => <option key={sub} value={sub}>{sub}</option>)}</optgroup>
