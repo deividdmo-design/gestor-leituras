@@ -6,8 +6,8 @@ import {
   PieChart, LayoutGrid, Quote, MessageSquare, PenTool, Clock, FileDown,
   BookMarked, StickyNote, X, Pencil, Trash2, Plus, Trophy, CheckCircle2,
   BarChart3, BookOpen, MapPin, Search, Shuffle, Sparkles, PlayCircle, ImagePlus,
-  Filter, Star, Bell, Target, Calendar, TrendingUp, Download, Award, FileText
-} from 'lucide-react'
+  Filter, Star, Bell, Target, TrendingUp, Download, Award, FileText
+} from 'lucide-react' // REMOVIDO: Calendar (não usado)
 
 type BookStatus = 'Lendo' | 'Na Fila' | 'Concluído' | 'Abandonado';
 
