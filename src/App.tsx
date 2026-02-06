@@ -5,8 +5,7 @@ import {
   Library, Globe, Save, History, 
   PieChart, LayoutGrid, Quote, MessageSquare, PenTool, Clock, FileDown,
   BookMarked, StickyNote, X, Pencil, Trash2, Plus, Trophy, CheckCircle2,
-  BarChart3, BookOpen, MapPin, Search, Shuffle, Sparkles, PlayCircle, ImagePlus,
-  Filter, Star, Bell, Target, TrendingUp, Download, Award, FileText
+  BarChart3, BookOpen, MapPin, Search, Shuffle, Sparkles, PlayCircle
 } from 'lucide-react'
 
 type BookStatus = 'Lendo' | 'Na Fila' | 'Concluído' | 'Abandonado';
@@ -19,10 +18,8 @@ interface AppBook {
   id: string; title: string; author: string; author_nationality?: string;
   total_pages: number; read_pages: number; cover_url?: string;
   genre?: string; status: BookStatus; notes?: string;
-  rating?: number;
 }
 
-// 🌍 DICIONÁRIO DE 195 PAÍSES
 const countryFlags: Record<string, string> = {
   'afeganistão': '🇦🇫', 'áfrica do sul': '🇿🇦', 'albânia': '🇦🇱', 'alemanha': '🇩🇪', 'andorra': '🇦🇩', 'angola': '🇦🇴', 'antígua e barbuda': '🇦🇬', 'arábia saudita': '🇸🇦', 'argélia': '🇩🇿', 'argentina': '🇦🇷', 'armênia': '🇦🇲', 'austrália': '🇦🇺', 'áustria': '🇦🇹', 'azerbaijão': '🇦🇿', 'bahamas': '🇧🇸', 'bahrein': '🇧🇭', 'bangladesh': '🇧🇩', 'barbados': '🇧🇧', 'bélgica': '🇧🇪', 'belize': '🇧🇿', 'benin': '🇧🇯', 'bielorrússia': '🇧🇾', 'bolívia': '🇧🇴', 'bósnia e herzegovina': '🇧🇦', 'botsuana': '🇧🇼', 'brasil': '🇧🇷', 'brasileira': '🇧🇷', 'brunei': '🇧🇳', 'bulgária': '🇧🇬', 'burkina faso': '🇧🇫', 'burundi': '🇧🇮', 'camboja': '🇰🇭', 'camarões': '🇨🇲', 'canadá': '🇨🇦', 'cabo verde': '🇨🇻', 'cazaquistão': '🇰🇿', 'chade': '🇹🇩', 'chile': '🇨🇱', 'china': '🇨🇳', 'chipre': '🇨🇾', 'colômbia': '🇨🇴', 'comores': '🇰🇲', 'congo': '🇨🇬', 'coreia do norte': '🇰🇵', 'coreia do sul': '🇰🇷', 'costa do marfim': '🇨🇮', 'costa rica': '🇨🇷', 'croácia': '🇭🇷', 'cuba': '🇨🇺', 'dinamarca': '🇩🇰', 'djibuti': '🇩🇯', 'dominica': '🇩🇲', 'egito': '🇪🇬', 'el salvador': '🇸🇻', 'emirados árabes unidos': '🇦🇪', 'equador': '🇪🇨', 'eritreia': '🇪🇷', 'eslováquia': '🇸🇰', 'eslovênia': '🇸🇮', 'espanha': '🇪🇸', 'estados unidos': '🇺🇸', 'eua': '🇺🇸', 'estônia': '🇪🇪', 'etiópia': '🇪🇹', 'fiji': '🇫🇯', 'filipinas': '🇵🇭', 'finlândia': '🇫🇮', 'frança': '🇫🇷', 'gabão': '🇬🇦', 'gâmbia': '🇬🇲', 'gana': '🇬🇭', 'geórgia': '🇬🇪', 'granada': '🇬🇩', 'grécia': '🇬🇷', 'guatemala': '🇬🇹', 'guiana': '🇬🇾', 'guiné': '🇬🇳', 'guiné-bissau': '🇬🇼', 'guiné equatorial': '🇬🇶', 'haiti': '🇭🇹', 'honduras': '🇭🇳', 'hungria': '🇭🇺', 'iêmen': '🇾🇪', 'índia': '🇮🇳', 'indonésia': '🇮🇩', 'irã': '🇮🇷', 'iraque': '🇮🇶', 'irlanda': '🇮🇪', 'islândia': '🇮🇸', 'israel': '🇮🇱', 'itália': '🇮🇹', 'jamaica': '🇯🇲', 'japão': '🇯🇵', 'jordânia': '🇯🇴', 'kuwait': '🇰🇼', 'laos': '🇱🇦', 'lesoto': '🇱🇸', 'letônia': '🇱🇻', 'líbano': '🇱🇧', 'libéria': '🇱🇷', 'líbia': '🇱🇾', 'liechtenstein': '🇱🇮', 'lituânia': '🇱🇹', 'luxemburgo': '🇱🇺', 'macedônia do norte': '🇲🇰', 'madagascar': '🇲🇬', 'malásia': '🇲🇾', 'malaui': '🇲🇼', 'maldivas': '🇲🇻', 'mali': '🇲🇱', 'malta': '🇲🇹', 'marrocos': '🇲🇦', 'maurício': '🇲🇺', 'mauritânia': '🇲🇷', 'méxico': '🇲🇽', 'mianmar': '🇲🇲', 'moçambique': '🇲🇿', 'moldávia': '🇲🇩', 'mônaco': '🇲🇨', 'mongólia': '🇲🇳', 'montenegro': '🇲🇪', 'namíbia': '🇳🇦', 'nauru': '🇳🇷', 'nepal': '🇳🇵', 'nicarágua': '🇳🇮', 'níger': '🇳🇪', 'nigéria': '🇳🇬', 'noruega': '🇳🇴', 'nova zelândia': '🇳🇿', 'omã': '🇴🇲', 'países baixos': '🇳🇱', 'panamá': '🇵🇦', 'paquistão': '🇵🇰', 'paraguai': '🇵🇾', 'peru': '🇵🇪', 'polônia': '🇵🇱', 'portugal': '🇵🇹', 'qatar': '🇶🇦', 'quênia': '🇰🇪', 'reino unido': '🇬🇧', 'inglaterra': '🇬🇧', 'república dominicana': '🇩🇴', 'república tcheca': '🇨🇿', 'romênia': '🇷🇴', 'ruanda': '🇷🇼', 'rússia': '🇷🇺', 'samoa': '🇼🇸', 'senegal': '🇸🇳', 'sérvia': '🇷🇸', 'singapura': '🇸🇬', 'síria': '🇸🇾', 'somália': '🇸🇴', 'sri lanka': '🇱🇰', 'sudão': '🇸🇩', 'suécia': '🇸🇪', 'suíça': '🇨🇭', 'suriname': '🇸🇷', 'tailândia': '🇹🇭', 'tanzânia': '🇹🇿', 'timor-leste': '🇹🇱', 'togo': '🇹🇬', 'tunísia': '🇹🇳', 'turquia': '🇹🇷', 'ucrânia': '🇺🇦', 'uganda': '🇺🇬', 'uruguai': '🇺🇾', 'uzbequistão': '🇺🇿', 'vaticano': '🇻🇦', 'venezuela': '🇻🇪', 'vietnã': '🇻🇳', 'zâmbia': '🇿🇲', 'zimbábue': '🇿🇼'
 };
@@ -57,23 +54,6 @@ const getGenreStyle = (genre: string): string => {
   return 'bg-stone-50 text-stone-500 border-stone-200';
 };
 
-// Componentes Auxiliares (Tags e Stars)
-const StatusTag = ({ status }: { status: string }) => {
-  const configs: any = {
-    'Lendo': 'bg-blue-100 text-blue-700 border-blue-200',
-    'Na Fila': 'bg-stone-100 text-stone-700 border-stone-200',
-    'Concluído': 'bg-emerald-100 text-emerald-700 border-emerald-200',
-    'Abandonado': 'bg-rose-100 text-rose-700 border-rose-200'
-  };
-  return <span className={`text-[9px] px-2 py-1 rounded-lg border font-bold uppercase ${configs[status] || configs['Na Fila']}`}>{status}</span>;
-};
-
-const RatingStars = ({ rating = 0 }: { rating?: number }) => (
-  <div className="flex gap-0.5">
-    {[1, 2, 3, 4, 5].map((s) => <Star key={s} size={12} className={s <= rating ? 'fill-amber-400 text-amber-400' : 'text-stone-200'} />)}
-  </div>
-);
-
 export default function App() {
   const { books, refreshBooks } = useBooks()
   const [currentView, setCurrentView] = useState<'library' | 'analytics' | 'insights'>('library')
@@ -93,10 +73,12 @@ export default function App() {
   const [formData, setFormData] = useState<any>(emptyForm);
 
   const activeInsightBook = useMemo(() => books.find(b => b.id === selectedBookId) as AppBook | undefined, [selectedBookId, books])
+  
   const history: Marginalia[] = useMemo(() => {
     if (!activeInsightBook?.notes) return [];
     try { const parsed = JSON.parse(activeInsightBook.notes); return Array.isArray(parsed) ? parsed : []; } catch (e) { return []; }
   }, [activeInsightBook]);
+
   const readingBooks = useMemo(() => books.filter(b => b.status === 'Lendo'), [books])
 
   useEffect(() => {
@@ -194,14 +176,14 @@ export default function App() {
 
         {currentView === 'library' && (
           <>
-            <div className="bg-white/60 backdrop-blur-md p-2 rounded-[1.5rem] border border-stone-200 flex flex-col lg:flex-row gap-2 shadow-sm">
-              <div className="relative flex-1"><Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300 w-5 h-5"/><input className="w-full pl-12 pr-4 bg-transparent font-bold outline-none h-full py-3 text-sm" placeholder="Pesquisar título ou autor..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)}/></div>
+            <div className="bg-white/60 backdrop-blur-md p-2 rounded-[1.5rem] border border-stone-200 flex flex-col lg:flex-row gap-2 shadow-sm animate-in fade-in duration-500">
+              <div className="relative flex-1"><Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300 w-5 h-5"/><input className="w-full pl-12 pr-4 bg-transparent font-bold outline-none text-stone-800 placeholder:text-stone-300 h-full py-3 text-sm" placeholder="Pesquisar..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)}/></div>
               <div className="flex gap-2 p-1 overflow-x-auto">
                 {['Todos', 'Na Fila', 'Lendo', 'Concluído'].map((s) => (<button key={s} onClick={() => setFilterStatus(s as any)} className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all whitespace-nowrap ${filterStatus === s ? 'bg-stone-900 text-white shadow-md' : 'text-stone-400 hover:bg-white hover:shadow-sm'}`}>{s}</button>))}
                 <button onClick={handleShuffle} className="p-3 bg-stone-100 text-stone-500 rounded-xl hover:bg-amber-500 hover:text-white transition-all shadow-sm"><Shuffle size={18}/></button>
               </div>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in fade-in duration-500">
               {books.filter(b => (b.title.toLowerCase().includes(searchTerm.toLowerCase()) || b.author.toLowerCase().includes(searchTerm.toLowerCase())) && (filterStatus === 'Todos' || b.status === filterStatus)).map(book => {
                 const typedBook = book as any as AppBook;
                 const progress = Math.round(((typedBook.read_pages || 0) / (typedBook.total_pages || 1)) * 100);
@@ -211,12 +193,9 @@ export default function App() {
                     <div className="flex-1 py-1">
                       <span className={`text-[8px] font-black uppercase px-2 py-1 rounded-md border mb-3 block w-fit ${getGenreStyle(typedBook.genre || '')}`}>{typedBook.genre}</span>
                       <h3 className="font-black text-lg text-stone-900 leading-tight mb-1">{typedBook.title}</h3>
-                      <p className="text-xs text-stone-400 font-bold uppercase flex items-center gap-1">
-                        {typedBook.author_nationality ? (countryFlags[typedBook.author_nationality.toLowerCase().trim()] || <Globe size={10}/>) : <Globe size={10}/>} {typedBook.author}
-                      </p>
-                      <div className="mt-4"><RatingStars /></div>
-                      <div className="mt-4"><div className="flex justify-between text-[9px] font-black text-stone-400 mb-1.5 uppercase tracking-widest"><span>Progresso</span><span className="text-amber-600">{progress}%</span></div><div className="w-full bg-stone-100 h-1.5 rounded-full overflow-hidden shadow-inner"><div className="bg-amber-500 h-full transition-all duration-1000" style={{ width: `${progress}%` }}></div></div></div>
-                      <div className="mt-5 flex gap-2"><StatusTag status={typedBook.status} />{typedBook.notes && <div className="bg-amber-100 text-amber-700 px-3 py-1 rounded-lg text-[9px] font-black flex items-center gap-1 shadow-sm uppercase"><StickyNote size={10}/> Nota</div>}</div>
+                      <p className="text-xs text-stone-400 font-bold uppercase flex items-center gap-1">{typedBook.author_nationality ? (countryFlags[typedBook.author_nationality.toLowerCase().trim()] || <Globe size={10}/>) : <Globe size={10}/>} {typedBook.author}</p>
+                      <div className="mt-6"><div className="flex justify-between text-[9px] font-black text-stone-400 mb-1.5 uppercase tracking-widest"><span>Progresso</span><span className="text-amber-600">{progress}%</span></div><div className="w-full bg-stone-100 h-1.5 rounded-full overflow-hidden shadow-inner"><div className="bg-amber-500 h-full transition-all duration-1000" style={{ width: `${progress}%` }}></div></div></div>
+                      <div className="mt-5 flex gap-2"><span className="text-[9px] font-black px-3 py-1 rounded-lg bg-stone-50 text-stone-500 uppercase">{typedBook.status}</span>{typedBook.notes && <div className="bg-amber-100 text-amber-700 px-3 py-1 rounded-lg text-[9px] font-black flex items-center gap-1 shadow-sm uppercase"><StickyNote size={10}/> Nota</div>}</div>
                     </div>
                     <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all">
                       <button onClick={() => { setEditingBookId(typedBook.id); setFormData(typedBook); setIsModalOpen(true); }} className="p-2.5 text-stone-300 hover:text-stone-900 bg-stone-50 rounded-xl transition-all"><Pencil size={16}/></button>
@@ -289,7 +268,7 @@ export default function App() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm">
-                    <div className="flex items-center gap-3 mb-8 text-stone-900"><MapPin size={20}/><h3 className="font-black uppercase tracking-widest text-xs">Nacionalidades</h3></div>
+                    <div className="flex items-center gap-3 mb-8 text-stone-900"><BarChart3 size={20}/><h3 className="font-black uppercase tracking-widest text-xs">Nacionalidades</h3></div>
                     <div className="grid grid-cols-1 gap-3">
                         {analytics.sortedNations.map(([nation, count]) => (
                             <div key={nation} className="flex items-center justify-between p-3 rounded-2xl bg-stone-50 border border-stone-100"><div className="flex items-center gap-3"><span className="text-xl">{countryFlags[nation] || '🏳️'}</span><span className="text-[10px] font-black uppercase text-stone-600">{nation}</span></div><span className="text-[10px] font-black bg-white px-2 py-1 rounded-lg shadow-sm text-stone-900">{count}</span></div>
@@ -304,12 +283,11 @@ export default function App() {
         )}
       </main>
 
-      {/* MODAL SORTEADOR */}
       {isShuffleOpen && (
-        <div className="fixed inset-0 bg-stone-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-stone-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-500">
           <div className="bg-white w-full max-w-md rounded-[2.5rem] p-10 text-center shadow-2xl relative overflow-hidden">
             <button onClick={() => setIsShuffleOpen(false)} className="absolute top-6 right-6 p-2 bg-stone-100 rounded-full hover:bg-stone-200"><X size={20}/></button>
-            <h2 className="text-xs font-black uppercase tracking-[0.3em] text-stone-400 mb-6">{isShuffling ? 'EMBARALHANDO ESTANTE...' : 'O DESTINO ESCOLHEU'}</h2>
+            <h2 className="text-xs font-black uppercase tracking-[0.3em] text-stone-400 mb-6">{isShuffling ? 'EMBARALHANDO...' : 'O DESTINO ESCOLHEU'}</h2>
             <div className="flex justify-center mb-6">
                 {shuffledBook ? (
                     <div className="w-48 h-72 bg-stone-50 rounded-2xl shadow-xl overflow-hidden border-4 border-stone-100 transform transition-transform hover:scale-105">
@@ -328,16 +306,15 @@ export default function App() {
         </div>
       )}
 
-      {/* MODAL CADASTRO */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-stone-950/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 print:hidden animate-in fade-in duration-300">
           <div className="bg-white w-full max-w-xl rounded-[2.5rem] p-8 shadow-2xl overflow-y-auto max-h-[90vh] border border-stone-100">
             <div className="flex justify-between items-center mb-6 pb-6 border-b border-stone-50"><h2 className="font-black uppercase tracking-widest text-stone-900">{editingBookId ? 'Editar Obra' : 'Nova Obra'}</h2><button onClick={() => setIsModalOpen(false)} className="p-2 bg-stone-50 rounded-full hover:bg-stone-100"><X/></button></div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <input className="w-full bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none border-2 border-transparent focus:border-stone-100 transition-all shadow-sm" placeholder="Título" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required/>
-              <div className="grid grid-cols-2 gap-4"><input className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none" placeholder="Autor" value={formData.author} onChange={e => setFormData({...formData, author: e.target.value})}/><input className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none" placeholder="País (ex: Brasil)" value={formData.author_nationality} onChange={e => setFormData({...formData, author_nationality: e.target.value})}/></div>
-              <input className="w-full bg-stone-50 rounded-2xl px-6 py-4 text-xs font-bold outline-none shadow-sm" placeholder="URL da Capa" value={formData.cover_url} onChange={e => setFormData({...formData, cover_url: e.target.value})}/>
-              <div className="grid grid-cols-2 gap-4"><input type="number" className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none" placeholder="Total Páginas" value={formData.total_pages} onChange={e => setFormData({...formData, total_pages: Number(e.target.value)})}/><input type="number" className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none" placeholder="Lidas" value={formData.read_pages} onChange={e => setFormData({...formData, read_pages: Number(e.target.value)})}/></div>
+              <div className="grid grid-cols-2 gap-4"><input className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none" placeholder="Autor" value={formData.author} onChange={e => setFormData({...formData, author: e.target.value})}/><input className="bg-stone-50 rounded-2xl px-6 py-4 text-sm font-bold outline-none" placeholder="País" value={formData.author_nationality} onChange={e => setFormData({...formData, author_nationality: e.target.value})}/></div>
+              <input className="w-full bg-stone-50 rounded-2xl px-6 py-4 text-xs font-bold outline-none" placeholder="URL da Capa" value={formData.cover_url} onChange={e => setFormData({...formData, cover_url: e.target.value})}/>
+              <div className="grid grid-cols-2 gap-4"><input type="number" className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none" placeholder="Páginas" value={formData.total_pages} onChange={e => setFormData({...formData, total_pages: Number(e.target.value)})}/><input type="number" className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none" placeholder="Lidas" value={formData.read_pages} onChange={e => setFormData({...formData, read_pages: Number(e.target.value)})}/></div>
               <div className="grid grid-cols-2 gap-4">
                 <select className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none appearance-none cursor-pointer" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}><option value="Na Fila">Na Fila</option><option value="Lendo">Lendo</option><option value="Concluído">Concluído</option><option value="Abandonado">Abandonado</option></select>
                 <select className="bg-stone-50 rounded-2xl px-6 py-4 font-bold outline-none appearance-none cursor-pointer text-sm" value={formData.genre} onChange={e => setFormData({...formData, genre: e.target.value})}>
@@ -360,7 +337,7 @@ export default function App() {
           .print\\:hidden { display: none !important; }
           textarea { border: none !important; resize: none !important; overflow: visible !important; height: auto !important; }
         }
-      `}`}</style>
+      `}</style>
     </div>
   )
 }
